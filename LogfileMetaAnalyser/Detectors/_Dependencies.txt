@@ -1,0 +1,11 @@
+
+TimeRangeDetector
+	SyncStructureDetector req #TimeRangeDetector
+		ConnectorsDetector req #SyncStructureDetector
+			SyncStepDetailsDetector req #ConnectorsDetector
+			SyncJournalDetector req #ConnectorsDetector
+		SQLStatementDetector req #SyncStructureDetector
+	TimeGapDetector req #TimeRangeDetector
+JobServiceJobsDetector 
+
+IdMatchTestDetector 

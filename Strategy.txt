@@ -1,0 +1,63 @@
+AnalyzeStructureAsync()
+	DataStore Init
+	Detectors Init (new, datastore pass, enabled, child/parent
+	TextReading
+		read from file
+		pass messaes to detectors
+	Detectors Finalize
+	
+	
+FilterAndExport
+	show form ExportWithFilterFrm
+	TextReading
+		read from file
+		filter messages
+		write to file
+		
+
+		
+	
+TextMessage
+public static Regex regexMessageMetaDataNLogDefault =
+            new Regex(@"^(?<Timestamp>20\d\d-\d\d-\d\d \d\d:\d\d(:\d\d(\.\d+)?)?).*? (?<NLevel>CRITICAL|ERROR|WARN|INFO|DEBUG|TRACE) \((?<NSource>[A-Za-z_.]+)(:(?<PID>\d+))?[ ]((?<SID>[0-9a-fA-F.-]+)|(?<NSourceExt>.*?))\)", RegexOptions.Compiled);
+
+			
+	Finalize stage 1 - NLog:
+		numberOfLines
+		Timestamp
+		Loggerlevel
+		LoggerSource
+		NSourceExt
+		PID
+		SID
+		
+public static Regex regexMessageMetaDataJobservice =
+            new Regex(@"^(?<tag><.>(<.>)?){0,2}(?<Timestamp>20\d\d-\d\d-\d\d \d\d:\d\d(:\d\d(\.\d+)?)?)(.*?(?<SID>[-0-9a-fA-F]{36}))?", RegexOptions.Compiled);
+
+	Finalize stage 1 - Jobservice:
+		NumberOfLines
+		Timestamp
+		Loggerlevel
+		loggersource
+		SID
+	
+	
+	Finalize stage 2 - both
+		NumberOfLines
+		messageText update
+		
+		
+		
+regex_JobStart_TypeJS = new Regex(@"<p>.*?( - (?<queue>(\\[^ ]+) - )| - )Process step parameter (?<jobid>[-0-9a-fA-F]{36}).*?ComponentClass=(?<classname>.*?)Task=(?<taskname>.*?)Executiontype.*?(?<params>\[Parameters\].+)", RegexOptions.Compiled | RegexOptions.Singleline);
+regex_JobStart_TypeNLog = new Regex(@"Process step parameter (?<jobid>[-0-9a-fA-F]{36}).*?ComponentClass=(?<classname>.*?)Task=(?<taskname>.*?)Executiontype.*?(?<params>\[Parameters\].+)", RegexOptions.Compiled | RegexOptions.Singleline);
+
+regex_JobFinish_TypeJS = new Regex(@"<[swr]>.*?( - (?<queue>(\\[^ ]+) - )| - )[a-zA-z].*[-a-zA-Z0-9]{36}: (?<jobstate>[a-zA-Z ]+)(?<msg>.*)?", RegexOptions.Compiled | RegexOptions.Singleline);
+regex_JobFinish_TypeNLog = new Regex(@"(?<jobid>[-0-9a-fA-F]{36}): (?<jobstate>[a-zA-Z ]+)(?<msg>.*)?", RegexOptions.Compiled | RegexOptions.Singleline);
+
+
+Problem beim Filter:
+- wenn ich ein JobTask filtere, will ich ALLE Messags zu dieser UID Job haben, auch bei messages, die keinen solchen Task haben
+- Generalles problem: Es gibt keine Verbindung zw. Queue und Job -> doch, ab 8.0??
+
+
+
