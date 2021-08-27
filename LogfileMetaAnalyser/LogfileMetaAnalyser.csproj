@@ -1,0 +1,316 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{40B45461-DCA8-4BE6-B5F8-D2587A7AF3BD}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>LogfileMetaAnalyser</RootNamespace>
+    <AssemblyName>LogfileMetaAnalyser</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>LogfileMetaAnalyser.Program</StartupObject>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>AppIcon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="ActiproSoftware.Shared.WinForms, Version=16.1.330.0, Culture=neutral, PublicKeyToken=c27e062d3c1a4763, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>_Alien\ActiproSoftware.Shared.WinForms.dll</HintPath>
+    </Reference>
+    <Reference Include="ActiproSoftware.SyntaxEditor.WinForms, Version=16.1.330.0, Culture=neutral, PublicKeyToken=c27e062d3c1a4763, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>_Alien\ActiproSoftware.SyntaxEditor.WinForms.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>_Alien\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NLog">
+      <HintPath>_Alien\NLog.dll</HintPath>
+    </Reference>
+    <Reference Include="SandBar">
+      <HintPath>_Alien\SandBar.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="VI.Base">
+      <HintPath>_Alien\VI.Base.dll</HintPath>
+    </Reference>
+    <Reference Include="VI.Controls">
+      <HintPath>_Alien\VI.Controls.dll</HintPath>
+    </Reference>
+    <Reference Include="VI.Controls.AlienSupport">
+      <HintPath>_Alien\VI.Controls.AlienSupport.dll</HintPath>
+    </Reference>
+    <Reference Include="VI.Controls.Design">
+      <HintPath>_Alien\VI.Controls.Design.dll</HintPath>
+    </Reference>
+    <Reference Include="VI.Controls.SyntaxEdit">
+      <HintPath>_Alien\VI.Controls.SyntaxEdit.dll</HintPath>
+    </Reference>
+    <Reference Include="VI.DB">
+      <HintPath>_Alien\VI.DB.dll</HintPath>
+    </Reference>
+    <Reference Include="VI.FormBase">
+      <HintPath>_Alien\VI.FormBase.dll</HintPath>
+    </Reference>
+    <Reference Include="VI.ImageLibrary">
+      <HintPath>_Alien\VI.ImageLibrary.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Analyzer\Analyzer.cs" />
+    <Compile Include="Analyzer\Exporter.cs" />
+    <Compile Include="Analyzer\ExportFilteredText\ExportSetting_FilterByActivity.cs" />
+    <Compile Include="Analyzer\ExportFilteredText\ExportSetting_FilterByLogtype.cs" />
+    <Compile Include="Analyzer\ExportFilteredText\ExportSetting_InputOutput.cs" />
+    <Compile Include="Analyzer\ExportFilteredText\ExportSetting_RegexFilter.cs" />
+    <Compile Include="Analyzer\ExportFilteredText\IExportSetting.cs" />
+    <Compile Include="Datastore\BaseDataClasses\DatastoreBaseDataSequence.cs" />
+    <Compile Include="Datastore\BaseDataClasses\SqlObject.cs" />
+    <Compile Include="Datastore\StoreClasses\SyncJournal.cs" />
+    <Compile Include="Datastore\ViewClasses\DatastoreBaseView.cs" />
+    <Compile Include="Datastore\ViewClasses\GeneralLogView.cs" />
+    <Compile Include="Datastore\ViewClasses\IDatastoreView.cs" />
+    <Compile Include="Datastore\ViewClasses\JobServiceActivitiesView.cs" />
+    <Compile Include="Datastore\ViewClasses\ProjectionActivitiesView.cs" />
+    <Compile Include="Datastore\ViewClasses\ResultUcCache.cs" />
+    <Compile Include="Analyzer\ExportProfiles.cs" />
+    <Compile Include="Analyzer\ExportSettings.cs" />
+    <Compile Include="Analyzer\ExportSettingsJsonContractResolver.cs" />
+    <Compile Include="Controls\ContextLinesUC.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\ContextLinesUC.Designer.cs">
+      <DependentUpon>ContextLinesUC.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ExportWithFilterFrm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Controls\ExportWithFilterFrm.Designer.cs">
+      <DependentUpon>ExportWithFilterFrm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ListViewUC.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\ListViewUC.Designer.cs">
+      <DependentUpon>ListViewUC.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\MultiListViewUC.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\MultiListViewUC.Designer.cs">
+      <DependentUpon>MultiListViewUC.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\QuestionFrm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Controls\QuestionFrm.Designer.cs">
+      <DependentUpon>QuestionFrm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\TextBoxFrm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Controls\TextBoxFrm.Designer.cs">
+      <DependentUpon>TextBoxFrm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\TimeTraceUC.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\TimeTraceUC.designer.cs">
+      <DependentUpon>TimeTraceUC.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\WaitUC.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\WaitUC.Designer.cs">
+      <DependentUpon>WaitUC.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\WelcomeUC.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\WelcomeUC.Designer.cs">
+      <DependentUpon>WelcomeUC.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Datastore\BaseDataClasses\DatastoreBaseData.cs" />
+    <Compile Include="Datastore\BaseDataClasses\DatastoreBaseDataPoint.cs" />
+    <Compile Include="Datastore\BaseDataClasses\DatastoreBaseDataRange.cs" />
+    <Compile Include="Datastore\BaseDataClasses\JobserviceJobattempt.cs" />
+    <Compile Include="Datastore\BaseDataClasses\SqlLongRunningStatement.cs" />
+    <Compile Include="Datastore\BaseDataClasses\SqlSession.cs" />
+    <Compile Include="Datastore\BaseDataClasses\SyncStepDetailQueryObject.cs" />
+    <Compile Include="Datastore\BaseDataClasses\TimeGap.cs" />
+    <Compile Include="Datastore\BaseDataClasses\TransactionData.cs" />
+    <Compile Include="Datastore\StoreClasses\DetectorStatistic.cs" />
+    <Compile Include="Datastore\StoreClasses\JobserviceActivity.cs" />
+    <Compile Include="Datastore\StoreClasses\DatastoreStructure.cs" />
+    <Compile Include="Datastore\StoreClasses\GeneralLogData.cs" />
+    <Compile Include="Datastore\StoreClasses\JobserviceJob.cs" />
+    <Compile Include="Datastore\StoreClasses\ParseStatistic.cs" />
+    <Compile Include="Datastore\StoreClasses\ProjectionActivity.cs" />
+    <Compile Include="Datastore\StoreClasses\SqlInformation.cs" />
+    <Compile Include="Datastore\StoreClasses\StatisticsStore.cs" />
+    <Compile Include="Datastore\StoreClasses\SyncStepDetail.cs" />
+    <Compile Include="Datastore\StoreClasses\TimetraceReferenceStore.cs" />
+    <Compile Include="Datastore\ViewClasses\DataStoreViewer.cs" />
+    <Compile Include="Datastore\ViewClasses\SqlInformationView.cs" />
+    <Compile Include="Datastore\ViewClasses\StatisticsStoreView.cs" />
+    <Compile Include="Datastore\ViewClasses\TimetraceReferenceView.cs" />
+    <Compile Include="Datastore\ViewClasses\TopNodeViewer.cs" />
+    <Compile Include="Detectors\IdMatchTestDetector.cs" />
+    <Compile Include="Detectors\JobServiceJobsDetector.cs" />
+    <Compile Include="Datastore\StoreClasses\Projection.cs" />
+    <Compile Include="Datastore\StoreClasses\ProjectionStep.cs" />
+    <Compile Include="Datastore\StoreClasses\SystemConnInfo.cs" />
+    <Compile Include="Datastore\StoreClasses\LogfileInformation.cs" />
+    <Compile Include="Detectors\ConnectorsDetector.cs" />
+    <Compile Include="Detectors\DetectorBase.cs" />
+    <Compile Include="Detectors\SQLStatementDetector.cs" />
+    <Compile Include="Detectors\SyncJournalDetector.cs" />
+    <Compile Include="Detectors\SyncStepDetailsDetector.cs" />
+    <Compile Include="Detectors\SyncStructureDetector.cs" />
+    <Compile Include="Detectors\TimeGapDetector.cs" />
+    <Compile Include="Detectors\TimeRangeDetector.cs" />
+    <Compile Include="Helpers\GlobalStopWatch.cs" />
+    <Compile Include="Helpers\MathHelper.cs" />
+    <Compile Include="Helpers\NLog.cs" />
+    <Compile Include="Helpers\SpeedTest.cs" />
+    <Compile Include="Helpers\SqlHelper.cs" />
+    <Compile Include="Helpers\StringHelper.cs" />
+    <Compile Include="Helpers\TreeNodeCollectionHelper.cs" />
+    <Compile Include="MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\Closeness.cs" />
+    <Compile Include="GlobalDefs\Constants.cs" />
+    <Compile Include="Helpers\ConvertSave.cs" />
+    <Compile Include="Helpers\DateHelper.cs" />
+    <Compile Include="Helpers\Extentions.cs" />
+    <Compile Include="Helpers\FileHelper.cs" />
+    <Compile Include="Detectors\ILogDetector.cs" />
+    <Compile Include="Helpers\GuiHelper.cs" />
+    <Compile Include="Helpers\Loglevels.cs" />
+    <Compile Include="Helpers\ProcessExec.cs" />
+    <Compile Include="Helpers\RegistryHelper.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TextReading\AdaptiveStatisticalStopKeyAnalyser.cs" />
+    <Compile Include="TextReading\ReadLogByBlock.cs" />
+    <Compile Include="TextReading\TextLocator.cs" />
+    <Compile Include="TextReading\TextMessage.cs" />
+    <Compile Include="TextReading\TextMessageGroup.cs" />
+    <Compile Include="TextReading\TextMessageGroupStream.cs" />
+    <Compile Include="TextReading\TextMessageJsonContractResolver.cs" />
+    <EmbeddedResource Include="Controls\ContextLinesUC.resx">
+      <DependentUpon>ContextLinesUC.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\ExportWithFilterFrm.resx">
+      <DependentUpon>ExportWithFilterFrm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\ListViewUC.resx">
+      <DependentUpon>ListViewUC.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\MultiListViewUC.resx">
+      <DependentUpon>MultiListViewUC.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\QuestionFrm.resx">
+      <DependentUpon>QuestionFrm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\TextBoxFrm.resx">
+      <DependentUpon>TextBoxFrm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\TimeTraceUC.resx">
+      <DependentUpon>TimeTraceUC.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\WaitUC.resx">
+      <DependentUpon>WaitUC.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\WelcomeUC.resx">
+      <DependentUpon>WelcomeUC.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="AppIcon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\welcome.png" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
