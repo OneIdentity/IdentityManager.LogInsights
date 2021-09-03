@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
 using System.Windows.Forms;
 
 using LogfileMetaAnalyser.Helpers;
@@ -19,7 +16,7 @@ namespace LogfileMetaAnalyser.Controls
         private string _NoDataMessage = " < No data to display > ";
         public string NoDataMessage
         {
-            get => _NoDataMessage; 
+            get => _NoDataMessage;
             set { _NoDataMessage = value; SwitchNoDataMessage(true, true); }
         }
 
@@ -35,7 +32,7 @@ namespace LogfileMetaAnalyser.Controls
             Visible = false;
 
             listView1.Enabled = false;
-                        
+
             listView1.ItemSelectionChanged += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
                {
                    if (((ListView)o).SelectedIndices.Count == 0)
@@ -55,8 +52,8 @@ namespace LogfileMetaAnalyser.Controls
 
             tableLayoutPanel1.RowStyles[0].Height = string.IsNullOrEmpty(s) ? 0 : 23;
             //label1.Enabled = !string.IsNullOrEmpty(s);
-            label1.Visible = !string.IsNullOrEmpty(s);            
-            label1.Text = s;                        
+            label1.Visible = !string.IsNullOrEmpty(s);
+            label1.Text = s;
         }
 
         public void SetupGroups(string[] groups)
@@ -88,7 +85,7 @@ namespace LogfileMetaAnalyser.Controls
 
                 listView1.Items.Add(new ListViewItem(NoDataMessage));
                 isNoDataMessageDisplayed = true;
-                
+
                 return;
             }
 
@@ -113,7 +110,7 @@ namespace LogfileMetaAnalyser.Controls
 
             if (!string.IsNullOrEmpty(group))
                 listViewItem.Group = listView1.Groups[group];
-            
+
             listView1.Items.Add(listViewItem);
             CountDataLines++;
 
@@ -124,7 +121,7 @@ namespace LogfileMetaAnalyser.Controls
 
 
             listView1.Enabled = GetRowCount() > 0;
-            
+
             DataChanged?.Invoke(this, null);
         }
 
@@ -152,7 +149,7 @@ namespace LogfileMetaAnalyser.Controls
 
             listView1.EndUpdate();
             listView1.ResumeLayout();
-            ResumeLayout();            
+            ResumeLayout();
         }
 
         public void Clear(bool all = false)
@@ -221,7 +218,7 @@ namespace LogfileMetaAnalyser.Controls
 
             if (listView1.Scrollable)
                 res += singleRowHeight;
-            
+
             return Convert.ToInt32(res);
         }
 
