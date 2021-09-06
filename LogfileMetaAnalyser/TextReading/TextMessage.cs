@@ -22,8 +22,7 @@ namespace LogfileMetaAnalyser
 
     public class TextMessage
     {
-        private StringBuilder _stringbuilder;
-        private bool wasAppendCalled = false;
+        private StringBuilder _stringbuilder; 
         public FinalizeStates finalizeState = FinalizeStates.NotFinalized; //when true, the object is read only
         private object locky = new object();
 
@@ -90,14 +89,11 @@ namespace LogfileMetaAnalyser
                 //the first text of a message cannot be null or empty
                 if (string.IsNullOrWhiteSpace(value))
                 {
-                    _stringbuilder = new StringBuilder();
                     numberOfLines = 0;
-
                     return;
                 }
 
                 _messageText = value;
-                _stringbuilder = new StringBuilder(_messageText);
                 numberOfLines = 1;
             }
 
@@ -151,9 +147,11 @@ namespace LogfileMetaAnalyser
             if (finalizeState == FinalizeStates.Finalized)
                 throw new Exception("This text message object is already finalized and marked as read only!");
 
+            if (_stringbuilder == null)
+                _stringbuilder = new StringBuilder(_messageText);
+
             _stringbuilder.AppendLine(messageTextToAppend);
-            numberOfLines++;
-            wasAppendCalled = true;
+            numberOfLines++; 
         }
                        
         internal void FillObject( 
@@ -295,7 +293,7 @@ namespace LogfileMetaAnalyser
             GlobalStopWatch.StartWatch("FinalizeMessage");
             DateTime dt;
 
-            if (wasAppendCalled) //when this message consists of more than one msg, we need to take stringbuilder;
+            if (_stringbuilder != null) //when this message consists of more than one msg, we need to take stringbuilder;
                 _messageText = _stringbuilder.ToString();
 
             _stringbuilder = null;
