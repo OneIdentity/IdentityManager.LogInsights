@@ -55,6 +55,7 @@
     <Reference Include="VI.ImageLibrary">
       <HintPath>_Alien\VI.ImageLibrary.dll</HintPath>
     </Reference>
+    <PackageReference Include="Microsoft.Azure.ApplicationInsights.Query" Version="1.0.0" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Controls\ContextLinesUC.cs">

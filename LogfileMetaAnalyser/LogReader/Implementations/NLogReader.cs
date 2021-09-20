@@ -57,7 +57,7 @@ namespace LogfileMetaAnalyser.LogReader
                         lineNumber.ToString(),
                         DateTime.Now,
                         LogEntryType.Info,
-                        0, entry, "");
+                        0, entry, "", "");
 
                     yield return logEntry;
                 }
