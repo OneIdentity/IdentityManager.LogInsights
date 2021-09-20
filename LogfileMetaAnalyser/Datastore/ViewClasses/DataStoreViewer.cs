@@ -132,7 +132,7 @@ namespace LogfileMetaAnalyser.Datastore
 
 
             //Branch: General information
-            TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, "General information", "information", GetBgColor(dsref.mostDetailedLogLevel.IsGreater(Loglevels.Info)));
+            TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, "General information", "information", GetBgColor(dsref.mostDetailedLogLevel.IsGreater(LogLevel.Info)));
             responsibleViewerClass.Add(key, viewer);
 
 

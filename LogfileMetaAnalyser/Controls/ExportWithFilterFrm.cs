@@ -401,10 +401,10 @@ namespace LogfileMetaAnalyser.Controls
 
                 List<System.Windows.Forms.CheckBox> cbLst_LogLevelBoxes = new List<System.Windows.Forms.CheckBox>();
 
-                foreach (byte iLevel in Enumerable.Range(Loglevel.FewestDetailedLevel, Loglevel.MostDetailedLevel))
+                foreach (byte iLevel in Enumerable.Range(LogLevelTools.FewestDetailedLevel, LogLevelTools.MostDetailedLevel))
                 {
-                    Loglevels Llevel = Loglevel.ConvertFromNumberToEnum(iLevel);
-                    string sLevel = Loglevel.ConvertFromEnumToString(Llevel);
+                    LogLevel Llevel = LogLevelTools.ConvertFromNumberToEnum(iLevel);
+                    string sLevel = LogLevelTools.ConvertFromEnumToString(Llevel);
 
                     cb = new System.Windows.Forms.CheckBox()
                     {
@@ -560,10 +560,10 @@ namespace LogfileMetaAnalyser.Controls
 
 
             //Log level
-            foreach (byte iLevel in Enumerable.Range(Loglevel.FewestDetailedLevel, Loglevel.MostDetailedLevel))
+            foreach (byte iLevel in Enumerable.Range(LogLevelTools.FewestDetailedLevel, LogLevelTools.MostDetailedLevel))
             {
-                Loglevels Llevel = Loglevel.ConvertFromNumberToEnum(iLevel);
-                string sLevel = Loglevel.ConvertFromEnumToString(Llevel);
+                LogLevel Llevel = LogLevelTools.ConvertFromNumberToEnum(iLevel);
+                string sLevel = LogLevelTools.ConvertFromEnumToString(Llevel);
 
                 exportSettings.filterByLogtype.logLevelFilters[Llevel] = ((System.Windows.Forms.CheckBox)tableLayoutPanel_FilterByLogProperties.Controls[$"cb_LogLevel {sLevel}"]).Checked;
             }
