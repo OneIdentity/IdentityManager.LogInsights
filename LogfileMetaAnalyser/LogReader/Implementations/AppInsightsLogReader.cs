@@ -144,5 +144,10 @@ namespace LogfileMetaAnalyser.LogReader
 				yield return new LogEntry(locator, id, timeStamp, type, (int)severity, message, logger, appName, "", "");
 			}
 		}
+
+        /// <summary>
+        /// Gets a short display of the reader and it's data.
+        /// </summary>
+        public override string Display => $"App Insights Reader - {_client.BaseUri.OriginalString}";
 	}
 }

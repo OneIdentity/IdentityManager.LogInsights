@@ -24,10 +24,14 @@ namespace LogfileMetaAnalyser.LogReader
             return OnReadAsync(ct);
         }
 
-
         protected virtual void OnDispose()
         { }
 
         protected abstract IAsyncEnumerable<LogEntry> OnReadAsync(CancellationToken ct);
+
+        /// <summary>
+        /// Gets a short display of the reader and it's data.
+        /// </summary>
+        public abstract string Display { get; }
     }
 }

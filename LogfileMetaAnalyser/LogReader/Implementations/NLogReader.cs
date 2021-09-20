@@ -13,11 +13,11 @@ namespace LogfileMetaAnalyser.LogReader
 {
     public class NLogReader : LogReader
     {
-        public NLogReader(string[] fileNames, Encoding encoding)
+        public NLogReader(string[] fileNames, Encoding encoding = null)
         {
             // check the parameters
             m_FileNames = fileNames ?? throw new ArgumentNullException(nameof(fileNames));
-            m_Encoding = encoding ?? throw new ArgumentNullException(nameof(encoding));
+            m_Encoding = encoding ?? Encoding.Default;
         }
 
 		public NLogReader(NLogReaderConnectionStringBuilder connectionString)
@@ -138,6 +138,11 @@ namespace LogfileMetaAnalyser.LogReader
                    && line[7] == '-'
                    && m_LineStartRegex.IsMatch(line);
         }
+
+        /// <summary>
+        /// Gets a short display of the reader and it's data.
+        /// </summary>
+        public override string Display => $"NLog Reader - {m_FileNames.Length} files";
 
         private readonly string[] m_FileNames;
         private readonly Encoding m_Encoding;
