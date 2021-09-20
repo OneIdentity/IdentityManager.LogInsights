@@ -108,8 +108,9 @@ namespace LogfileMetaAnalyser.LogReader
 
 			var pos = 0;
 			foreach (var row in table.Rows)
-			{
-				var locator = new Locator(pos++, _connString.Query);
+            {
+                pos++;
+				var locator = new Locator(pos, pos, _connString.Query);
 
 				var id = (string) row[itemIdIdx];
 				var timeStamp = (DateTime) row[timestampIdx];
@@ -138,7 +139,7 @@ namespace LogfileMetaAnalyser.LogReader
 					}
 				}
 
-				yield return new LogEntry(locator, id, timeStamp, type, (int)severity, message, logger, appName);
+				yield return new LogEntry(locator, id, timeStamp, type, (int)severity, message, logger, appName, "", "");
 			}
 		}
 	}

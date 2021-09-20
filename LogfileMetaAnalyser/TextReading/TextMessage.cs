@@ -4,6 +4,7 @@ using System.Text;
 using System.Collections.Generic;
 
 using LogfileMetaAnalyser.Helpers;
+using LogfileMetaAnalyser.LogReader;
 
 namespace LogfileMetaAnalyser
 {
@@ -22,6 +23,7 @@ namespace LogfileMetaAnalyser
 
     public class TextMessage
     {
+        private readonly LogEntry m_Entry;
         private StringBuilder _stringbuilder; 
         public FinalizeStates finalizeState = FinalizeStates.NotFinalized; //when true, the object is read only
         private object locky = new object();
@@ -123,36 +125,54 @@ namespace LogfileMetaAnalyser
             this.messageText = initialText;
         }
 
+        public TextMessage(LogEntry entry)
+        {
+            // check the parameters
+            if (entry == null) throw new ArgumentNullException(nameof(entry));
+
+            m_Entry = entry;
+            textLocator = new TextLocator(entry.Locator.Source, -1, entry.Locator.Position, entry.Locator.EntryNumber);
+            messageText = entry.Message;
+            payloadmessage = entry.Message;
+
+            messageTimestamp = entry.TimeStamp;
+            numberOfLines = 1; // TODO
+            loggerLevel = entry.Level.ToString();
+            loggerSource = entry.Logger;
+            pid = entry.Pid;
+            spid = entry.Spid;
+            finalizeState = FinalizeStates.Finalized;
+        }
 
         public override string ToString()
         {
             return string.Format("msg #{0} in line {1}@{2}/{3}: {4}", textLocator.messageNumber, textLocator.fileLinePosition, textLocator.fileName, textLocator.fileStreamOffset, messageText);
         }
 
-        public TextMessage GetShrunkMessage()
-        {
-            //only attributes textLocator and messageText are valid
+        //public TextMessage GetShrunkMessage()
+        //{
+        //    //only attributes textLocator and messageText are valid
 
-            TextMessage tm = new TextMessage(this.textLocator, this.messageText);
-            tm.FillObject("", "", "", "", "", this.messageLogfileType, null, null, messageTimestamp, -1, FinalizeStates.Finalized);
+        //    TextMessage tm = new TextMessage(this.textLocator, this.messageText);
+        //    tm.FillObject("", "", "", "", "", this.messageLogfileType, null, null, messageTimestamp, -1, FinalizeStates.Finalized);
 
-            return tm;           
-        }
+        //    return tm;           
+        //}
         
-        public void AppendMessageLine(string messageTextToAppend)
-        {
-            if (messageTextToAppend == null)
-                return;
+        //public void AppendMessageLine(string messageTextToAppend)
+        //{
+        //    if (messageTextToAppend == null)
+        //        return;
             
-            if (finalizeState == FinalizeStates.Finalized)
-                throw new Exception("This text message object is already finalized and marked as read only!");
+        //    if (finalizeState == FinalizeStates.Finalized)
+        //        throw new Exception("This text message object is already finalized and marked as read only!");
 
-            if (_stringbuilder == null)
-                _stringbuilder = new StringBuilder(_messageText);
+        //    if (_stringbuilder == null)
+        //        _stringbuilder = new StringBuilder(_messageText);
 
-            _stringbuilder.AppendLine(messageTextToAppend);
-            numberOfLines++; 
-        }
+        //    _stringbuilder.AppendLine(messageTextToAppend);
+        //    numberOfLines++; 
+        //}
                        
         internal void FillObject( 
                 string loggerLevel,
@@ -290,6 +310,8 @@ namespace LogfileMetaAnalyser
                 
         private void FinalizeMessage()
         {
+            return;
+
             GlobalStopWatch.StartWatch("FinalizeMessage");
             DateTime dt;
 

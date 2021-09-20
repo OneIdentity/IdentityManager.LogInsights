@@ -13,6 +13,9 @@
     <ApplicationIcon>AppIcon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="TextReading\ReadLogByBlock.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="ActiproSoftware.Shared.WinForms, Version=16.1.330.0, Culture=neutral, PublicKeyToken=c27e062d3c1a4763, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>_Alien\ActiproSoftware.Shared.WinForms.dll</HintPath>
