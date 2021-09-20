@@ -2,7 +2,6 @@
   <PropertyGroup>
     <TargetFramework>net5.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <UseWindowsForms>true</UseWindowsForms>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
   </PropertyGroup>
@@ -11,6 +10,10 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>AppIcon.ico</ApplicationIcon>
+    <Company>One Identity LLC.</Company>
+    <Copyright>© 2021 One Identity LLC.  All rights reserved.</Copyright>
+    <PackageProjectUrl>https://github.com/OneIdentity/IdentityManager.LogInsights</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/OneIdentity/IdentityManager.LogInsights</RepositoryUrl>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="TextReading\ReadLogByBlock.cs" />
@@ -59,6 +62,9 @@
       <HintPath>_Alien\VI.ImageLibrary.dll</HintPath>
     </Reference>
     <PackageReference Include="Microsoft.Azure.ApplicationInsights.Query" Version="1.0.0" />
+    <PackageReference Include="GitVersion.MsBuild" Version="5.7.0">
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Controls\ContextLinesUC.cs">
