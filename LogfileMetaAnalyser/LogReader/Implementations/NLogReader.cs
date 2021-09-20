@@ -56,7 +56,7 @@ namespace LogfileMetaAnalyser.LogReader
                     var logEntry = new LogEntry(new Locator(lineNumber, file), 
                         lineNumber.ToString(),
                         DateTime.Now,
-                        LogEntryType.Info,
+                        LogLevel.Info,
                         0, entry, "", "");
 
                     yield return logEntry;
