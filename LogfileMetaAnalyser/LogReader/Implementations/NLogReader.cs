@@ -15,8 +15,16 @@ namespace LogfileMetaAnalyser.LogReader
         {
             // check the parameters
             m_FileNames = fileNames ?? throw new ArgumentNullException(nameof(fileNames));
-            m_Encoding = encoding;
+            m_Encoding = encoding ?? throw new ArgumentNullException(nameof(encoding));
         }
+
+		public NLogReader(NLogReaderConnectionStringBuilder connectionString)
+			: this(connectionString?.FileNames, connectionString?.Encoding)
+		{}
+
+        public NLogReader(string connectionString)
+			: this(new NLogReaderConnectionStringBuilder(connectionString))
+        {}
 
         protected override  async IAsyncEnumerable<LogEntry> OnReadAsync(CancellationToken ct)
         {
