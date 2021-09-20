@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 
 using LogfileMetaAnalyser.Helpers;
 using LogfileMetaAnalyser.Datastore;
+using LogfileMetaAnalyser.LogReader;
 
 
 namespace LogfileMetaAnalyser.Detectors
@@ -410,7 +411,7 @@ namespace LogfileMetaAnalyser.Detectors
                         queryResult_NumberOfObjectsAfterScope = queryResult_NumberOfObjectsBeforeScope;
                     }
 
-                    stepDetail.queryObjectInformation.isSuccessful = msg.loggerLevel == "DEBUG";
+                    stepDetail.queryObjectInformation.isSuccessful = msg.loggerLevel == LogLevel.Debug;
                     stepDetail.queryObjectInformation.isDataComplete = true;
                     stepDetail.queryObjectInformation.messageEnd = msg;
                     stepDetail.queryObjectInformation.dtTimestampEnd = msg.messageTimestamp;
@@ -540,7 +541,7 @@ namespace LogfileMetaAnalyser.Detectors
 
                      
 
-                    stepDetail.queryObjectInformation.isSuccessful = (cntFailure == 0 && state == "Success") || (string.IsNullOrEmpty(state) && msg.loggerLevel == "DEBUG");
+                    stepDetail.queryObjectInformation.isSuccessful = (cntFailure == 0 && state == "Success") || (string.IsNullOrEmpty(state) && msg.loggerLevel == LogLevel.Debug);
                     stepDetail.queryObjectInformation.isDataComplete = true;
                     stepDetail.queryObjectInformation.messageEnd = msg;
                     stepDetail.queryObjectInformation.dtTimestampEnd = msg.messageTimestamp;

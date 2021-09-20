@@ -16,8 +16,8 @@ namespace LogfileMetaAnalyser
 
 
         //Profile relevant
-        public Dictionary<Loglevels, bool> logLevelFilters = new Dictionary<Loglevels, bool>();
-        public Dictionary<string, bool> logSourceFilters = new Dictionary<string, bool>();
+        public Dictionary<LogLevel, bool> logLevelFilters = new();
+        public Dictionary<string, bool> logSourceFilters = new();
 
 
         //Non-Profile relevant
@@ -64,7 +64,6 @@ namespace LogfileMetaAnalyser
             set { dsref = value; }
         }
 
-        private Dictionary<string, bool> loglevelStringFiltersLst = new Dictionary<string, bool>();
         private bool logLevelFilters_passUnseen = false;  //do not check, pass the filter
         private bool logSourceFilters_passUnseen = false; //do not check, pass the filter
 
@@ -80,13 +79,9 @@ namespace LogfileMetaAnalyser
 
         public void Prepare()
         {
-            loglevelStringFiltersLst.Clear();
-            foreach (var kp in logLevelFilters.Where(di => di.Value))
-                loglevelStringFiltersLst.Add(Loglevel.ConvertFromEnumToString(kp.Key), true);
-
             //let's check: If ALL filters are enabled or disabled => disable filter
-            int checkedLLFilters = loglevelStringFiltersLst.Count;
-            if (checkedLLFilters == 0 || checkedLLFilters == Loglevel.MostDetailedLevel) //none or all are checked
+            int checkedLLFilters = logLevelFilters.Count(di => di.Value);
+            if (checkedLLFilters == 0 || checkedLLFilters == LogLevelTools.MostDetailedLevel) //none or all are checked
                 logLevelFilters_passUnseen = true;
 
             int checkedLSFilters = logSourceFilters.Where(di => di.Value).Count();
@@ -111,7 +106,7 @@ namespace LogfileMetaAnalyser
             if (msg.messageTimestamp < startDate || msg.messageTimestamp > endDate)
                 return MessageMatchResult.negative;
 
-            if (!logLevelFilters_passUnseen && !loglevelStringFiltersLst[msg.loggerLevel])
+            if (!logLevelFilters_passUnseen && !logLevelFilters[msg.loggerLevel])
                 return MessageMatchResult.negative;
 
             if (!logSourceFilters_passUnseen && (!logSourceFilters.ContainsKey(msg.loggerSource) || !logSourceFilters[msg.loggerSource]))

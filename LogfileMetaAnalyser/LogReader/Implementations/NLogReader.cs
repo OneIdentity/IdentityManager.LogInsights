@@ -7,6 +7,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
+using LogfileMetaAnalyser.Helpers;
+
 namespace LogfileMetaAnalyser.LogReader
 {
     public class NLogReader : LogReader
@@ -101,7 +103,7 @@ namespace LogfileMetaAnalyser.LogReader
                     return LogLevel.Trace;
                 case 'W':
                 case 'w':
-                    return LogLevel.Warning;
+                    return LogLevel.Warn;
                 case 'E':
                 case 'e':
                     return LogLevel.Error;

@@ -110,7 +110,7 @@ namespace LogfileMetaAnalyser
         public LogfileType messageLogfileType { get;  set; } = LogfileType.Undef;
         public DateTime messageTimestamp { get; private set; }         
         public int numberOfLines { get; private set; }
-        public string loggerLevel { get; private set; }
+        public LogLevel loggerLevel { get; private set; }
         public string loggerSource { get; private set; } 
         public string pid { get; private set; }
         public string spid { get; private set; }
@@ -137,7 +137,7 @@ namespace LogfileMetaAnalyser
 
             messageTimestamp = entry.TimeStamp;
             numberOfLines = 1; // TODO
-            loggerLevel = entry.Level.ToString();
+            loggerLevel = entry.Level;
             loggerSource = entry.Logger;
             pid = entry.Pid;
             spid = entry.Spid;
@@ -175,7 +175,7 @@ namespace LogfileMetaAnalyser
         //}
                        
         internal void FillObject( 
-                string loggerLevel,
+                LogLevel loggerLevel,
                 string loggerSource, 
                 string pid, string spid,
                 string payloadmessage,
@@ -312,115 +312,115 @@ namespace LogfileMetaAnalyser
         {
             return;
 
-            GlobalStopWatch.StartWatch("FinalizeMessage");
-            DateTime dt;
+            //GlobalStopWatch.StartWatch("FinalizeMessage");
+            //DateTime dt;
 
-            if (_stringbuilder != null) //when this message consists of more than one msg, we need to take stringbuilder;
-                _messageText = _stringbuilder.ToString();
+            //if (_stringbuilder != null) //when this message consists of more than one msg, we need to take stringbuilder;
+            //    _messageText = _stringbuilder.ToString();
 
-            _stringbuilder = null;
+            //_stringbuilder = null;
 
-            try
-            {                
-                if (messageLogfileType == LogfileType.Undef || messageLogfileType == LogfileType.NLogDefault)
-                {
-                    GlobalStopWatch.StartWatch("FinalizeMessage.NLogDefault");
-                    var rm = Constants.regexMessageMetaDataNLogDefault.Match(messageText);
-                    if (rm.Success)
-                    {
-                        GlobalStopWatch.StartWatch("FinalizeMessage.NLogDefault.ParseTimestamp");
-                        if (!DateTime.TryParse(rm.Groups["Timestamp"].Value, out dt))
-                            messageTimestamp = DateTime.MinValue;
-                        else
-                            messageTimestamp = dt;
-                        GlobalStopWatch.StopWatch("FinalizeMessage.NLogDefault.ParseTimestamp");
+            //try
+            //{                
+            //    if (messageLogfileType == LogfileType.Undef || messageLogfileType == LogfileType.NLogDefault)
+            //    {
+            //        GlobalStopWatch.StartWatch("FinalizeMessage.NLogDefault");
+            //        var rm = Constants.regexMessageMetaDataNLogDefault.Match(messageText);
+            //        if (rm.Success)
+            //        {
+            //            GlobalStopWatch.StartWatch("FinalizeMessage.NLogDefault.ParseTimestamp");
+            //            if (!DateTime.TryParse(rm.Groups["Timestamp"].Value, out dt))
+            //                messageTimestamp = DateTime.MinValue;
+            //            else
+            //                messageTimestamp = dt;
+            //            GlobalStopWatch.StopWatch("FinalizeMessage.NLogDefault.ParseTimestamp");
 
-                        loggerLevel = rm.Groups["NLevel"].Value;
-                        loggerSource = rm.Groups["NSource"].Value;
+            //            loggerLevel = rm.Groups["NLevel"].Value;
+            //            loggerSource = rm.Groups["NSource"].Value;
 
-                        spid = string.Format("{1}{0}",
-                                                rm.Groups["SID"].Value,
-                                                rm.Groups["NSourceExt"].Value != ""
-                                                    ? rm.Groups["NSourceExt"].Value
-                                                    : rm.Groups["NSourceExt2"].Value.Trim());
+            //            spid = string.Format("{1}{0}",
+            //                                    rm.Groups["SID"].Value,
+            //                                    rm.Groups["NSourceExt"].Value != ""
+            //                                        ? rm.Groups["NSourceExt"].Value
+            //                                        : rm.Groups["NSourceExt2"].Value.Trim());
 
-                        pid = rm.Groups["PID"].Value;                        
-                        payloadmessage = rm.Groups["Payload"].Value;
+            //            pid = rm.Groups["PID"].Value;                        
+            //            payloadmessage = rm.Groups["Payload"].Value;
 
-                        messageLogfileType = LogfileType.NLogDefault;
+            //            messageLogfileType = LogfileType.NLogDefault;
 
-                        return;
-                    }
-                }
+            //            return;
+            //        }
+            //    }
                 
-                if (messageLogfileType == LogfileType.Undef || messageLogfileType == LogfileType.Jobservice)
-                {
-                    GlobalStopWatch.StartWatch("FinalizeMessage.Jobservice");
-                    var rm = Constants.regexMessageMetaDataJobservice.Match(messageText);
-                    if (rm.Success)
-                    {
-                        GlobalStopWatch.StartWatch("FinalizeMessage.Jobservice.ParseTimestamp");
-                        if (!DateTime.TryParse(rm.Groups["Timestamp"].Value, out dt))
-                            messageTimestamp = DateTime.MinValue;
-                        else
-                            messageTimestamp = dt;
-                        GlobalStopWatch.StopWatch("FinalizeMessage.Jobservice.ParseTimestamp");
+            //    if (messageLogfileType == LogfileType.Undef || messageLogfileType == LogfileType.Jobservice)
+            //    {
+            //        GlobalStopWatch.StartWatch("FinalizeMessage.Jobservice");
+            //        var rm = Constants.regexMessageMetaDataJobservice.Match(messageText);
+            //        if (rm.Success)
+            //        {
+            //            GlobalStopWatch.StartWatch("FinalizeMessage.Jobservice.ParseTimestamp");
+            //            if (!DateTime.TryParse(rm.Groups["Timestamp"].Value, out dt))
+            //                messageTimestamp = DateTime.MinValue;
+            //            else
+            //                messageTimestamp = dt;
+            //            GlobalStopWatch.StopWatch("FinalizeMessage.Jobservice.ParseTimestamp");
 
-                        string tags = rm.Groups["tag"].Value;
-                        loggerLevel = "Info";
-                        loggerSource = "JobService";
+            //            string tags = rm.Groups["tag"].Value;
+            //            loggerLevel = "Info";
+            //            loggerSource = "JobService";
 
-                        if (tags.Contains("<d>")) loggerLevel = "Debug";
-                        if (tags.Contains("<s>")) loggerLevel = "Info";
-                        if (tags.Contains("<w>")) loggerLevel = "Warning";
-                        if (tags.Contains("<e>")) loggerLevel = "Error";
-                        if (tags.Contains("<r>")) loggerLevel = "Error";
+            //            if (tags.Contains("<d>")) loggerLevel = "Debug";
+            //            if (tags.Contains("<s>")) loggerLevel = "Info";
+            //            if (tags.Contains("<w>")) loggerLevel = "Warning";
+            //            if (tags.Contains("<e>")) loggerLevel = "Error";
+            //            if (tags.Contains("<r>")) loggerLevel = "Error";
 
-                        spid = rm.Groups["SID"]?.Value ?? "";
+            //            spid = rm.Groups["SID"]?.Value ?? "";
 
-                        payloadmessage = rm.Groups["Payload"].Value;
+            //            payloadmessage = rm.Groups["Payload"].Value;
 
-                        messageLogfileType = LogfileType.Jobservice;
+            //            messageLogfileType = LogfileType.Jobservice;
 
-                        return;
-                    }
-                }
-
-
-                //ok, hopefully we get at least the timestamp
-                GlobalStopWatch.StartWatch("FinalizeMessageStage1.at least the timestamp");
-                try
-                {
-                    loggerLevel = "";
-                    loggerSource = ""; 
-                    pid = "";
-                    spid = "";
-                    messageLogfileType = LogfileType.Undef;
+            //            return;
+            //        }
+            //    }
 
 
-                    var rm = Constants.regexTimeStampAtLinestart.Match(messageText);
+            //    //ok, hopefully we get at least the timestamp
+            //    GlobalStopWatch.StartWatch("FinalizeMessageStage1.at least the timestamp");
+            //    try
+            //    {
+            //        loggerLevel = "";
+            //        loggerSource = ""; 
+            //        pid = "";
+            //        spid = "";
+            //        messageLogfileType = LogfileType.Undef;
 
-                    if (rm.Success && DateTime.TryParse(rm.Groups["Timestamp"].Value, out dt))
-                    {
-                        messageTimestamp = dt;
-                        payloadmessage = messageText.Remove(rm.Groups["Timestamp"].Index, (rm.Groups["Timestamp"].Length));
-                    }
-                    else
-                    {
-                        messageTimestamp = DateTime.MinValue;
-                        payloadmessage = messageText;
-                    }
-                }
-                catch { }
-                GlobalStopWatch.StopWatch("FinalizeMessage.at least the timestamp");
-            }
-            finally
-            {
-                finalizeState = FinalizeStates.Finalized;
-                GlobalStopWatch.StopWatch("FinalizeMessage");
-                GlobalStopWatch.StopWatch("FinalizeMessage.NLogDefault");
-                GlobalStopWatch.StopWatch("FinalizeMessage.Jobservice");
-            }
+
+            //        var rm = Constants.regexTimeStampAtLinestart.Match(messageText);
+
+            //        if (rm.Success && DateTime.TryParse(rm.Groups["Timestamp"].Value, out dt))
+            //        {
+            //            messageTimestamp = dt;
+            //            payloadmessage = messageText.Remove(rm.Groups["Timestamp"].Index, (rm.Groups["Timestamp"].Length));
+            //        }
+            //        else
+            //        {
+            //            messageTimestamp = DateTime.MinValue;
+            //            payloadmessage = messageText;
+            //        }
+            //    }
+            //    catch { }
+            //    GlobalStopWatch.StopWatch("FinalizeMessage.at least the timestamp");
+            //}
+            //finally
+            //{
+            //    finalizeState = FinalizeStates.Finalized;
+            //    GlobalStopWatch.StopWatch("FinalizeMessage");
+            //    GlobalStopWatch.StopWatch("FinalizeMessage.NLogDefault");
+            //    GlobalStopWatch.StopWatch("FinalizeMessage.Jobservice");
+            //}
         }
     }
 }

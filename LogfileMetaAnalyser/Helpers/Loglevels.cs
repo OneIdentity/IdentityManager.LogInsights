@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace LogfileMetaAnalyser.Helpers
 {
-    public enum Loglevels
+    public enum LogLevel
     {
         Undef = 0,
         Critical = 1,
@@ -14,7 +14,7 @@ namespace LogfileMetaAnalyser.Helpers
         Trace = 6
     }
 
-    public static class Loglevel
+    public static class LogLevelTools
     {
         public static byte MostDetailedLevel = 6;
         public static byte FewestDetailedLevel = 1;
@@ -24,61 +24,49 @@ namespace LogfileMetaAnalyser.Helpers
             return (byte)ConvertFromStringToEnum(loglevelAsString);            
         }
 
-        public static Loglevels ConvertFromStringToEnum(string s)
+        public static LogLevel ConvertFromStringToEnum(string s)
         {
             if (string.IsNullOrWhiteSpace(s))
-                return Loglevels.Undef;
+                return LogLevel.Undef;
 
-            Loglevels res;
-            if (Enum.TryParse<Loglevels>(s.Trim(), true, out res))
-                return (res);
+			if (Enum.TryParse(s.Trim(), true, out LogLevel res))
+                return res;
 
-            return Loglevels.Undef;
+            return LogLevel.Undef;
         }
 
-        public static string ConvertFromEnumToString(Loglevels level)
+		public static string ConvertFromEnumToString(LogLevel level)
+		{
+			//return level.ToString().ToUpperInvariant();  //performance issue
+			switch (level)
+			{
+				case LogLevel.Critical: return ("CRITICAL");
+				case LogLevel.Error: return ("ERROR");
+				case LogLevel.Warn: return ("WARN");
+				case LogLevel.Info: return ("INFO");
+				case LogLevel.Debug: return ("DEBUG");
+				case LogLevel.Trace: return ("TRACE");
+			}
+
+			return "";
+		}
+
+        public static LogLevel ConvertFromNumberToEnum(byte level)
+		{
+			return (LogLevel) level;
+		}
+
+        public static byte ConvertFromEnumToNumber(this LogLevel level)
         {
-            //return level.ToString().ToUpperInvariant();  //performance issue
-            switch (level)
-            {
-                case Loglevels.Critical: return ("CRITICAL");
-                case Loglevels.Error: return ("ERROR");
-                case Loglevels.Warn: return ("WARN");
-                case Loglevels.Info: return ("INFO");
-                case Loglevels.Debug: return ("DEBUG");
-                case Loglevels.Trace: return ("TRACE");
-            }
-
-            return "";
+            return (byte)Enum.Parse(typeof(LogLevel), level.ToString());           
         }
 
-        public static Loglevels ConvertFromNumberToEnum(byte level)
-        {
-            switch (level)
-            {
-                case 1: return Loglevels.Critical;
-                case 2: return Loglevels.Error;
-                case 3: return Loglevels.Warn;
-                case 4: return Loglevels.Info;
-                case 5: return Loglevels.Debug;
-                case 6: return Loglevels.Trace;
-
-                default:
-                    return Loglevels.Undef;
-            }
-        }
-
-        public static byte ConvertFromEnumToNumber(Loglevels level)
-        {
-            return (byte)Enum.Parse(typeof(Loglevels), level.ToString());           
-        }
-
-        public static bool IsGreater(this Loglevels levA, Loglevels LevB)
+        public static bool IsGreater(this LogLevel levA, LogLevel LevB)
         {
             return (levA > LevB);
         }
 
-        public static Loglevels GetHighestLevel(Loglevels[] levels)
+        public static LogLevel GetHighestLevel(LogLevel[] levels)
         {
             return levels.Max(l => l);            
         }
