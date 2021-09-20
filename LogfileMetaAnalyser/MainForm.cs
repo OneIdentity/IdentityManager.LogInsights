@@ -2,47 +2,48 @@
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using LogfileMetaAnalyser.Controls;
 using LogfileMetaAnalyser.Helpers;
 using LogfileMetaAnalyser.Datastore;
+using LogfileMetaAnalyser.LogReader;
 
 namespace LogfileMetaAnalyser
 {
     public partial class MainForm : Form
     {
-        private string[] _filesOrDirectoryToLoad;
-        private string[] filesOrDirectoryToLoad
+        private ILogReader _activeReader;
+
+        private void _Load(ILogReader reader)
         {
-            get { return _filesOrDirectoryToLoad; }
-            set
-            {
-                if (value == _filesOrDirectoryToLoad)
-                    return;
+            if (reader == _activeReader)
+                return;
 
-                _filesOrDirectoryToLoad = value;
+            _activeReader?.Dispose();
+            _activeReader = reader;
 
-                if (value == new string[] { })
-                    return;
+            _analyzerCore.Initialize(_activeReader);
+            // todo toolStripStatusLabel.Text = analyzerCore.filesToAnalyze.Length + " files to analyze";
+            RefreshStatusLabel(1);
 
-                analyzerCore.InitializeFiles(_filesOrDirectoryToLoad);
-                toolStripStatusLabel.Text = analyzerCore.filesToAnalyze.Length + " files to analyze";
-                RefreshStatusLabel(1);
-
-                StartAnalysis();                
-            }
+            StartAnalysis();
         }
 
-        private Analyzer analyzerCore;
-        private DataStoreViewer datastoreViewer;
-        private Exporter logfileFilterExporter;
+        private bool _CheckForClose()
+        {
+            return _activeReader == null || MessageBox.Show("Do you want to start a new analysis?", "Discard current report?", MessageBoxButtons.YesNo) == DialogResult.Yes;
+
+        }
+
+        private Analyzer _analyzerCore;
+        private DataStoreViewer _datastoreViewer;
+        private Exporter _logfileFilterExporter;
 
 
         public MainForm()
         {             
-            _filesOrDirectoryToLoad = new string[] { };
-
             InitializeComponent();
 
             splitContainerRightIn.Panel1.Controls.Add(new LogfileMetaAnalyser.Controls.WelcomeUC());
@@ -57,12 +58,12 @@ namespace LogfileMetaAnalyser
 
 
             //initialize analyzer
-            analyzerCore = new Analyzer();
-            logfileFilterExporter = new Exporter(analyzerCore.datastore);
-            datastoreViewer = new DataStoreViewer(analyzerCore.datastore, logfileFilterExporter, this, splitContainerRightIn.Panel1.Controls, splitContainerRightIn.Panel2.Controls);
+            _analyzerCore = new Analyzer();
+            _logfileFilterExporter = new Exporter(_analyzerCore.datastore);
+            _datastoreViewer = new DataStoreViewer(_analyzerCore.datastore, _logfileFilterExporter, this, splitContainerRightIn.Panel1.Controls, splitContainerRightIn.Panel2.Controls);
 
 
-            analyzerCore.OnReadProgressChanged += new EventHandler<double>((object o, double d) =>
+            _analyzerCore.OnReadProgressChanged += new EventHandler<double>((object o, double d) =>
             {
                 GuiHelper.SetGuiSave(statusStrip1, () =>
                 {
@@ -71,7 +72,7 @@ namespace LogfileMetaAnalyser
                 });
             });
 
-            logfileFilterExporter.OnExportProgressChanged += new EventHandler<double>((object o, double d) =>
+            _logfileFilterExporter.OnExportProgressChanged += new EventHandler<double>((object o, double d) =>
             {
                 GuiHelper.SetGuiSave(statusStrip1, () =>
                 {
@@ -84,7 +85,7 @@ namespace LogfileMetaAnalyser
                 GuiHelper.SetGuiSave(treeViewLeft, async () =>
                 {
                     string key = args.Node.Name;
-                    await datastoreViewer.ExportAsViewContent(key).ConfigureAwait(false);
+                    await _datastoreViewer.ExportAsViewContent(key).ConfigureAwait(false);
                 });
             });
 
@@ -322,44 +323,45 @@ namespace LogfileMetaAnalyser
                     _filesOrDirectoryToLoad.Add(param);
             }
 
-            if (_filesOrDirectoryToLoad.Count > 0)
-                filesOrDirectoryToLoad = _filesOrDirectoryToLoad.ToArray();
+            if (_filesOrDirectoryToLoad.Count > 0 && _CheckForClose())
+                _Load(new NLogReader(_filesOrDirectoryToLoad.ToArray()));
         }
 
         public void RefreshStatusLabel(byte phase)
         {
-            string basetip = "";
+            // TODO
+            //string basetip = "";
 
-            if (analyzerCore != null && analyzerCore.filesToAnalyze != null && analyzerCore.filesToAnalyze.Any())
-            {
-                if (analyzerCore.filesToAnalyze.Length == 1)
-                    basetip = "1 file to analyze: " + analyzerCore.filesToAnalyze[0];
-                else
-                    basetip = analyzerCore.filesToAnalyze.Length + " files to analyze";
-            }
+            //if (_analyzerCore != null && _analyzerCore.filesToAnalyze != null && _analyzerCore.filesToAnalyze.Any())
+            //{
+            //    if (_analyzerCore.filesToAnalyze.Length == 1)
+            //        basetip = "1 file to analyze: " + _analyzerCore.filesToAnalyze[0];
+            //    else
+            //        basetip = _analyzerCore.filesToAnalyze.Length + " files to analyze";
+            //}
 
-            switch (phase)
-            {
-                case 1:
-                    if (analyzerCore == null || analyzerCore.filesToAnalyze.Length == 0)
-                    {
-                        toolStripStatusLabel.Text = "ready";
-                        toolStripProgressBar1.Visible = false;
-                    }
-                    else
-                        toolStripStatusLabel.Text = basetip;
+            //switch (phase)
+            //{
+            //    case 1:
+            //        if (_analyzerCore == null || _analyzerCore.filesToAnalyze.Length == 0)
+            //        {
+            //            toolStripStatusLabel.Text = "ready";
+            //            toolStripProgressBar1.Visible = false;
+            //        }
+            //        else
+            //            toolStripStatusLabel.Text = basetip;
 
-                    break;
+            //        break;
 
-                case 2:
-                    toolStripStatusLabel.Text = basetip + "; analyzing, please wait ...";
-                    break;
+            //    case 2:
+            //        toolStripStatusLabel.Text = basetip + "; analyzing, please wait ...";
+            //        break;
 
-                case 3:
-                    toolStripStatusLabel.Text = basetip + "; done!";
-                    toolStripProgressBar1.Visible = false;
-                    break;
-            }
+            //    case 3:
+            //        toolStripStatusLabel.Text = basetip + "; done!";
+            //        toolStripProgressBar1.Visible = false;
+            //        break;
+            //}
         }
 
         private void DragEnterMethod(object sender, DragEventArgs e)
@@ -381,8 +383,8 @@ namespace LogfileMetaAnalyser
             if (files == null || files.Length < 1)
                 return;
 
-            if (filesOrDirectoryToLoad.Length == 0 || MessageBox.Show("Do you want to start a new analysis?","Discard current report?", MessageBoxButtons.YesNo) == DialogResult.Yes)
-                filesOrDirectoryToLoad = files;
+            if (_CheckForClose())
+                _Load(new NLogReader(files));
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -390,54 +392,57 @@ namespace LogfileMetaAnalyser
             this.Close();
         }
 
-        private void loadDirectoryToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            folderBrowserDialog1.ShowNewFolderButton = false;
-            folderBrowserDialog1.RootFolder = Environment.SpecialFolder.Desktop;
-            if (filesOrDirectoryToLoad.Length == 0)
-                folderBrowserDialog1.SelectedPath = "C:\\";
+        //private void loadDirectoryToolStripMenuItem_Click(object sender, EventArgs e)
+        //{
+        //    folderBrowserDialog1.ShowNewFolderButton = false;
+        //    folderBrowserDialog1.RootFolder = Environment.SpecialFolder.Desktop;
+        //    if (_activeReader == null) // first open
+        //        folderBrowserDialog1.SelectedPath = "C:\\";
 
-            if (filesOrDirectoryToLoad.Length == 0 || MessageBox.Show("Do you want to start a new analysis?", "Discard current report?", MessageBoxButtons.YesNo) == DialogResult.Yes)
-                if (folderBrowserDialog1.ShowDialog() == DialogResult.OK && folderBrowserDialog1.SelectedPath != "")
-                    filesOrDirectoryToLoad = new string[] { folderBrowserDialog1.SelectedPath};
-        }
+        //    if (filesOrDirectoryToLoad.Length == 0 || MessageBox.Show("Do you want to start a new analysis?", "Discard current report?", MessageBoxButtons.YesNo) == DialogResult.Yes)
+        //        if (folderBrowserDialog1.ShowDialog() == DialogResult.OK && folderBrowserDialog1.SelectedPath != "")
+        //            filesOrDirectoryToLoad = new string[] { folderBrowserDialog1.SelectedPath};
+        //}
 
-        private void loadFilesToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (filesOrDirectoryToLoad.Length == 0 || MessageBox.Show("Do you want to start a new analysis?", "Discard current report?", MessageBoxButtons.YesNo) == DialogResult.Yes)
-                if (openFileDialog1.ShowDialog() == DialogResult.OK)
-                    filesOrDirectoryToLoad = openFileDialog1.FileNames;
-        }
+        //private void loadFilesToolStripMenuItem_Click(object sender, EventArgs e)
+        //{
+        //    if (filesOrDirectoryToLoad.Length == 0 || MessageBox.Show("Do you want to start a new analysis?", "Discard current report?", MessageBoxButtons.YesNo) == DialogResult.Yes)
+        //        if (openFileDialog1.ShowDialog() == DialogResult.OK)
+        //            filesOrDirectoryToLoad = openFileDialog1.FileNames;
+        //}
 
         private async void StartAnalysis()
         {
-            if (this.filesOrDirectoryToLoad.Length > 0)
-            {
-                RefreshStatusLabel(2);
-                await analyzerCore.AnalyzeStructureAsync().ConfigureAwait(true);
+            if (_activeReader == null)
+                return;
 
-                RefreshStatusLabel(3);
-                bool rt = datastoreViewer.ExportAsNavigationTreeView(ref treeViewLeft);
-            }
+            RefreshStatusLabel(2);
+            await _analyzerCore.AnalyzeStructureAsync().ConfigureAwait(true);
+
+            RefreshStatusLabel(3);
+            bool rt = _datastoreViewer.ExportAsNavigationTreeView(ref treeViewLeft);
         }
 
         private void debugDatastoreToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Controls.TextBoxFrm fm = new Controls.TextBoxFrm();
             fm.SetupLabel($"Data Store JSON export");
-            fm.SetupData(datastoreViewer.ExportAsJson());            
+            fm.SetupData(_datastoreViewer.ExportAsJson());            
 
             fm.ShowDialog();
         }
 
         private async void filterLogfilesToScopeTheImportantStuffToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            await logfileFilterExporter.FilterAndExport().ConfigureAwait(true);
+            await _logfileFilterExporter.FilterAndExport().ConfigureAwait(true);
             RefreshStatusLabel(3);
         }
 
         private void loadLogsToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (!_CheckForClose())
+                return;
+
             using (var dlgProvider = new LogReaderForm())
             {
                 DialogResult dr = dlgProvider.ShowDialog(this);
@@ -445,7 +450,7 @@ namespace LogfileMetaAnalyser
                 if (dr == DialogResult.OK)
                 {
                     // start Load
-
+                    _Load(dlgProvider.ConnectToReader());
                 }
             }
         }
