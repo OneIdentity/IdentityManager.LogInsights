@@ -13,6 +13,9 @@
         /// <param name="disposing">True, wenn verwaltete Ressourcen gelöscht werden sollen; andernfalls False.</param>
         protected override void Dispose(bool disposing)
         {
+            _activeReader?.Dispose();
+            _activeReader = null;
+
             if (disposing && (components != null))
             {
                 components.Dispose();
@@ -32,8 +35,6 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.loadDirectoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.loadFilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadLogsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -77,28 +78,12 @@
             // fileToolStripMenuItem
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.loadDirectoryToolStripMenuItem,
-            this.loadFilesToolStripMenuItem,
             this.loadLogsToolStripMenuItem,
             this.toolStripSeparator1,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
-            // 
-            // loadDirectoryToolStripMenuItem
-            // 
-            this.loadDirectoryToolStripMenuItem.Name = "loadDirectoryToolStripMenuItem";
-            this.loadDirectoryToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.loadDirectoryToolStripMenuItem.Text = "Load Directory";
-            this.loadDirectoryToolStripMenuItem.Click += new System.EventHandler(this.loadDirectoryToolStripMenuItem_Click);
-            // 
-            // loadFilesToolStripMenuItem
-            // 
-            this.loadFilesToolStripMenuItem.Name = "loadFilesToolStripMenuItem";
-            this.loadFilesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.loadFilesToolStripMenuItem.Text = "Load File(s)";
-            this.loadFilesToolStripMenuItem.Click += new System.EventHandler(this.loadFilesToolStripMenuItem_Click);
             // 
             // loadLogsToolStripMenuItem
             // 
@@ -300,8 +285,6 @@
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel;
         private System.Windows.Forms.SplitContainer splitContainerOutVert;
         private System.Windows.Forms.SplitContainer splitContainerRightIn;
-        private System.Windows.Forms.ToolStripMenuItem loadDirectoryToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem loadFilesToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.TreeView treeViewLeft;

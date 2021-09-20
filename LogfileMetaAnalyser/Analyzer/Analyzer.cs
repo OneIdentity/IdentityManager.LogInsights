@@ -20,6 +20,8 @@ namespace LogfileMetaAnalyser
 
 
         private int _AnalyzeDOP;
+        private ILogReader m_LogReader;
+
         public int AnalyzeDOP
         {
             get { return _AnalyzeDOP; }
@@ -28,7 +30,6 @@ namespace LogfileMetaAnalyser
         private Helpers.NLog logger;
 
         public DatastoreStructure datastore = new DatastoreStructure(); 
-        public string[] filesToAnalyze;
 
         
         //Constructor
@@ -40,52 +41,9 @@ namespace LogfileMetaAnalyser
             AnalyzeDOP = 2; 
         }
 
-        public void InitializeFiles(string[] filenameOrFolder)
+        public void Initialize(ILogReader reader)
         {
-            if (filenameOrFolder == null || filenameOrFolder.Length == 0)
-                return;
-
-            var inputFileFolderTupels = FileHelper.GetFileAndDirectory(filenameOrFolder);
-            string[] unsupportedFiles = new string[] { };
-
-            foreach (var srcMode in new SearchOption [] { SearchOption.TopDirectoryOnly, SearchOption.AllDirectories})
-            {
-                var filesToGrab = inputFileFolderTupels
-                                    .SelectMany(t => t.filenames
-                                                        .SelectMany(f => Helpers.FileHelper.DirectoryGetFilesSave(t.directoryname, f, srcMode)))
-                                    .ToArray();
-
-                filesToAnalyze = FileHelper.OrderByContentTimestamp(filesToGrab, out unsupportedFiles);
-
-                if (filesToAnalyze.Length == 0)
-                {
-                    switch (srcMode)
-                    {
-                        case SearchOption.TopDirectoryOnly:
-                            var ret = MessageBox.Show($"No files found to analyze:\n {filenameOrFolder[0]}\n\nWould you like to include all sub folders into the file search?", "No files", MessageBoxButtons.YesNoCancel);
-
-                            if (ret != DialogResult.Yes)
-                                return;
-
-                            break;
-
-                        case SearchOption.AllDirectories:
-                            MessageBox.Show($"No files found to analyze:\n {filenameOrFolder[0]} (incl. sub folders)");
-                            return;
-                    }
-                }
-                else
-                    break;
-            }
-
-            if (unsupportedFiles.Length > 0)
-            {
-                string msg = string.Join(Environment.NewLine, unsupportedFiles.Take(10).ToArray());
-                logger.Warning($"{unsupportedFiles.Length} unsupported log file(s) detected: {msg}");
-
-                MessageBox.Show(msg, $"{unsupportedFiles.Length} unsupported log file(s) detected",
-                                MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
+            m_LogReader = reader;
         }
 
         //main procedure to analyze a log file
@@ -94,21 +52,23 @@ namespace LogfileMetaAnalyser
             //clear old datastore values
             datastore.Clear();
 
-            logger.Info($"Starting analyzing {filesToAnalyze.Length} file(s): {string.Join(";", filesToAnalyze)}");
-            if (filesToAnalyze.Length == 0)
+            if (m_LogReader == null)
                 return;
 
-            List<Detectors.ILogDetector> detectors = new List<Detectors.ILogDetector>();
+            logger.Info($"Starting analyzing {m_LogReader.Display ?? "?"}.");
 
-            detectors.Add(new Detectors.TimeRangeDetector());
-            detectors.Add(new Detectors.TimeGapDetector());
-            detectors.Add(new Detectors.SyncStructureDetector());
-            detectors.Add(new Detectors.ConnectorsDetector());
-            detectors.Add(new Detectors.SyncStepDetailsDetector());
-            detectors.Add(new Detectors.SQLStatementDetector());
-            detectors.Add(new Detectors.JobServiceJobsDetector());
-            detectors.Add(new Detectors.SyncJournalDetector());
-
+            List<Detectors.ILogDetector> detectors = new List<Detectors.ILogDetector>
+            {
+                new Detectors.TimeRangeDetector(),
+                new Detectors.TimeGapDetector(),
+                new Detectors.SyncStructureDetector(),
+                new Detectors.ConnectorsDetector(),
+                new Detectors.SyncStepDetailsDetector(),
+                new Detectors.SQLStatementDetector(),
+                new Detectors.JobServiceJobsDetector(),
+                new Detectors.SyncJournalDetector()
+            };
+            
 
             //Auslesen der Required Parent Detectors und zuweisen der resourcen
             foreach (var childDetector in detectors.Where(d => d.requiredParentDetectors.Any()))
@@ -136,10 +96,7 @@ namespace LogfileMetaAnalyser
             //text reading
             logger.Info("Starting reading the text");
             GlobalStopWatch.StartWatch("TextReading");
-            using (var reader = new NLogReader(filesToAnalyze, Encoding.UTF8))
-            {
-                await TextReading(reader, detectors).ConfigureAwait(false);
-            }
+            await TextReading(m_LogReader, detectors).ConfigureAwait(false);
 
             GlobalStopWatch.StopWatch("TextReading");
 

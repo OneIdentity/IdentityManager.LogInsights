@@ -33,7 +33,7 @@ namespace LogfileMetaAnalyser.Controls
         {
             DbConnectionStringBuilder csb = new DbConnectionStringBuilder();
 
-            csb.Add("Files", _GetFiles());
+            csb.Add("FileNames", _GetFiles());
 
             return csb.ConnectionString;
         }
