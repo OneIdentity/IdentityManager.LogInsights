@@ -17,7 +17,7 @@ namespace LogfileMetaAnalyser.LogReader
 
     public class LogEntry
     {
-        public LogEntry(Locator locator, string id, DateTime timeStamp, LogEntryType type, int severity, string message, string logger)
+        public LogEntry(Locator locator, string id, DateTime timeStamp, LogEntryType type, int severity, string message, string logger, string appName)
         {
             Locator = locator;
             Id = id;
@@ -26,7 +26,8 @@ namespace LogfileMetaAnalyser.LogReader
             Type = type;
             Message = message;
             Logger = logger;
-        }
+			AppName = appName;
+		}
 
         public Locator Locator { get; }
 
@@ -40,6 +41,8 @@ namespace LogfileMetaAnalyser.LogReader
 
         public string Message { get; }
 
-        public string Logger { get; } 
-    }
+        public string Logger { get; }
+
+		public string AppName { get; }
+	}
 }
