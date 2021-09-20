@@ -20,11 +20,13 @@ namespace LogfileMetaAnalyser.Controls
         }
 
         protected override string GetConnectionString()
-        {
-            DbConnectionStringBuilder csb = new DbConnectionStringBuilder();
-
-            csb.Add("AppID", textAppID.Text);
-            csb.Add("ApiKey", textApiKey.Text);
+		{
+			AppInsightsLogReaderConnectionStringBuilder csb = new AppInsightsLogReaderConnectionStringBuilder
+				{
+					AppId = textAppID.Text,
+					ApiKey = textApiKey.Text,
+					Query = textQuery.Text
+				};
 
             return csb.ConnectionString;
         }
