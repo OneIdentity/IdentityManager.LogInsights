@@ -37,6 +37,7 @@ namespace LogfileMetaAnalyser.LogReader
 
                 sb.Length = 0;
                 int lineNumber = 0;
+                int entryNumber = 0;
 
                 await foreach(var line in _ReadAsync(reader, ct))
                 {
@@ -50,6 +51,7 @@ namespace LogfileMetaAnalyser.LogReader
                         continue;
                     }
 
+                    entryNumber++;
                     entry = sb.ToString();
                     sb.Clear();
 
@@ -60,19 +62,61 @@ namespace LogfileMetaAnalyser.LogReader
                     if (entry.Length == 0)
                         continue;
 
-                    // TODO
-                    var logEntry = new LogEntry(new Locator(lineNumber, file), 
+                    var match = Constants.regexMessageMetaDataNLogDefault.Match(entry);
+                    if (!match.Success)
+                        continue;
+
+                    var spid = string.Format("{1}{0}", 
+                        match.Groups["SID"].Value,
+                        match.Groups["NSourceExt"].Value.Length > 0 ? match.Groups["NSourceExt"].Value : match.Groups["NSourceExt2"].Value.Trim());
+                    
+                    var logEntry = new LogEntry(new Locator(entryNumber, lineNumber, file), 
                         lineNumber.ToString(),
-                        DateTime.Now,
-                        LogLevel.Info,
-                        0, entry, "", "");
+                        DateTime.TryParse(match.Groups["Timestamp"].Value, out var timeStamp) ? timeStamp : DateTime.MinValue,
+                        _GetLogLevel(match.Groups["NLevel"].Value),
+                        0,
+                        match.Groups["Payload"].Value,
+                        match.Groups["NSource"].Value, 
+                        "",
+                        match.Groups["PID"].Value,
+                        spid);
 
                     yield return logEntry;
                 }
             }
         }
 
-       
+        private LogLevel _GetLogLevel(string value)
+        {
+            if (value.Length == 0)
+                return LogLevel.Critical;
+
+            switch (value[0])
+            {
+                case 'D':
+                case 'd':
+                    return LogLevel.Debug;
+                case 'T':
+                case 't':
+                    return LogLevel.Trace;
+                case 'W':
+                case 'w':
+                    return LogLevel.Warning;
+                case 'E':
+                case 'e':
+                    return LogLevel.Error;
+                case 'C':
+                case 'c':
+                    return LogLevel.Critical;
+                case 'I':
+                case 'i':
+                    return LogLevel.Info;
+                default:
+                    return LogLevel.Critical;
+            }
+        }
+
+
         private static async IAsyncEnumerable<string> _ReadAsync(StreamReader reader, CancellationToken ct)
         {
             string line;
