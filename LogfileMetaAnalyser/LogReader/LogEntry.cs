@@ -1,23 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LogfileMetaAnalyser.LogReader
 {
-    public enum LogEntryType
+    public enum LogLevel
     {
         Info,
         Warning,
         Error,
         Debug,
-        Trace
+        Trace,
+        Critical
     }
 
     public class LogEntry
     {
-        public LogEntry(Locator locator, string id, DateTime timeStamp, LogEntryType type, int severity, string message, string logger, string appName)
+        public LogEntry(Locator locator, string id, DateTime timeStamp, LogLevel type, int severity, string message, string logger, string appName)
         {
             Locator = locator;
             Id = id;
@@ -37,7 +34,7 @@ namespace LogfileMetaAnalyser.LogReader
 
         public string Id { get; }
 
-        public LogEntryType Type { get; }
+        public LogLevel Type { get; }
 
         public string Message { get; }
 
