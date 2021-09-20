@@ -9,7 +9,8 @@ using System.Windows.Forms;
 
 using LogfileMetaAnalyser.Helpers;
 using LogfileMetaAnalyser.Datastore;
- 
+using LogfileMetaAnalyser.LogReader;
+
 
 namespace LogfileMetaAnalyser
 {
@@ -97,7 +98,6 @@ namespace LogfileMetaAnalyser
             if (filesToAnalyze.Length == 0)
                 return;
 
-            
             List<Detectors.ILogDetector> detectors = new List<Detectors.ILogDetector>();
 
             detectors.Add(new Detectors.TimeRangeDetector());
@@ -136,7 +136,11 @@ namespace LogfileMetaAnalyser
             //text reading
             logger.Info("Starting reading the text");
             GlobalStopWatch.StartWatch("TextReading");
-            await TextReading(filesToAnalyze, detectors).ConfigureAwait(false);
+            using (var reader = new NLogReader(filesToAnalyze, Encoding.UTF8))
+            {
+                await TextReading(reader, detectors).ConfigureAwait(false);
+            }
+
             GlobalStopWatch.StopWatch("TextReading");
 
 
@@ -167,11 +171,26 @@ namespace LogfileMetaAnalyser
             logger.Info("Analyzer done!");
         }
 
-        private async Task TextReading(string[] filesToRead, List<Detectors.ILogDetector> detectors)
+        private async Task TextReading(ILogReader logReader, List<Detectors.ILogDetector> detectors)
         {
             if (detectors == null)
                 return;
 
+            logger.Info($"Starting reading {logReader.GetType().Name}");
+
+            // TODO respect Constants.NumberOfContextMessages
+
+            await foreach (var entry in logReader.ReadAsync())
+            {
+                Parallel.ForEach(detectors, new ParallelOptions {MaxDegreeOfParallelism = AnalyzeDOP},
+                    detector =>
+                    {
+                        detector.ProcessMessage(new TextMessage(entry));
+                    });
+            }
+
+
+            /*
             var parseStatisticPerTextfile = new List<ParseStatistic>();
              
             TextMessage msg;
@@ -237,6 +256,7 @@ namespace LogfileMetaAnalyser
             }
 
             datastore.statistics.parseStatistic.AddRange(parseStatisticPerTextfile);
+            */
         } 
         
     }

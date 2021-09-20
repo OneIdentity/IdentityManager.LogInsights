@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Linq; 
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
  
 using LogfileMetaAnalyser.Helpers;
 using LogfileMetaAnalyser.Datastore;
+using LogfileMetaAnalyser.LogReader;
 
 
 namespace LogfileMetaAnalyser
@@ -129,23 +131,20 @@ namespace LogfileMetaAnalyser
 
                 string exportfilename = FileHelper.GetNewFilename(inputfilename, exportSettings.inputOutputOptions.filenamePostfix, exportSettings.inputOutputOptions.outputFolder);
 
-                using (var reader = new ReadLogByBlock(inputfilename, Constants.messageInsignificantStopTermRegexString, 0))
-                using (var writer = new StreamWriter(exportfilename, false, reader.CurrentEncoding))
+                using (var reader = new NLogReader(new[]{inputfilename}, Encoding.UTF8))
+                using (var writer = new StreamWriter(exportfilename, false, Encoding.UTF8))
                 {
                     //refire the progress event
-                    if (OnExportProgressChanged != null)
-                        reader.OnProgressChanged += new EventHandler<ReadLogByBlockEventArgs>((object o, ReadLogByBlockEventArgs args) =>
-                        {
-                            OnExportProgressChanged(this, (args.progressPercent / files.Length) + percentDone);
-                        });
+                    //if (OnExportProgressChanged != null)
+                    //    reader.OnProgressChanged += new EventHandler<ReadLogByBlockEventArgs>((object o, ReadLogByBlockEventArgs args) =>
+                    //    {
+                    //        OnExportProgressChanged(this, (args.progressPercent / files.Length) + percentDone);
+                    //    });
 
                     //reading
-                    while (reader.HasMoreMessages)
+                    await foreach (var entry in reader.ReadAsync())
                     {
-                        msg = await reader.GetNextMessageAsync().ConfigureAwait(false);
-
-                        if (msg == null)
-                            break;
+                        msg = new TextMessage(entry);
 
                         //checking and writing
                         if (exportSettings.IsMessageMatch(msg))                            
