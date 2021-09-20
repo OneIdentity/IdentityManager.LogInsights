@@ -96,17 +96,17 @@ namespace LogfileMetaAnalyser.Detectors
 
             switch (_datastore.generalLogData.logfileInformation[filename].mostDetailedLogLevel)
             {
-                case Helpers.Loglevels.Undef: return false;
-                case Helpers.Loglevels.Info:
+                case Helpers.LogLevel.Undef: return false;
+                case Helpers.LogLevel.Info:
                     gap_threshold = gap_threshold_WhenLogIsOnLevel_Info;
                     break;
-                case Helpers.Loglevels.Debug:
+                case Helpers.LogLevel.Debug:
                     gap_threshold = gap_threshold_WhenLogIsOnLevel_Debug;
                     break;
-                case Helpers.Loglevels.Warn:
+                case Helpers.LogLevel.Warn:
                     gap_threshold = gap_threshold_WhenLogIsOnLevel_Warning;
                     break;
-                case Helpers.Loglevels.Error:
+                case Helpers.LogLevel.Error:
                     gap_threshold = gap_threshold_WhenLogIsOnLevel_Error;
                     break;
             }

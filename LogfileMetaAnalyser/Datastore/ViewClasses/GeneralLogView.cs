@@ -56,7 +56,7 @@ namespace LogfileMetaAnalyser.Datastore
                 uc[0].AddItemRow("gt1", new string[] { "overall log start (earliest event)", dsref.logDataOverallTimeRange_Start.ToString("G") });
                 uc[0].AddItemRow("gt2", new string[] { "overall log end (latest event)", dsref.logDataOverallTimeRange_Finish.ToString("G") });
                 uc[0].AddItemRow("gt3", new string[] { "overall log time span ", (dsref.logDataOverallTimeRange_Finish - dsref.logDataOverallTimeRange_Start).ToHumanString() });
-                uc[0].AddItemRow("gl4", new string[] { "most detailed log level", dsref.mostDetailedLogLevel.ToString() }, "", GetBgColor(dsref.mostDetailedLogLevel.IsGreater(Loglevels.Info)));
+                uc[0].AddItemRow("gl4", new string[] { "most detailed log level", dsref.mostDetailedLogLevel.ToString() }, "", GetBgColor(dsref.mostDetailedLogLevel.IsGreater(LogLevel.Info)));
 
                 foreach (var kp in dsref.numberOfEntriesPerLoglevel.OrderBy(t => (int)t.Value))
                     uc[0].AddItemRow("gnl" + kp.Key.ToString(), new string[]

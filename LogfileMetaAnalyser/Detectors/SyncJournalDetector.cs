@@ -365,7 +365,11 @@ namespace LogfileMetaAnalyser.Detectors
             DateTime procMsgStartpoint = DateTime.Now; 
 
             //basic filter, we only need the sql log
-            if (msg?.spid == "" || msg?.loggerSource != "SqlLog" || ((msg?.loggerLevel != "DEBUG") && (msg?.loggerLevel != "ERROR")))
+            if ( msg == null ||
+				 string.IsNullOrEmpty(msg.spid) || 
+				 !string.Equals(msg.loggerSource, "SqlLog", StringComparison.Ordinal) || 
+				 msg.loggerLevel != LogLevel.Debug && 
+				 msg.loggerLevel != LogLevel.Error)
                 return;
 
 

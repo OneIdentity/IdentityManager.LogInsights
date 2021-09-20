@@ -1,18 +1,10 @@
 ﻿using System;
 
+using LogfileMetaAnalyser.Helpers;
+
 namespace LogfileMetaAnalyser.LogReader
 {
-    public enum LogLevel
-    {
-        Info,
-        Warning,
-        Error,
-        Debug,
-        Trace,
-        Critical
-    }
-
-    public class LogEntry
+   public class LogEntry
     {
         public LogEntry(Locator locator, string id, DateTime timeStamp, LogLevel type, int severity, string message, string logger, string appName, string pid, string spid)
         {

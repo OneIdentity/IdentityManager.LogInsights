@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 
 using LogfileMetaAnalyser.Helpers;
 using LogfileMetaAnalyser.Datastore;
+using LogfileMetaAnalyser.LogReader;
 
 namespace LogfileMetaAnalyser.Detectors
 {
@@ -111,7 +112,7 @@ namespace LogfileMetaAnalyser.Detectors
                     rm_JobStart = regex_JobStart_TypeJS.Match(msg.messageText);
                 else if (msg.loggerSource == "Jobservice")
                     rm_JobStart = regex_JobStart_TypeNLog.Match(msg.messageText);
-                else if (msg.loggerSource == "SqlLog" && msg.loggerLevel == "DEBUG")
+                else if (msg.loggerSource == "SqlLog" && msg.loggerLevel == LogLevel.Debug)
                     rm_JobStart = regex_JobStart_TypeNLog_SQL.Match(msg.messageText);
 
 
@@ -168,7 +169,7 @@ namespace LogfileMetaAnalyser.Detectors
                     rm_JobFinish = regex_JobFinish_TypeJS.Match(msg.messageText);
                 else if (msg.loggerSource == "Jobservice")
                     rm_JobFinish = regex_JobFinish_TypeNLog.Match(msg.messageText);
-                else if (msg.loggerSource == "SqlLog" && msg.loggerLevel == "DEBUG")
+                else if (msg.loggerSource == "SqlLog" && msg.loggerLevel == LogLevel.Debug)
                     rm_JobFinish = regex_JobFinish_TypeNLog_SQL.Match(msg.messageText);
 
                 if (rm_JobFinish != null && rm_JobFinish.Success)

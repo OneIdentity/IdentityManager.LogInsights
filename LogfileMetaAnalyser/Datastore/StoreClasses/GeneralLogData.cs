@@ -11,8 +11,8 @@ namespace LogfileMetaAnalyser.Datastore
     {
         public DateTime logDataOverallTimeRange_Start = DateTime.MinValue;
         public DateTime logDataOverallTimeRange_Finish;
-        public Helpers.Loglevels mostDetailedLogLevel = Helpers.Loglevels.Undef;
-        public Dictionary<Helpers.Loglevels, long> numberOfEntriesPerLoglevel = new Dictionary<Helpers.Loglevels, long>();
+        public Helpers.LogLevel mostDetailedLogLevel = Helpers.LogLevel.Undef;
+        public Dictionary<Helpers.LogLevel, long> numberOfEntriesPerLoglevel = new Dictionary<Helpers.LogLevel, long>();
 
         public Dictionary<string, LogfileInformation> logfileInformation = new Dictionary<string, LogfileInformation>();  //key == file name
         public List<TimeGap> timegaps = new List<TimeGap>();

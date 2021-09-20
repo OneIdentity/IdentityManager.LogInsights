@@ -14,9 +14,9 @@ namespace LogfileMetaAnalyser.Datastore
         public DateTime logfileTimerange_Finish;
 
         public LogfileType logfileType = LogfileType.Undef;        
-        public Helpers.Loglevels mostDetailedLogLevel = Helpers.Loglevels.Undef;
+        public Helpers.LogLevel mostDetailedLogLevel = Helpers.LogLevel.Undef;
 
-        public Dictionary<Helpers.Loglevels, long> numberOfEntriesPerLoglevel = new Dictionary<Helpers.Loglevels, long>();
+        public Dictionary<Helpers.LogLevel, long> numberOfEntriesPerLoglevel = new Dictionary<Helpers.LogLevel, long>();
 
         public TextMessage firstMessage;
 
