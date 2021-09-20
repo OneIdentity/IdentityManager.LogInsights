@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
+using LogfileMetaAnalyser.Controls;
 using LogfileMetaAnalyser.Helpers;
 using LogfileMetaAnalyser.Datastore;
 
@@ -434,6 +434,20 @@ namespace LogfileMetaAnalyser
         {
             await logfileFilterExporter.FilterAndExport().ConfigureAwait(true);
             RefreshStatusLabel(3);
+        }
+
+        private void loadLogsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (var dlgProvider = new LogReaderForm())
+            {
+                DialogResult dr = dlgProvider.ShowDialog(this);
+
+                if (dr == DialogResult.OK)
+                {
+                    // start Load
+
+                }
+            }
         }
     }
 }
