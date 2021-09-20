@@ -117,8 +117,8 @@ namespace LogfileMetaAnalyser.LogReader
 				var severity = severityIdx > -1 ? (long) row[severityIdx] : 0;
 				var itemTypeStr = itemTypeIdx > -1 ? (string) row[itemTypeIdx] : null;
 
-				if ( !Enum.TryParse(itemTypeStr, out LogEntryType type) )
-					type = LogEntryType.Info;
+				if ( !Enum.TryParse(itemTypeStr, out LogLevel type) )
+					type = LogLevel.Info;
 
 				var logger = "";
 				var appName = "";
