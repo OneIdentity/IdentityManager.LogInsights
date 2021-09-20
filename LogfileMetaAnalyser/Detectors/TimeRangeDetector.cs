@@ -5,6 +5,7 @@ using System.Text;
 
 using LogfileMetaAnalyser.Datastore;
 using LogfileMetaAnalyser.Helpers;
+using LogfileMetaAnalyser.LogReader;
 
 
 namespace LogfileMetaAnalyser.Detectors
@@ -18,7 +19,7 @@ namespace LogfileMetaAnalyser.Detectors
 
     public class TimeRangeDetector : DetectorBase, ILogDetector
     {        
-        private Loglevels _currentHighestLogLevelFound = Loglevels.Undef;
+        private LogLevel _currentHighestLogLevelFound = LogLevel.Undef;
         private Dictionary<string, bool> startDateSet = new Dictionary<string, bool>();
                 
 
@@ -42,7 +43,7 @@ namespace LogfileMetaAnalyser.Detectors
 
         public void InitializeDetector()
         { 
-            _currentHighestLogLevelFound = Loglevels.Undef;
+            _currentHighestLogLevelFound = LogLevel.Undef;
             startDateSet = new Dictionary<string, bool>();
 			detectorStats.Clear();
         }
@@ -59,7 +60,7 @@ namespace LogfileMetaAnalyser.Detectors
             foreach (var d in _datastore.generalLogData.logfileInformation)
             {
                 var levels = d.Value.numberOfEntriesPerLoglevel.Select(l => l.Key).ToArray();
-                d.Value.mostDetailedLogLevel = Loglevel.GetHighestLevel(levels);
+                d.Value.mostDetailedLogLevel = LogLevelTools.GetHighestLevel(levels);
                 d.Value.filenameBestNotation = Helpers.FileHelper.GetBestRelativeFilename(d.Value.filename, allFiles);
 
                 //stats per log file
@@ -72,7 +73,7 @@ namespace LogfileMetaAnalyser.Detectors
             sw.Stop();
             detectorStats.numberOfDetections += _datastore.generalLogData.logfileInformation.Count;
             detectorStats.numberOfDetections += _datastore.generalLogData.numberOfEntriesPerLoglevel.Count;
-            detectorStats.numberOfDetections += (_datastore.generalLogData.mostDetailedLogLevel != Loglevels.Undef) ? 1 : 0;
+            detectorStats.numberOfDetections += (_datastore.generalLogData.mostDetailedLogLevel != LogLevel.Undef) ? 1 : 0;
             detectorStats.numberOfDetections += (_datastore.generalLogData.logDataOverallTimeRange_Start.IsNull()) ? 0 : 1;
             detectorStats.numberOfDetections += (_datastore.generalLogData.logDataOverallTimeRange_Finish.IsNull()) ? 0 : 1;
 
@@ -126,46 +127,40 @@ namespace LogfileMetaAnalyser.Detectors
             _datastore.generalLogData.logfileInformation[msg.textLocator.fileName].charsRead += msg.messageText.Length;
 
 
-            //count msgs - msg log level
-            if (msg.loggerLevel != "")
-            {
-                Loglevels loglev = Loglevel.ConvertFromStringToEnum(msg.loggerLevel);
+			//count msgs - msg log level
+			_datastore.generalLogData.numberOfEntriesPerLoglevel.AddOrIncrease(msg.loggerLevel);
+			_datastore.generalLogData.logfileInformation[msg.textLocator.fileName].numberOfEntriesPerLoglevel
+				.AddOrIncrease(msg.loggerLevel);
 
-                _datastore.generalLogData.numberOfEntriesPerLoglevel.AddOrIncrease(loglev);
-                _datastore.generalLogData.logfileInformation[msg.textLocator.fileName].numberOfEntriesPerLoglevel.AddOrIncrease(loglev);
-             
+			if (msg.loggerLevel != _currentHighestLogLevelFound )
+			{
+				bool levelChanged = SetHighestLogLevel(msg.loggerLevel);
 
-                if (loglev != _currentHighestLogLevelFound)
-                {
-                    bool levelChanged = SetHighestLogLevel(loglev);
+				if ( levelChanged )
+					_datastore.generalLogData.mostDetailedLogLevel = msg.loggerLevel;
+			}
 
-                    if (levelChanged)                   
-                        _datastore.generalLogData.mostDetailedLogLevel = loglev;                 
-                }
-            }
-                       
 
-            //errors and warnings
-            if (msg.loggerLevel == Loglevel.ConvertFromEnumToString(Loglevels.Warn))
+			//errors and warnings
+            if (msg.loggerLevel == LogLevel.Warn)
             {
                 _datastore.generalLogData.messageWarnings.Add(new DatastoreBaseDataPoint()
                 {
                     dtTimestamp = msg.messageTimestamp,
                     isDataComplete = true,
                     message = msg,
-                    metaData = msg.loggerLevel 
+                    metaData = msg.loggerLevel.ToString() 
                 });
             }
 
-            if (msg.loggerLevel == Loglevel.ConvertFromEnumToString(Loglevels.Error) 
-                || msg.loggerLevel == Loglevel.ConvertFromEnumToString(Loglevels.Critical))
+            if (msg.loggerLevel == LogLevel.Error || msg.loggerLevel == LogLevel.Critical)
             {
-                _datastore.generalLogData.messageErrors.Add(new DatastoreBaseDataPoint()
-                {
+                _datastore.generalLogData.messageErrors.Add(new DatastoreBaseDataPoint
+					{
                     dtTimestamp = msg.messageTimestamp,
                     isDataComplete = true,
                     message = msg,
-                    metaData = msg.loggerLevel
+                    metaData = msg.loggerLevel.ToString()
                 });
             }
 
@@ -177,7 +172,7 @@ namespace LogfileMetaAnalyser.Detectors
             detectorStats.parseDuration += sw.ElapsedMilliseconds;
         }
 
-        private bool SetHighestLogLevel(Loglevels loglevel)
+        private bool SetHighestLogLevel(LogLevel loglevel)
         {            
             if (loglevel.IsGreater(_currentHighestLogLevelFound))
             {

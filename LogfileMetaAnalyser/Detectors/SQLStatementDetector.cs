@@ -214,7 +214,7 @@ namespace LogfileMetaAnalyser.Detectors
                 sqlSessionInfo[msg.spid].dtTimestampEnd = msg.messageTimestamp;
 
 
-            if (msg.loggerLevel != "DEBUG")
+            if (msg.loggerLevel != LogLevel.Debug)
                 return;
             
                         
