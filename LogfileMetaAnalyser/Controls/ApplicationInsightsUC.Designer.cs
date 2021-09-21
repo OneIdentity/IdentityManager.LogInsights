@@ -33,13 +33,10 @@ namespace LogfileMetaAnalyser.Controls
             this.textAppID = new System.Windows.Forms.TextBox();
             this.textApiKey = new System.Windows.Forms.TextBox();
             this.labelApiKey = new System.Windows.Forms.Label();
-            this.linkExtended = new System.Windows.Forms.LinkLabel();
-            this.textQuery = new System.Windows.Forms.TextBox();
             this.labelQueury = new System.Windows.Forms.Label();
-            this.panelExtended = new System.Windows.Forms.Panel();
             this.panelTop = new System.Windows.Forms.Panel();
             this.lblHeader = new System.Windows.Forms.Label();
-            this.panelExtended.SuspendLayout();
+            this.textQuery = new System.Windows.Forms.TextBox();
             this.panelTop.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -61,6 +58,7 @@ namespace LogfileMetaAnalyser.Controls
             this.textAppID.Name = "textAppID";
             this.textAppID.Size = new System.Drawing.Size(480, 23);
             this.textAppID.TabIndex = 1;
+            this.textAppID.TextChanged += new System.EventHandler(this.textAppID_TextChanged);
             // 
             // textApiKey
             // 
@@ -71,6 +69,8 @@ namespace LogfileMetaAnalyser.Controls
             this.textApiKey.Name = "textApiKey";
             this.textApiKey.Size = new System.Drawing.Size(480, 23);
             this.textApiKey.TabIndex = 3;
+            this.textApiKey.UseSystemPasswordChar = true;
+            this.textApiKey.TextChanged += new System.EventHandler(this.textApiKey_TextChanged);
             // 
             // labelApiKey
             // 
@@ -81,54 +81,16 @@ namespace LogfileMetaAnalyser.Controls
             this.labelApiKey.TabIndex = 2;
             this.labelApiKey.Text = "API Key";
             // 
-            // linkExtended
-            // 
-            this.linkExtended.AutoSize = true;
-            this.linkExtended.Location = new System.Drawing.Point(8, 146);
-            this.linkExtended.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.linkExtended.Name = "linkExtended";
-            this.linkExtended.Size = new System.Drawing.Size(112, 15);
-            this.linkExtended.TabIndex = 4;
-            this.linkExtended.TabStop = true;
-            this.linkExtended.Text = "Extended properties";
-            this.linkExtended.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkExtended_LinkClicked);
-            // 
-            // textQuery
-            // 
-            this.textQuery.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textQuery.Location = new System.Drawing.Point(0, 25);
-            this.textQuery.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
-            this.textQuery.Multiline = true;
-            this.textQuery.Name = "textQuery";
-            this.textQuery.Size = new System.Drawing.Size(480, 83);
-            this.textQuery.TabIndex = 6;
-            // 
             // labelQueury
             // 
             this.labelQueury.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelQueury.Location = new System.Drawing.Point(2, 7);
+            this.labelQueury.Location = new System.Drawing.Point(8, 154);
             this.labelQueury.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.labelQueury.Name = "labelQueury";
             this.labelQueury.Size = new System.Drawing.Size(435, 17);
             this.labelQueury.TabIndex = 5;
             this.labelQueury.Text = "Query definition";
-            // 
-            // panelExtended
-            // 
-            this.panelExtended.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.panelExtended.Controls.Add(this.labelQueury);
-            this.panelExtended.Controls.Add(this.textQuery);
-            this.panelExtended.Location = new System.Drawing.Point(8, 166);
-            this.panelExtended.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
-            this.panelExtended.Name = "panelExtended";
-            this.panelExtended.Size = new System.Drawing.Size(480, 113);
-            this.panelExtended.TabIndex = 7;
-            this.panelExtended.Visible = false;
             // 
             // panelTop
             // 
@@ -151,13 +113,25 @@ namespace LogfileMetaAnalyser.Controls
             this.lblHeader.TabIndex = 0;
             this.lblHeader.Text = "Application insights ";
             // 
+            // textQuery
+            // 
+            this.textQuery.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textQuery.Location = new System.Drawing.Point(8, 176);
+            this.textQuery.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
+            this.textQuery.Multiline = true;
+            this.textQuery.Name = "textQuery";
+            this.textQuery.Size = new System.Drawing.Size(480, 101);
+            this.textQuery.TabIndex = 6;
+            // 
             // ApplicationInsightsUC
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.textQuery);
+            this.Controls.Add(this.labelQueury);
             this.Controls.Add(this.panelTop);
-            this.Controls.Add(this.panelExtended);
-            this.Controls.Add(this.linkExtended);
             this.Controls.Add(this.textApiKey);
             this.Controls.Add(this.labelApiKey);
             this.Controls.Add(this.textAppID);
@@ -165,8 +139,6 @@ namespace LogfileMetaAnalyser.Controls
             this.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.Name = "ApplicationInsightsUC";
             this.Size = new System.Drawing.Size(496, 292);
-            this.panelExtended.ResumeLayout(false);
-            this.panelExtended.PerformLayout();
             this.panelTop.ResumeLayout(false);
             this.panelTop.PerformLayout();
             this.ResumeLayout(false);
@@ -180,11 +152,9 @@ namespace LogfileMetaAnalyser.Controls
         private System.Windows.Forms.TextBox textAppID;
         private System.Windows.Forms.TextBox textApiKey;
         private System.Windows.Forms.Label labelApiKey;
-        private System.Windows.Forms.LinkLabel linkExtended;
-        private System.Windows.Forms.TextBox textQuery;
         private System.Windows.Forms.Label labelQueury;
-        private System.Windows.Forms.Panel panelExtended;
         private System.Windows.Forms.Panel panelTop;
         private System.Windows.Forms.Label lblHeader;
+        private System.Windows.Forms.TextBox textQuery;
     }
 }
