@@ -14,6 +14,13 @@ namespace LogfileMetaAnalyser.LogReader
 {
     public class NLogReader : LogReader
     {
+        private enum LogFormat
+        {
+            Unknown,
+            NLog,
+            JobService
+        }
+
         public NLogReader(string[] fileNames, Encoding encoding = null)
         {
             // check the parameters
@@ -36,8 +43,21 @@ namespace LogfileMetaAnalyser.LogReader
             // todo read order of files?
             foreach (var file in m_FileNames)
             {
-                var regex = await _TryDetectFileFormatAsync(file).ConfigureAwait(false);
-                if (regex == null) break; // todo log message or other user notification
+                var logFormat = await _TryDetectFileFormatAsync(file).ConfigureAwait(false);
+
+                Regex regex = null;
+                switch (logFormat)
+                {
+                    case LogFormat.NLog:
+                        regex = Constants.regexMessageMetaDataNLogDefault;
+                        break;
+                    case LogFormat.JobService:
+                        regex = Constants.regexMessageMetaDataJobservice;
+                        break;
+                    default:
+                        continue; // todo log message or other user notification
+                }
+
 
                 using var reader = new StreamReader(file, m_Encoding, true);
 
@@ -51,7 +71,7 @@ namespace LogfileMetaAnalyser.LogReader
                     string entry = null;
                     lineNumberTotal++;
 
-                    bool isStart = line == null || _IsLineStart(line);
+                    bool isStart = line == null || _IsLineStart(line, logFormat);
                     if (!isStart)
                     {
                         sb.AppendLine();
@@ -69,7 +89,7 @@ namespace LogfileMetaAnalyser.LogReader
                     if (entry.Length == 0)
                         continue;
 
-                    var match = Constants.regexMessageMetaDataNLogDefault.Match(entry);
+                    var match = regex.Match(entry);
                     if (!match.Success)
                         continue;
 
@@ -95,7 +115,7 @@ namespace LogfileMetaAnalyser.LogReader
             }
         }
 
-        private async Task<Regex> _TryDetectFileFormatAsync(string file)
+        private async Task<LogFormat> _TryDetectFileFormatAsync(string file)
         {
             using (StreamReader reader = new StreamReader(file))
             {
@@ -104,17 +124,17 @@ namespace LogfileMetaAnalyser.LogReader
                 while ((line = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
                 {
                     if (Constants.regexMessageMetaDataNLogDefault.IsMatch(line))
-                        return Constants.regexMessageMetaDataNLogDefault;
+                        return LogFormat.NLog;
 
                     if (Constants.regexMessageMetaDataJobservice.IsMatch(line))
-                        return Constants.regexMessageMetaDataJobservice;
+                        return LogFormat.JobService;
 
                     if (idx++ == 32)
                         break;
                 }
             }
 
-            return null;
+            return LogFormat.Unknown;
         }
 
         private LogLevel _GetLogLevel(string value)
@@ -160,12 +180,25 @@ namespace LogfileMetaAnalyser.LogReader
         }
 
 
-        private static bool _IsLineStart(string line)
+        private static bool _IsLineStart(string line, LogFormat format)
         {
-            return line.Length > 30
-                   && line[4] == '-'
-                   && line[7] == '-'
-                   && m_LineStartRegex.IsMatch(line);
+            switch (format)
+            {
+                case LogFormat.NLog:
+                    return line.Length > 30
+                           && line[4] == '-'
+                           && line[7] == '-'
+                           && m_LineStartRegexNLog.IsMatch(line);
+
+                case LogFormat.JobService:
+                    return line.Length > 30
+                           && line[0] == '<'
+                           && line[2] == '>'
+                           && line[7] == '-'
+                           && m_LineStartRegexJobService.IsMatch(line);
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -176,6 +209,7 @@ namespace LogfileMetaAnalyser.LogReader
         private readonly string[] m_FileNames;
         private readonly Encoding m_Encoding;
 
-        private static readonly Regex m_LineStartRegex = new (@"^\d\d\d\d-\d\d-\d\d\s+\d\d:\d\d:\d\d", RegexOptions.CultureInvariant | RegexOptions.Compiled);
+        private static readonly Regex m_LineStartRegexNLog = new (@"^\d\d\d\d-\d\d-\d\d\s+\d\d:\d\d:\d\d", RegexOptions.CultureInvariant | RegexOptions.Compiled);
+        private static readonly Regex m_LineStartRegexJobService = new(@"^<\w>\d\d\d\d-\d\d-\d\d\s+\d\d:\d\d:\d\d", RegexOptions.CultureInvariant | RegexOptions.Compiled);
     }
 }
