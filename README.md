@@ -4,7 +4,7 @@ Logfile Analyser of One Identity text log files
 ![LogfileMetaAnalyser screen shot](./LogfileMetaAnalyser.png)
 
 Can read text files (a single one, a multi select or a file system folder) of following types:
-- NLog with default OneIM config (e.g. StdIoprocessor.log)
+- NLog with default OneIM config (e.g. StdioProcessor.log)
 - Jobservice.log produced by OneIM Jobservice service
 
 
@@ -12,8 +12,8 @@ What does it do?
 ----------------
 
 - it will read the provided log files and try to detect their type 
-- all lines were send into a buffer to unite all lines that belong a to message (which needs to start with a time stamp)
-- those messages were passed into several parsers, each of them will subscribe to a specific topic
+- all lines are send into a buffer to unite all lines that belong to a message (which need to start with a time stamp)
+- those messages are passed into several parsers, each of them will subscribe to a specific topic
 	- detecting time ranges of all logfiles to provide a time line for all of them 
 	- detecting time gaps between messages, which references to possible stuck situations
 	- detecting Jobservice process steps, each of them have a request and response which should be tied together, detect errors and warning results for process steps
@@ -22,7 +22,7 @@ What does it do?
 	- detecting OneIM synchronization activity (e.g. loading data from a specific target system)
 	- detecting OneIM synchronization journal reports
 	- detecting database SQL commands and their duration, detecting SQL transactions and long running queries
-- finally all gathered information were presented in an UI
+- finally all gathered information are presented in an UI
 - there is a possibility to filter the log files for certain messages, based on gathered IDs, message types and activity flows and threads
 
 
