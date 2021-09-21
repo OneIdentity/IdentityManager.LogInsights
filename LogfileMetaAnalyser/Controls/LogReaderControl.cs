@@ -14,7 +14,6 @@ namespace LogfileMetaAnalyser.Controls
 {
     public partial class LogReaderControl : UserControl
     {
-        private string _ConnectionString;
         private bool _isValid;
 
         public event EventHandler IsValidChanged;

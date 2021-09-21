@@ -389,11 +389,7 @@ namespace LogfileMetaAnalyser.Helpers
 
         public static bool IsNull(this DateTime dt)
         {
-            return (
-                (dt == null) ||
-                (dt == DateTime.MinValue) ||
-                (dt == DateTime.MaxValue)
-                );
+            return dt == DateTime.MinValue || dt == DateTime.MaxValue;
         }
 
         public static bool InRange(this DateTime dt, DateTime rangeStart, DateTime rangeEnd, int tolleranceMsInsideRange = 0)
@@ -404,9 +400,6 @@ namespace LogfileMetaAnalyser.Helpers
 
         public static string ToHumanTimerange(this DateTime dt_from, DateTime dt_to, string pattern = "from {0} to {1}")
         {
-            if (dt_to == null)
-                return "n/a";
-            
             bool sameDay =  dt_from.Day == dt_to.Day && 
                             dt_from.Month == dt_to.Month && 
                             dt_from.Year == dt_to.Year;

@@ -1,72 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
-
 using LogfileMetaAnalyser.Datastore;
 using LogfileMetaAnalyser.Helpers;
 
-using VI.Controls;
-
 namespace LogfileMetaAnalyser.Controls
 {
+    // ReSharper disable LocalizableElement
     public partial class ExportWithFilterFrm : Form
     {
         public ExportSettings exportSettings;
 
-        private Datastore.DatastoreStructure myDataStore;
-        private ExportProfiles exportProfiles;
-        
+        private readonly DatastoreStructure myDataStore;
+        private readonly ExportProfiles exportProfiles;
+        private const string BeforeOtherFilters = "before other filters";
+        private const string AfterOtherFilters = "after other filters";
 
         public ExportWithFilterFrm(DatastoreStructure datastore, ExportSettings exportSettings)
         {
-            this.myDataStore = datastore;
+            myDataStore = datastore;
             this.exportSettings = exportSettings;
 
             exportProfiles = new ExportProfiles(datastore);
 
             InitializeComponent();
 
-            treelist_Inputfiles.ImageList = VI.ImageLibrary.ImagelistHandler.StockImageListSmall;
-            treelist_regexFilters.ImageList = VI.ImageLibrary.ImagelistHandler.StockImageListSmall;
-            treelist_activity.ImageList = VI.ImageLibrary.ImagelistHandler.StockImageListSmall;
+            treeActivities.AfterCheck += TreeActivities_AfterCheck;
 
-            treelist_Inputfiles.NodeIconDoubleClick += new TreeListEventHandler((object o, TreeListEventArgs args) =>
-                {
-                    try
-                    {
-                        SwitchNodeState(args.Node);
-                    }
-                    catch { }
-                });
-
-            treelist_activity.NodeIconDoubleClick += new TreeListEventHandler((object o, TreeListEventArgs args) =>
+            comboBox_Profiles.SelectedIndexChanged += (_, _) =>
             {
-                try
-                {
-                    SwitchNodeState(args.Node);
-                }
-                catch { }
-            });
-
-            treelist_regexFilters.NodeIconDoubleClick += new TreeListEventHandler((object o, TreeListEventArgs args) =>
-            {
-                try
-                {
-                    SwitchNodeState(args.Node);
-                }
-                catch { }
-            });
-
-            
-            comboBox_Profiles.SelectedIndexChanged += new EventHandler((object o, EventArgs args) =>
-               {
-                   LoadSettingsByProfilename();
-               });
+                LoadSettingsByProfilename();
+            };
 
 
             if (!myDataStore.HasData())
@@ -78,6 +44,12 @@ namespace LogfileMetaAnalyser.Controls
             FillActivityPanel();
             FillLogTypePanel();
             FillRegexFilters();
+        }
+
+        private void TreeActivities_AfterCheck(object sender, TreeViewEventArgs e)
+        {
+            if (e.Action != TreeViewAction.Unknown)
+                SwitchNodeState(e.Node, e.Node.Checked ? 1 : 0);
         }
 
         private void LoadSettingsByProfilename()
@@ -102,49 +74,45 @@ namespace LogfileMetaAnalyser.Controls
             FillLogTypePanel();
             FillRegexFilters();
         }
-                
 
-        private void SwitchNodeState(TreeListNode node, sbyte setState = -1)
+        private void SwitchNodeState(TreeNode node, int setState = -1)
         {
+
             switch (setState)
             {
-                case -1:  //switch
-                    node.ImageIndex = isNodeEnabled(node) ? (int)VI.ImageLibrary.StockImage.AssignedNone : (int)VI.ImageLibrary.StockImage.AssignedDirect;
+                case -1: //switch
+                    node.Checked = !node.Checked;
                     break;
 
-                case 0:  //disable
-                    node.ImageIndex = (int)VI.ImageLibrary.StockImage.AssignedNone;
+                case 0: //disable
+                    node.Checked = false;
                     break;
 
-                case 1:  //enable
-                    node.ImageIndex = (int)VI.ImageLibrary.StockImage.AssignedDirect;
+                case 1: //enable
+                    node.Checked = true;
                     break;
 
                 case 2: //enable this from child 
-                    node.ImageIndex = (int)VI.ImageLibrary.StockImage.AssignedDirect;
+                    node.Checked = true;
                     break;
             }
 
-            sbyte newstate = node.ImageIndex == (int)VI.ImageLibrary.StockImage.AssignedDirect ? (sbyte)1 : (sbyte)0;
+            sbyte newstate = node.Checked ? (sbyte)1 : (sbyte)0;
 
             //in case the current node was enabled also enable the parent nodes too
-            if (node.ParentNode != null)  //this node has a parent
-                if ((newstate == 1 && setState == -1)  //either the current node was switched, so handle its parent
-                    || (setState == 2))  //we already came from a child and are now on its parent, so handle the parent of the parent
-                    SwitchNodeState(node.ParentNode, 2);
+            if (node.Parent != null) //this node has a parent
+                if (newstate == 1 //either the current node was switched, so handle its parent
+                    || setState == 2) //we already came from a child and are now on its parent, so handle the parent of the parent
+                    SwitchNodeState(node.Parent, 2);
 
             //set current state to all child nodes as well
             if (setState < 2)
-                foreach (var subnode in node.Nodes)
+                foreach (var subnode in node.Nodes.OfType<TreeNode>())
                     SwitchNodeState(subnode, newstate);
-            
-            node.Invalidate(true);
+
+            //node.Invalidate(true);
         }
 
-        private bool isNodeEnabled(TreeListNode node)
-        {
-            return (node.ImageIndex == (int)VI.ImageLibrary.StockImage.AssignedDirect);
-        }
 
         private void FillProfileDropdown()
         {
@@ -152,14 +120,17 @@ namespace LogfileMetaAnalyser.Controls
 
             comboBox_Profiles.Items.Clear();
             comboBox_Profiles.Items.Add("");
-            comboBox_Profiles.Items.AddRange(exportProfiles.profiles_predef.Keys.ToArray());
-            comboBox_Profiles.Items.AddRange(exportProfiles.profiles_custom.Keys.ToArray());
+            comboBox_Profiles.Items.AddRange(exportProfiles.profiles_predef.Keys.Cast<object>().ToArray());
+            comboBox_Profiles.Items.AddRange(exportProfiles.profiles_custom.Keys.Cast<object>().ToArray());
 
             try
             {
                 comboBox_Profiles.SelectedItem = currentItem;
             }
-            catch { };
+            catch
+            {
+                // ignored
+            } 
         }
 
         /// <summary>
@@ -167,23 +138,19 @@ namespace LogfileMetaAnalyser.Controls
         /// </summary>
         private void FillInputFilePanel()
         {
-            TreeListNode node;
-
             //input file name list
-            using (new VI.FormBase.UpdateHelper(treelist_Inputfiles))
+            gridInputfiles.Rows.Clear();
+            foreach (var (_, value) in myDataStore.generalLogData.logfileInformation)
             {
-                treelist_Inputfiles.Nodes.Clear();
-
-                foreach (var f in myDataStore.generalLogData.logfileInformation)
-                {
-                    node = treelist_Inputfiles.Nodes.Add("", (int)VI.ImageLibrary.StockImage.AssignedDirect);
-                    node.SubItems.Add(new TreeListItemTextBox(f.Value.filenameBestNotation) { Data = f.Value.filename });
-                    node.SubItems.Add(new TreeListItemTextBox(f.Value.logfileType.ToString()));
-
-                    if (exportSettings.inputOutputOptions.includeFiles.Contains(f.Value.filename))
-                        SwitchNodeState(node, 1);
-                }
+                var rowIdx = gridInputfiles.Rows.Add();
+                
+                gridInputfiles.Rows[rowIdx].Height = 20;
+                gridInputfiles.Rows[rowIdx].Cells[0].Value = true;
+                gridInputfiles.Rows[rowIdx].Cells[1].Value = value.filename;
+                gridInputfiles.Rows[rowIdx].Cells[2].Value = value.logfileType.ToString();
+                gridInputfiles.Rows[rowIdx].Tag = value;
             }
+            
 
             //file type
             if (!exportSettings.inputOutputOptions.includeFileType_NLog && !exportSettings.inputOutputOptions.includeFileType_JSLog)
@@ -211,55 +178,62 @@ namespace LogfileMetaAnalyser.Controls
         /// </summary>
         private void FillActivityPanel()
         {
-            string category;
-            bool on;
-            int imgOn = (int)VI.ImageLibrary.StockImage.AssignedDirect;
-            int imgOff = (int)VI.ImageLibrary.StockImage.AssignedNone;
-            TreeListNode node;
-            Stack<Tuple<TreeListNode, bool>> joblst = new Stack<Tuple<TreeListNode, bool>>();
-
-            using (new VI.FormBase.UpdateHelper(treelist_activity))
+            Stack<Tuple<TreeNode, bool>> joblst = new Stack<Tuple<TreeNode, bool>>();
+            try
             {
-                treelist_activity.Nodes.Clear();
-                treelist_activity.Columns[0].Width = 1024;
-
+                treeActivities.BeginUpdate();
+                treeActivities.Nodes.Clear();
+                
                 //part 1: Projections
-                category = "Projection activities";
-                on = exportSettings.filterByActivity.isfilterEnabled_ProjectionActivity;
-                node = treelist_activity.Nodes.Add(category, on ? imgOn : imgOff);
-                joblst.Push(new Tuple<TreeListNode, bool>(node, on));
+                var category = "Projection activities";
+                var on = exportSettings.filterByActivity.isfilterEnabled_ProjectionActivity;
+                var node = treeActivities.Nodes.Add(category);
+                node.Checked = on;
+                joblst.Push(new Tuple<TreeNode, bool>(node, on));
 
                 category = "Projections";
                 on = exportSettings.filterByActivity.isfilterEnabled_ProjectionActivity_Projections;
-                node = treelist_activity.Nodes[0].Nodes.Add($"{category} ({myDataStore.projectionActivity.projections.Count})", on ? imgOn : imgOff);
-                joblst.Push(new Tuple<TreeListNode, bool>(node, on));
+                node = treeActivities.Nodes[0].Nodes
+                    .Add($"{category} ({myDataStore.projectionActivity.projections.Count})");
+                node.Checked = on;
+                joblst.Push(new Tuple<TreeNode, bool>(node, on));
 
                 category = "AdHoc jobs";
                 on = exportSettings.filterByActivity.isfilterEnabled_ProjectionActivity_Projections_AdHoc;
-                var aNode = treelist_activity.Nodes[0].Nodes[0].Nodes.Add($"{category} ({myDataStore.projectionActivity.NumberOfAdHocProjections})", on ? imgOn : imgOff);
-                joblst.Push(new Tuple<TreeListNode, bool>(aNode, on));
+                var aNode = treeActivities.Nodes[0].Nodes[0].Nodes.Add(
+                    $"{category} ({myDataStore.projectionActivity.NumberOfAdHocProjections})");
+                aNode.Checked = on;
+                joblst.Push(new Tuple<TreeNode, bool>(aNode, on));
 
                 category = "Jobservice jobs";
                 on = exportSettings.filterByActivity.isfilterEnabled_ProjectionActivity_Projections_Sync;
-                var bNode = treelist_activity.Nodes[0].Nodes[0].Nodes.Add($"{category} ({myDataStore.projectionActivity.NumberOfSyncProjections})", on ? imgOn : imgOff);
-                joblst.Push(new Tuple<TreeListNode, bool>(bNode, on));
+                var bNode = treeActivities.Nodes[0].Nodes[0].Nodes.Add(
+                    $"{category} ({myDataStore.projectionActivity.NumberOfSyncProjections})");
+                bNode.Checked = on;
+                joblst.Push(new Tuple<TreeNode, bool>(bNode, on));
 
                 if (myDataStore.projectionActivity.projections.Count > 0)
                 {
                     int i = 0;
-                    foreach (var proj in myDataStore.projectionActivity.projections.Where(t => t.projectionType == ProjectionType.AdHocProvision))
+                    foreach (var proj in myDataStore.projectionActivity.projections.Where(t =>
+                        t.projectionType == ProjectionType.AdHocProvision))
                     {
-                        var xNode = aNode.Nodes.Add($"#{++i} {proj.GetLabel()}", imgOff);
-                        xNode.Data = proj.uuid;
-                        joblst.Push(new Tuple<TreeListNode, bool>(xNode, exportSettings.filterByActivity.filterProjectionActivity_Projections_AdHocLst.Contains(proj.uuid)));
+                        var xNode = aNode.Nodes.Add($"#{++i} {proj.GetLabel()}");
+                        xNode.Tag = proj.uuid;
+                        joblst.Push(new Tuple<TreeNode, bool>(xNode,
+                            exportSettings.filterByActivity.filterProjectionActivity_Projections_AdHocLst.Contains(
+                                proj.uuid)));
                     }
 
                     i = 0;
-                    foreach (var proj in myDataStore.projectionActivity.projections.Where(t => t.projectionType != ProjectionType.AdHocProvision))
+                    foreach (var proj in myDataStore.projectionActivity.projections.Where(t =>
+                        t.projectionType != ProjectionType.AdHocProvision))
                     {
-                        var xNode = bNode.Nodes.Add($"#{++i} {proj.GetLabel()}", imgOff);
-                        xNode.Data = proj.uuid;
-                        joblst.Push(new Tuple<TreeListNode, bool>(xNode, exportSettings.filterByActivity.filterProjectionActivity_Projections_SyncLst.Contains(proj.uuid)));
+                        var xNode = bNode.Nodes.Add($"#{++i} {proj.GetLabel()}");
+                        xNode.Tag = proj.uuid;
+                        joblst.Push(new Tuple<TreeNode, bool>(xNode,
+                            exportSettings.filterByActivity.filterProjectionActivity_Projections_SyncLst.Contains(
+                                proj.uuid)));
                     }
                 }
 
@@ -267,34 +241,43 @@ namespace LogfileMetaAnalyser.Controls
                 while (joblst.Count > 0)
                 {
                     var job = joblst.Pop();
-                    SwitchNodeState(job.Item1, job.Item2 ? (sbyte)1 : (sbyte)0);
+                    SwitchNodeState(job.Item1, job.Item2 ? 1 : 0);
                 }
 
 
                 //part 2: Jobservice
                 on = exportSettings.filterByActivity.isfilterEnabled_JobServiceActivity;
-                node = treelist_activity.Nodes.Add(category, on ? imgOn : imgOff);
-                joblst.Push(new Tuple<TreeListNode, bool>(node, on));
+                node = treeActivities.Nodes.Add(category);
+                node.Checked = on;
+                joblst.Push(new Tuple<TreeNode, bool>(node, on));
 
                 category = "by Component";
                 on = exportSettings.filterByActivity.isfilterEnabled_JobServiceActivity_ByComponent;
-                var cNode = treelist_activity.Nodes[1].Nodes.Add($"{category} ({myDataStore.jobserviceActivities.distinctTaskfull.Count}", on ? imgOn : imgOff);
-                joblst.Push(new Tuple<TreeListNode, bool>(cNode, on));
+                var cNode = treeActivities.Nodes[1].Nodes
+                    .Add($"{category} ({myDataStore.jobserviceActivities.distinctTaskfull.Count})");
+                cNode.Checked = on;
+                joblst.Push(new Tuple<TreeNode, bool>(cNode, on));
 
                 category = "by Queue";
                 on = exportSettings.filterByActivity.isfilterEnabled_JobServiceActivity_ByQueue;
-                var dNode = treelist_activity.Nodes[1].Nodes.Add($"{category} ({myDataStore.jobserviceActivities.distinctQueuename.Count})", on ? imgOn : imgOff);
-                joblst.Push(new Tuple<TreeListNode, bool>(dNode, on));
+                var dNode = treeActivities.Nodes[1].Nodes
+                    .Add($"{category} ({myDataStore.jobserviceActivities.distinctQueuename.Count})");
+                dNode.Checked = on;
+                joblst.Push(new Tuple<TreeNode, bool>(dNode, on));
 
                 if (myDataStore.jobserviceActivities.jobserviceJobs.Count > 0)
                 {
                     foreach (var task in myDataStore.jobserviceActivities.jobserviceJobs)
-                    {   
-                        on = exportSettings.filterByActivity.filterJobServiceActivity_ByComponentLst.Contains(task.taskfull);
-                        cNode.Nodes.Add(task.taskfull, on ? imgOn : imgOff);
-                        
-                        on = exportSettings.filterByActivity.filterJobServiceActivity_ByQueueLst.Contains(task.queuename);
-                        dNode.Nodes.Add(task.queuename, on ? imgOn : imgOff);
+                    {
+                        on = exportSettings.filterByActivity.filterJobServiceActivity_ByComponentLst.Contains(
+                            task.taskfull);
+                        var xNode = cNode.Nodes.Add(task.taskfull);
+                        xNode.Checked = on;
+
+                        on = exportSettings.filterByActivity.filterJobServiceActivity_ByQueueLst.Contains(
+                            task.queuename);
+                         xNode = dNode.Nodes.Add(task.queuename);
+                         xNode.Checked = on;
                     }
                 }
 
@@ -302,11 +285,14 @@ namespace LogfileMetaAnalyser.Controls
                 while (joblst.Count > 0)
                 {
                     var job = joblst.Pop();
-                    SwitchNodeState(job.Item1, job.Item2 ? (sbyte)1 : (sbyte)0);
+                    SwitchNodeState(job.Item1, job.Item2 ? 1 : 0);
                 }
-            } //update helper
-
-            treelist_activity.Nodes.Expand(true);
+            }
+            finally
+            {
+                treeActivities.EndUpdate();
+                treeActivities.ExpandAll();
+            }
         }
 
         /// <summary>
@@ -383,12 +369,12 @@ namespace LogfileMetaAnalyser.Controls
                 };
                 l3.Font = new Font(l3.Font, FontStyle.Bold | FontStyle.Underline);
 
-                System.Windows.Forms.CheckBox cb;
+                CheckBox cb;
 
                 int colY = 2;
                 tableLayoutPanel_FilterByLogProperties.Controls.Add(l3, 0, colY);
 
-                System.Windows.Forms.Button bl3 = new System.Windows.Forms.Button()
+                Button bl3 = new Button()
                 {
                     Text = "toggle log level switches",
                     TextAlign = ContentAlignment.MiddleLeft,
@@ -399,14 +385,14 @@ namespace LogfileMetaAnalyser.Controls
                 tableLayoutPanel_FilterByLogProperties.RowCount++;
 
 
-                List<System.Windows.Forms.CheckBox> cbLst_LogLevelBoxes = new List<System.Windows.Forms.CheckBox>();
+                List<CheckBox> cbLst_LogLevelBoxes = new List<CheckBox>();
 
-                foreach (byte iLevel in Enumerable.Range(LogLevelTools.FewestDetailedLevel, LogLevelTools.MostDetailedLevel))
+                foreach (var iLevel in Enumerable.Range(LogLevelTools.FewestDetailedLevel, LogLevelTools.MostDetailedLevel))
                 {
-                    LogLevel Llevel = LogLevelTools.ConvertFromNumberToEnum(iLevel);
+                    var Llevel = LogLevelTools.ConvertFromNumberToEnum(Convert.ToByte(iLevel));
                     string sLevel = LogLevelTools.ConvertFromEnumToString(Llevel);
 
-                    cb = new System.Windows.Forms.CheckBox()
+                    cb = new CheckBox()
                     {
                         AutoSize = true,
                         TextAlign = ContentAlignment.MiddleLeft,
@@ -422,11 +408,11 @@ namespace LogfileMetaAnalyser.Controls
                     cbLst_LogLevelBoxes.Add(cb);
                 }
 
-                bl3.Click += new EventHandler((object o, EventArgs args) =>
+                bl3.Click += (_, _) =>
                 {
                     foreach (var ckb in cbLst_LogLevelBoxes)
                         ckb.Checked = !ckb.Checked;
-                });
+                };
 
 
 
@@ -440,7 +426,7 @@ namespace LogfileMetaAnalyser.Controls
 
                 tableLayoutPanel_FilterByLogProperties.Controls.Add(l4, 0, colY);
 
-                System.Windows.Forms.Button bl4 = new System.Windows.Forms.Button()
+                Button bl4 = new Button()
                 {
                     Text = "toggle log sources switches",
                     TextAlign = ContentAlignment.MiddleLeft,
@@ -450,7 +436,7 @@ namespace LogfileMetaAnalyser.Controls
                 tableLayoutPanel_FilterByLogProperties.RowStyles.Add(new RowStyle(SizeType.AutoSize, 40F));
                 tableLayoutPanel_FilterByLogProperties.RowCount++;
 
-                List<System.Windows.Forms.CheckBox> cbLst_LogSourceBoxes = new List<System.Windows.Forms.CheckBox>();
+                List<CheckBox> cbLst_LogSourceBoxes = new List<CheckBox>();
 
                 Dictionary<string, long> data = Constants.logSourcesOfInterest.Select(t => new KeyValuePair<string, long>(t, 0)).ToDictionary(t => t.Key, v => v.Value, StringComparer.InvariantCultureIgnoreCase);
                 foreach (var elem in myDataStore.generalLogData.numberOflogSources)
@@ -458,13 +444,13 @@ namespace LogfileMetaAnalyser.Controls
 
                 foreach (var kp in data.OrderBy(t => t.Key))
                 {
-                    cb = new System.Windows.Forms.CheckBox()
+                    cb = new CheckBox()
                     {
                         AutoSize = true,
-                        Name = $"cb_LogSource {kp.Key.ToString()}",
+                        Name = $"cb_LogSource {kp.Key}",
                         TextAlign = ContentAlignment.MiddleLeft,
                         Checked = exportSettings.filterByLogtype.logSourceFilters.GetBoolOrAdd(kp.Key, true),
-                        Text = string.Format("Log message source: {0} ({1})", kp.Key, kp.Value)
+                        Text = $"Log message source: {kp.Key} ({kp.Value})"
                     };
 
                     tableLayoutPanel_FilterByLogProperties.Controls.Add(cb, 1, colY++);
@@ -474,11 +460,11 @@ namespace LogfileMetaAnalyser.Controls
                     cbLst_LogSourceBoxes.Add(cb);
                 }
 
-                bl4.Click += new EventHandler((object o, EventArgs args) =>
+                bl4.Click += (_, _) =>
                 {
                     foreach (var ckb in cbLst_LogSourceBoxes)
                         ckb.Checked = !ckb.Checked;
-                });
+                };
             }
             finally
             {
@@ -490,21 +476,23 @@ namespace LogfileMetaAnalyser.Controls
         /// initialize gui and fill gui by data from passed exportsetting
         /// </summary>
         private void FillRegexFilters()
-        {         
-            using (new VI.FormBase.UpdateHelper(treelist_regexFilters))
-            {
-                treelist_regexFilters.Nodes.Clear();
-                TreeListNode node;                
+        {
+            gridRegexFilter.Rows.Clear();
 
-                foreach (var filter in exportSettings.filterByRegex.rxFilters)
-                {
-                    node = treelist_regexFilters.Nodes.Add("", filter.enabled ? (int)VI.ImageLibrary.StockImage.AssignedDirect : (int)VI.ImageLibrary.StockImage.AssignedNone);
-                    node.SubItems.Add(new TreeListItemTextBox(filter.regexText));
-                    node.SubItems.Add(new TreeListItemCheckBox(filter.ignoreCase));
-                    node.SubItems.Add(new TreeListItemCheckBox(filter.isMatch));                    
-                    node.SubItems.Add(new TreeListItemComboBox(new string[] { "before other filters", "after other filters" }, filter.isAppliedAtStart ? 0 : 1));
-                }
+            foreach (var filter in exportSettings.filterByRegex.rxFilters)
+            {
+                var rowIdx = gridRegexFilter.Rows.Add();
+
+                gridRegexFilter.Rows[rowIdx].Height = 20;
+                gridRegexFilter.Rows[rowIdx].Cells[0].Value = filter.enabled;
+                gridRegexFilter.Rows[rowIdx].Cells[1].Value = filter.regexText;
+                gridRegexFilter.Rows[rowIdx].Cells[2].Value = filter.ignoreCase;
+                gridRegexFilter.Rows[rowIdx].Cells[3].Value = filter.isMatch;
+                gridRegexFilter.Rows[rowIdx].Cells[4].Value = filter.isAppliedAtStart ? BeforeOtherFilters : AfterOtherFilters;
+
+                gridRegexFilter.Rows[rowIdx].Tag = filter;
             }
+
         }
 
         /// <summary>
@@ -514,13 +502,18 @@ namespace LogfileMetaAnalyser.Controls
         {
             //input files
             exportSettings.inputOutputOptions.includeFiles.Clear();
-            foreach (var node in treelist_Inputfiles.Nodes.Where(t => isNodeEnabled(t)))
-                exportSettings.inputOutputOptions.includeFiles.Add(node.SubItems[0].Data.ToString());
+
+            foreach (var row in gridInputfiles.Rows
+                .OfType<DataGridViewRow>()
+                .Where(r => (bool)r.Cells[0].Value))
+            {
+                var lfi = (LogfileInformation)row.Tag;
+                exportSettings.inputOutputOptions.includeFiles.Add(lfi!.filename);
+            }
 
             exportSettings.inputOutputOptions.includeFileType_JSLog = checkBox_inputOpt_jobservice.Checked;
             exportSettings.inputOutputOptions.includeFileType_NLog = checkBox_inputOpt_nlog.Checked;
             
-
             //output file options
             exportSettings.inputOutputOptions.filenamePostfix = textBox_postfix.Text;
             exportSettings.inputOutputOptions.outputFolder = textBox_destFolder.Text;
@@ -529,29 +522,28 @@ namespace LogfileMetaAnalyser.Controls
 
             //Filter By Activity
             //projections activities
-            exportSettings.filterByActivity.isfilterEnabled_ProjectionActivity = isNodeEnabled(treelist_activity.Nodes[0]);
-            exportSettings.filterByActivity.isfilterEnabled_ProjectionActivity_Projections = isNodeEnabled(treelist_activity.Nodes[0].Nodes[0]);
-            exportSettings.filterByActivity.isfilterEnabled_ProjectionActivity_Projections_AdHoc = isNodeEnabled(treelist_activity.Nodes[0].Nodes[0].Nodes[0]);
-            exportSettings.filterByActivity.isfilterEnabled_ProjectionActivity_Projections_Sync = isNodeEnabled(treelist_activity.Nodes[0].Nodes[0].Nodes[1]);
+            exportSettings.filterByActivity.isfilterEnabled_ProjectionActivity = treeActivities.Nodes[0].Checked;
+            exportSettings.filterByActivity.isfilterEnabled_ProjectionActivity_Projections = treeActivities.Nodes[0].Nodes[0].Checked;
+            exportSettings.filterByActivity.isfilterEnabled_ProjectionActivity_Projections_AdHoc = treeActivities.Nodes[0].Nodes[0].Nodes[0].Checked;
+            exportSettings.filterByActivity.isfilterEnabled_ProjectionActivity_Projections_Sync = treeActivities.Nodes[0].Nodes[0].Nodes[1].Checked;
 
             exportSettings.filterByActivity.filterProjectionActivity_Projections_AdHocLst.Clear();
-            foreach (var subnode in treelist_activity.Nodes[0].Nodes[0].Nodes[0].Nodes.Where(t => isNodeEnabled(t)))
-                exportSettings.filterByActivity.filterProjectionActivity_Projections_AdHocLst.Add(subnode.Data.ToString());
+            foreach (var subnode in treeActivities.Nodes[0].Nodes[0].Nodes[0].Nodes.OfType<TreeNode>().Where(t => t.Checked))
+                exportSettings.filterByActivity.filterProjectionActivity_Projections_AdHocLst.Add(subnode.Tag.ToString());
 
             exportSettings.filterByActivity.filterProjectionActivity_Projections_SyncLst.Clear();
-            foreach (var subnode in treelist_activity.Nodes[0].Nodes[0].Nodes[1].Nodes.Where(t => isNodeEnabled(t)))
-                exportSettings.filterByActivity.filterProjectionActivity_Projections_SyncLst.Add(subnode.Data.ToString());
+            foreach (var subnode in treeActivities.Nodes[0].Nodes[0].Nodes[1].Nodes.OfType<TreeNode>().Where(t => t.Checked))
+                exportSettings.filterByActivity.filterProjectionActivity_Projections_SyncLst.Add(subnode.Tag.ToString());
 
             //jobservice activities
-            exportSettings.filterByActivity.isfilterEnabled_JobServiceActivity = isNodeEnabled(treelist_activity.Nodes[1]);
-            exportSettings.filterByActivity.isfilterEnabled_JobServiceActivity_ByComponent = isNodeEnabled(treelist_activity.Nodes[1].Nodes[0]);
-            foreach (var subnode in treelist_activity.Nodes[1].Nodes[0].Nodes.Where(t => isNodeEnabled(t)))
-                exportSettings.filterByActivity.filterJobServiceActivity_ByComponentLst.Add(subnode.Caption);
+            exportSettings.filterByActivity.isfilterEnabled_JobServiceActivity = treeActivities.Nodes[1].Checked;
+            exportSettings.filterByActivity.isfilterEnabled_JobServiceActivity_ByComponent = treeActivities.Nodes[1].Nodes[0].Checked;
+            foreach (var subnode in treeActivities.Nodes[1].Nodes[0].Nodes.OfType<TreeNode>().Where(t => t.Checked))
+                exportSettings.filterByActivity.filterJobServiceActivity_ByComponentLst.Add(subnode.Text);
 
-            exportSettings.filterByActivity.isfilterEnabled_JobServiceActivity_ByQueue = isNodeEnabled(treelist_activity.Nodes[1].Nodes[1]);
-            foreach (var subnode in treelist_activity.Nodes[1].Nodes[1].Nodes.Where(t => isNodeEnabled(t)))
-                exportSettings.filterByActivity.filterJobServiceActivity_ByQueueLst.Add(subnode.Caption);
-
+            exportSettings.filterByActivity.isfilterEnabled_JobServiceActivity_ByQueue = treeActivities.Nodes[1].Nodes[1].Checked;
+            foreach (var subnode in treeActivities.Nodes[1].Nodes[1].Nodes.OfType<TreeNode>().Where(t => t.Checked))
+                exportSettings.filterByActivity.filterJobServiceActivity_ByQueueLst.Add(subnode.Text);
 
             //Filter by Log type
             //Dates
@@ -560,12 +552,12 @@ namespace LogfileMetaAnalyser.Controls
 
 
             //Log level
-            foreach (byte iLevel in Enumerable.Range(LogLevelTools.FewestDetailedLevel, LogLevelTools.MostDetailedLevel))
+            foreach (var iLevel in Enumerable.Range(LogLevelTools.FewestDetailedLevel, LogLevelTools.MostDetailedLevel))
             {
-                LogLevel Llevel = LogLevelTools.ConvertFromNumberToEnum(iLevel);
+                var Llevel = LogLevelTools.ConvertFromNumberToEnum(Convert.ToByte(iLevel));
                 string sLevel = LogLevelTools.ConvertFromEnumToString(Llevel);
 
-                exportSettings.filterByLogtype.logLevelFilters[Llevel] = ((System.Windows.Forms.CheckBox)tableLayoutPanel_FilterByLogProperties.Controls[$"cb_LogLevel {sLevel}"]).Checked;
+                exportSettings.filterByLogtype.logLevelFilters[Llevel] = ((CheckBox)tableLayoutPanel_FilterByLogProperties.Controls[$"cb_LogLevel {sLevel}"]).Checked;
             }
 
 
@@ -577,18 +569,20 @@ namespace LogfileMetaAnalyser.Controls
 
                 string source = ctl.Name.Substring("cb_LogSource ".Length);
 
-                exportSettings.filterByLogtype.logSourceFilters.AddOrUpdate(source, ((System.Windows.Forms.CheckBox)ctl).Checked);
+                exportSettings.filterByLogtype.logSourceFilters.AddOrUpdate(source, ((CheckBox)ctl).Checked);
             }
 
 
             //Filter by Regex
             for (int i = 0; i < exportSettings.filterByRegex.rxFilters.Count; i++)
             {
-                exportSettings.filterByRegex.rxFilters[i].enabled = isNodeEnabled(treelist_regexFilters.Nodes[i]);
-                exportSettings.filterByRegex.rxFilters[i].regexText = ((TreeListItemTextBox)treelist_regexFilters.Nodes[i].SubItems[0]).Caption;
-                exportSettings.filterByRegex.rxFilters[i].ignoreCase = ((TreeListItemCheckBox)treelist_regexFilters.Nodes[i].SubItems[1]).Checked;
-                exportSettings.filterByRegex.rxFilters[i].isMatch = ((TreeListItemCheckBox)treelist_regexFilters.Nodes[i].SubItems[2]).Checked;
-                exportSettings.filterByRegex.rxFilters[i].isAppliedAtStart= ((TreeListItemComboBox)treelist_regexFilters.Nodes[i].SubItems[3]).SelectedIndex == 0;
+                var row = gridRegexFilter.Rows[i];
+
+                exportSettings.filterByRegex.rxFilters[i].enabled = (bool)row.Cells[0].Value;
+                exportSettings.filterByRegex.rxFilters[i].regexText = (string)row.Cells[1].Value;
+                exportSettings.filterByRegex.rxFilters[i].ignoreCase = (bool)row.Cells[2].Value;
+                exportSettings.filterByRegex.rxFilters[i].isMatch = (bool)row.Cells[3].Value;
+                exportSettings.filterByRegex.rxFilters[i].isAppliedAtStart = (string)row.Cells[4].Value == BeforeOtherFilters;
             }
 
             exportSettings.PrepareForFilterAndExport();
@@ -597,8 +591,8 @@ namespace LogfileMetaAnalyser.Controls
 
         private void buttonCancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult = DialogResult.Cancel;
-            this.Close();
+            DialogResult = DialogResult.Cancel;
+            Close();
         }
 
         private void button_Export_Click(object sender, EventArgs e)
@@ -619,38 +613,38 @@ namespace LogfileMetaAnalyser.Controls
             GetExportSettingFromGui();
 
             using (QuestionFrm frm = new QuestionFrm())
-            while (keepAsking)
-            {   
-                frm.SetupLabel("Please name your new profile:");
-                frm.SetupData(profilename);
-                var result = frm.ShowDialog();
+                while (keepAsking)
+                {   
+                    frm.SetupLabel("Please name your new profile:");
+                    frm.SetupData(profilename);
+                    var result = frm.ShowDialog();
 
-                if (result == DialogResult.Cancel)
-                    break;
-                else
-                {
-                    newprofilename = frm.QuestionDataText;
-
-                    if (exportProfiles.profiles_predef.ContainsKey(newprofilename))
+                    if (result == DialogResult.Cancel)
+                        break;
+                    else
                     {
-                            MessageBox.Show("This profile name is already taken by a predefined profile which cannot be overwritten. Choose another profile name!", "predefined profile", MessageBoxButtons.OK);
-                    }
-                    else if (exportProfiles.profiles_custom.ContainsKey(newprofilename))
-                    {
-                        var qRes = MessageBox.Show("Profile already exists with this name. Overwrite it?", "Overwrite profile?", MessageBoxButtons.YesNoCancel);
+                        newprofilename = frm.QuestionDataText;
 
-                        if (qRes == DialogResult.Cancel)
+                        if (exportProfiles.profiles_predef.ContainsKey(newprofilename))
                         {
-                            keepAsking = false;
-                            newprofilename = "";
+                            MessageBox.Show("This profile name is already taken by a predefined profile which cannot be overwritten. Choose another profile name!", "predefined profile", MessageBoxButtons.OK);
+                        }
+                        else if (exportProfiles.profiles_custom.ContainsKey(newprofilename))
+                        {
+                            var qRes = MessageBox.Show("Profile already exists with this name. Overwrite it?", "Overwrite profile?", MessageBoxButtons.YesNoCancel);
+
+                            if (qRes == DialogResult.Cancel)
+                            {
+                                keepAsking = false;
+                                newprofilename = "";
+                            }
+                            else
+                                keepAsking = qRes == DialogResult.No; //keep asking for profile name if profile name is NOt to overwrite
                         }
                         else
-                            keepAsking = qRes == DialogResult.No; //keep asking for profile name if profile name is NOt to overwrite
+                            keepAsking = false;
                     }
-                    else
-                        keepAsking = false;
                 }
-            }
 
             if (!string.IsNullOrEmpty(newprofilename))
             {
