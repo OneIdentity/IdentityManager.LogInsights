@@ -157,6 +157,8 @@
             // toolStripProgressBar1
             // 
             this.toolStripProgressBar1.Name = "toolStripProgressBar1";
+            this.toolStripProgressBar1.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
+            this.toolStripProgressBar1.MarqueeAnimationSpeed = 30;
             this.toolStripProgressBar1.Size = new System.Drawing.Size(292, 18);
             this.toolStripProgressBar1.Step = 1;
             this.toolStripProgressBar1.Visible = false;

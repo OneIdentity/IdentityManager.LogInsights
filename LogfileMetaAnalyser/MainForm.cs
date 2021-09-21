@@ -67,8 +67,8 @@ namespace LogfileMetaAnalyser
             {
                 GuiHelper.SetGuiSave(statusStrip1, () =>
                 {
-                    toolStripProgressBar1.Visible = (d > 0d && d < 100d);
-                    toolStripProgressBar1.Value = d.Int();
+                    toolStripProgressBar1.Visible = d < 1D;
+               //     toolStripProgressBar1.Value = d.Int();
                 });
             });
 
@@ -76,8 +76,8 @@ namespace LogfileMetaAnalyser
             {
                 GuiHelper.SetGuiSave(statusStrip1, () =>
                 {
-                    toolStripProgressBar1.Visible = (d > 0d && d < 100d);
-                    toolStripProgressBar1.Value = d.Int();
+                    toolStripProgressBar1.Visible = d < 1D;
+                    //toolStripProgressBar1.Value = d.Int();
                 });
             });
 
@@ -125,7 +125,6 @@ namespace LogfileMetaAnalyser
 
             string ll = Helpers.StringHelper.TranslateLds("#LDS#{0}. Updating revision information\nProcessing steps: {1}\nExecution time: {2}{3}|2|10|0,52|s");
 
-            bool stop = true;
             /*
          TimeRangeMatchCandidate Sync1 = new TimeRangeMatchCandidate("Sync1", new DateTime(2020, 01, 31, 15, 30, 00), new DateTime(2020, 01, 31, 17, 30, 00), "all Projection 1 - AD");  //umfasst conn
          TimeRangeMatchCandidate Sync2 = new TimeRangeMatchCandidate("Sync2", new DateTime(2020, 01, 31, 16, 10, 00), new DateTime(2020, 01, 31, 19, 00, 00), "Projection 2 - EBS");//umfasst conn NICHT

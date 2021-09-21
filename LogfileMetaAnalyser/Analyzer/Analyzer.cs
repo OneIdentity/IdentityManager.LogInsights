@@ -96,7 +96,7 @@ namespace LogfileMetaAnalyser
             //text reading
             logger.Info("Starting reading the text");
             GlobalStopWatch.StartWatch("TextReading");
-            await TextReading(m_LogReader, detectors).ConfigureAwait(false);
+            await _TextReadingAsync(m_LogReader, detectors).ConfigureAwait(false);
 
             GlobalStopWatch.StopWatch("TextReading");
 
@@ -128,25 +128,48 @@ namespace LogfileMetaAnalyser
             logger.Info("Analyzer done!");
         }
 
-        private async Task TextReading(ILogReader logReader, List<Detectors.ILogDetector> detectors)
+        private async Task _TextReadingAsync(ILogReader logReader, List<Detectors.ILogDetector> detectors)
         {
             if (detectors == null)
                 return;
 
             logger.Info($"Starting reading {logReader.GetType().Name}");
+            OnReadProgressChanged?.Invoke(this, 0.5D); // trigger progress
 
             // TODO respect Constants.NumberOfContextMessages
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
 
-            await foreach (var entry in logReader.ReadAsync())
+            var reader = await LogContextReader.CreateAsync(logReader, Constants.NumberOfContextMessages, Constants.NumberOfContextMessages).ConfigureAwait(false);
+            var enumerator = reader.ReadAsync()
+                .Partition(1024)
+                .GetAsyncEnumerator();
+
+            var preloader = new DataPreloader<IReadOnlyList<LogEntry>>(async () =>
             {
+                if (!await enumerator.MoveNextAsync())
+                    return null;
+
+                return enumerator.Current;
+            });
+
+            IReadOnlyCollection<LogEntry> partition;
+            while ((partition = await preloader.GetNextAsync().ConfigureAwait(false)) != null)
+            {
+                var textMsgs = partition.Select(p => new TextMessage(p)).ToArray();
+
                 Parallel.ForEach(detectors, new ParallelOptions {MaxDegreeOfParallelism = AnalyzeDOP},
                     detector =>
                     {
-                        detector.ProcessMessage(new TextMessage(entry));
+                        foreach (var entry in textMsgs)
+                            detector.ProcessMessage(entry);
                     });
             }
 
+            sw.Stop();
+            Debug.WriteLine(sw.Elapsed, nameof(_TextReadingAsync));
 
+            OnReadProgressChanged?.Invoke(this, 1D);
             /*
             var parseStatisticPerTextfile = new List<ParseStatistic>();
              

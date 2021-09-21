@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Linq;
 
-using Newtonsoft.Json;
+using System.Text.Json;
 
 
 namespace LogfileMetaAnalyser
@@ -37,9 +37,9 @@ namespace LogfileMetaAnalyser
         private Datastore.DatastoreStructure ds;
 
 
-        public ExportSettings(Datastore.DatastoreStructure ds)
+        public ExportSettings(Datastore.DatastoreStructure datastore)
         {
-            this.ds = ds;
+            ds = datastore;
 
             inputOutputOptions =  new ExportSetting_InputOutput(ds);
             filterByLogtype = new ExportSetting_FilterByLogtype(ds);
@@ -47,12 +47,12 @@ namespace LogfileMetaAnalyser
             filterByRegex = new ExportSetting_RegexFilter(ds);            
         }
 
-        public void PutDatastoreRef(Datastore.DatastoreStructure ds)
+        public void PutDatastoreRef(Datastore.DatastoreStructure datastore)
         {
-            this.ds = ds;
+            ds = datastore;
 
             foreach (var exportSettingsMod in exportSettingsMods)
-                exportSettingsMod.datastore = ds;
+                exportSettingsMod.datastore = datastore;
         }
 
         public void PrepareForFilterAndExport() 
@@ -114,22 +114,17 @@ namespace LogfileMetaAnalyser
 
         public string AsJson()
         {
-            var jssett = new JsonSerializerSettings
-                {
-                    NullValueHandling = NullValueHandling.Ignore,
-                    Formatting = Formatting.Indented,
-                    ContractResolver = new ExportSettingsJsonContractResolver()
-                };
-
-
             //transfer each IExportSetting submodule object into a json string
             var dataToExport = exportSettingsMods.Select(e => e.ExportAsJson()).ToArray();
 
             //put all strings into a string list and create a new json
-            string jsonText = JsonConvert.SerializeObject(dataToExport, jssett);
-
-            //this is a json representing a list of json string each representing an submodule
-            return jsonText;
+            return JsonSerializer.Serialize(dataToExport, new JsonSerializerOptions()
+            {
+                PropertyNameCaseInsensitive = true,
+                IncludeFields = true, //include public fields even without an explicit getter/setter
+                WriteIndented = true, //write pretty formatted text
+                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+            });
         }
 
         public static ExportSettings FromJson(string jsonText)
@@ -137,7 +132,7 @@ namespace LogfileMetaAnalyser
             string[] exportsettingImport = null;
             ExportSettings result = new ExportSettings(null); 
 
-            exportsettingImport = JsonConvert.DeserializeObject<string[]>(jsonText);
+            exportsettingImport = JsonSerializer.Deserialize<string[]>(jsonText);
 
             if (exportsettingImport != null && exportsettingImport.Length == result.exportSettingsMods.Length)
             {
@@ -150,23 +145,23 @@ namespace LogfileMetaAnalyser
                         case 0:
                             result.inputOutputOptions = jsonTextForSubModule == "" ?
                                 new ExportSetting_InputOutput(null) :
-                                JsonConvert.DeserializeObject<ExportSetting_InputOutput>(jsonTextForSubModule);
+                                JsonSerializer.Deserialize<ExportSetting_InputOutput>(jsonTextForSubModule);
  
                             break;
                         case 1:
                             result.filterByLogtype = jsonTextForSubModule == "" ?
                                     new ExportSetting_FilterByLogtype(null) :
-                                    JsonConvert.DeserializeObject< ExportSetting_FilterByLogtype>(jsonTextForSubModule);
+                                    JsonSerializer.Deserialize<ExportSetting_FilterByLogtype>(jsonTextForSubModule);
                             break;
                         case 2:
                             result.filterByActivity = jsonTextForSubModule == "" ?
                                     new ExportSetting_FilterByActivity(null) :
-                                    JsonConvert.DeserializeObject<ExportSetting_FilterByActivity>(jsonTextForSubModule);
+                                    JsonSerializer.Deserialize<ExportSetting_FilterByActivity>(jsonTextForSubModule);
                             break;
                         case 3:
                             result.filterByRegex = jsonTextForSubModule == "" ?
                                     new ExportSetting_RegexFilter(null) :
-                                    JsonConvert.DeserializeObject<ExportSetting_RegexFilter>(jsonTextForSubModule);
+                                    JsonSerializer.Deserialize<ExportSetting_RegexFilter>(jsonTextForSubModule);
                             break;
                     }
                 }

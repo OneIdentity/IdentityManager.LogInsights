@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -28,20 +29,23 @@ namespace LogfileMetaAnalyser.LogReader
 			: this(new NLogReaderConnectionStringBuilder(connectionString))
         {}
 
-        protected override  async IAsyncEnumerable<LogEntry> OnReadAsync(CancellationToken ct)
+        protected override  async IAsyncEnumerable<LogEntry> OnReadAsync([EnumeratorCancellation] CancellationToken ct)
         {
             StringBuilder sb = new StringBuilder(1024);
 
             // todo read order of files?
             foreach (var file in m_FileNames)
             {
+                var regex = await _TryDetectFileFormatAsync(file).ConfigureAwait(false);
+                if (regex == null) break; // todo log message or other user notification
+
                 using var reader = new StreamReader(file, m_Encoding, true);
 
                 sb.Length = 0;
                 int lineNumber = 0;
                 int entryNumber = 0;
 
-                await foreach(var line in _ReadAsync(reader, ct))
+                await foreach(var line in _ReadAsync(reader, ct).ConfigureAwait(false))
                 {
                     string entry = null;
                     lineNumber++;
@@ -88,6 +92,28 @@ namespace LogfileMetaAnalyser.LogReader
             }
         }
 
+        private async Task<Regex> _TryDetectFileFormatAsync(string file)
+        {
+            using (StreamReader reader = new StreamReader(file))
+            {
+                string line;
+                int idx = 0;
+                while ((line = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
+                {
+                    if (Constants.regexMessageMetaDataNLogDefault.IsMatch(line))
+                        return Constants.regexMessageMetaDataNLogDefault;
+
+                    if (Constants.regexMessageMetaDataJobservice.IsMatch(line))
+                        return Constants.regexMessageMetaDataJobservice;
+
+                    if (idx++ == 32)
+                        break;
+                }
+            }
+
+            return null;
+        }
+
         private LogLevel _GetLogLevel(string value)
         {
             if (value.Length == 0)
@@ -119,7 +145,7 @@ namespace LogfileMetaAnalyser.LogReader
         }
 
 
-        private static async IAsyncEnumerable<string> _ReadAsync(StreamReader reader, CancellationToken ct)
+        private static async IAsyncEnumerable<string> _ReadAsync(StreamReader reader, [EnumeratorCancellation] CancellationToken ct)
         {
             string line;
 

@@ -32,7 +32,10 @@ namespace LogfileMetaAnalyser.Helpers
 			if (Enum.TryParse(s.Trim(), true, out LogLevel res))
                 return res;
 
-            return LogLevel.Undef;
+			if ( string.Equals(s, "exception", StringComparison.OrdinalIgnoreCase) )
+				return LogLevel.Error;
+
+			return LogLevel.Undef;
         }
 
 		public static string ConvertFromEnumToString(LogLevel level)
