@@ -42,6 +42,10 @@ namespace LogfileMetaAnalyser.Datastore
        
     public enum SQLCmdType
     {
-        Insert, Update, Delete, Select, Other
+        Other,
+        Insert, 
+        Update, 
+        Delete, 
+        Select,
     }
 }
