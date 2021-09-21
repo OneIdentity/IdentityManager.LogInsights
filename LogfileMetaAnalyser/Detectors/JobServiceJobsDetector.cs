@@ -11,13 +11,15 @@ namespace LogfileMetaAnalyser.Detectors
 {
     class JobServiceJobsDetector : DetectorBase, ILogDetector
     {
-        private static Regex regex_JobStart_TypeJS = new Regex(@"<p>.*?( - (?<queue>(\\[^ ]+) - )| - )Process step parameter (?<jobid>[-0-9a-zA-Z]{36,38}).*?ComponentClass=(?<classname>.*?)Task=(?<taskname>.*?)Executiontype.*?(?<params>\[Parameters\].+)", RegexOptions.Compiled | RegexOptions.Singleline);
-        private static Regex regex_JobStart_TypeNLog = new Regex(@"Process step parameter (?<jobid>[-0-9a-zA-Z]{36,38}).*?ComponentClass=(?<classname>.*?)Task=(?<taskname>.*?)Executiontype.*?(?<params>\[Parameters\].+)", RegexOptions.Compiled | RegexOptions.Singleline);
-        private static Regex regex_JobStart_TypeNLog_SQL = new Regex(@"exec QBM_PJobUpdateState N?'(?<jobid>[-0-9a-zA-Z]{36,38})', N'PROCESSING'", RegexOptions.Compiled | RegexOptions.Singleline);
-
-        private static Regex regex_JobFinish_TypeJS = new Regex(@"<[swrxe]>.*?(?<queue>\\.+?) - .*?(?<jobid>[-0-9a-fA-Z]{36,38}): (?<jobstate>[a-zA-Z ]+)(?<msg>.*)?$|<[swrxe]>.*?(?<jobid>[-0-9a-fA-Z]{36,38}): (?<jobstate>[a-zA-Z ]+)(?<msg>.*)?$|<[swrxe]>.*?(?<queue>\\.+?) - Process step output parameter (?<jobid>[-0-9a-fA-Z]{36,38}):(?<msg>.*)?$", RegexOptions.Compiled | RegexOptions.Singleline);
-        private static Regex regex_JobFinish_TypeNLog = new Regex(@"(?<jobid>[-0-9a-fA-Z]{36,38}): (?<jobstate>[a-zA-Z ]+)(?<msg>.*)?", RegexOptions.Compiled | RegexOptions.Singleline);
-        private static Regex regex_JobFinish_TypeNLog_SQL = new Regex(@"exec QBM_PJobUpdateState.*@uid = (?<jobid>[-0-9a-fA-Z]{36,38}).*@state = (?<jobstate>[a-zA-Z ]+).*@messages = (?<msg>.*)?", RegexOptions.Compiled | RegexOptions.Singleline);
+        //private static Regex regex_JobStart_TypeJS = new Regex(@"<p>.*?( - (?<queue>(\\[^ ]+) - )| - )Process step parameter (?<jobid>[-0-9a-zA-Z]{36,38}).*?ComponentClass=(?<classname>.*?)Task=(?<taskname>.*?)Executiontype.*?(?<params>\[Parameters\].+)", RegexOptions.Compiled | RegexOptions.Singleline);
+        //private static Regex regex_JobStart_TypeNLog = new Regex                                   (@"Process step parameter (?<jobid>[-0-9a-zA-Z]{36,38}).*?ComponentClass=(?<classname>.*?)Task=(?<taskname>.*?)Executiontype.*?(?<params>\[Parameters\].+)", RegexOptions.Compiled | RegexOptions.Singleline);
+        private static Regex regex_JobStart = new Regex(@"(<p>.*?( - (?<queue>(\\[^ ]+) - )| - ))?Process step parameter (?<jobid>[-0-9a-zA-Z]{36,38}).*?ComponentClass=(?<classname>.*?)Task=(?<taskname>.*?)Executiontype.*?(?<params>\[Parameters\].+)", RegexOptions.Compiled | RegexOptions.Singleline);
+        private static Regex regex_JobStart_SQL = new Regex(@"exec QBM_PJobUpdateState N?'(?<jobid>[-0-9a-zA-Z]{36,38})', N'PROCESSING'", RegexOptions.Compiled | RegexOptions.Singleline);
+                
+        //private static Regex regex_JobFinish_TypeJS = new Regex(@"<[swrxe]>.*?(?<queue>\\.+?) - .*?(?<jobid>[-0-9a-fA-Z]{36,38}): (?<jobstate>[a-zA-Z ]+)(?<msg>.*)?$|<[swrxe]>.*?(?<jobid>[-0-9a-fA-Z]{36,38}): (?<jobstate>[a-zA-Z ]+)(?<msg>.*)?$|<[swrxe]>.*?(?<queue>\\.+?) - Process step output parameter (?<jobid>[-0-9a-fA-Z]{36,38}):(?<msg>.*)?$", RegexOptions.Compiled | RegexOptions.Singleline);
+        //private static Regex regex_JobFinish_TypeNLog = new Regex(                               @"(?<jobid>[-0-9a-fA-Z]{36,38}): (?<jobstate>[a-zA-Z ]+)(?<msg>.*)?", RegexOptions.Compiled | RegexOptions.Singleline);
+        private static Regex regex_JobFinish = new Regex(@"<[swrxe]>.*?(?<queue>\\.+?) - .*?(?<jobid>[-0-9a-fA-Z]{36,38}): (?<jobstate>[a-zA-Z ]+)(?<msg>.*)?$|<[swrxe]>.*?(?<jobid>[-0-9a-fA-Z]{36,38}): (?<jobstate>[a-zA-Z ]+)(?<msg>.*)?$|<[swrxe]>.*?(?<queue>\\.+?) - Process step output parameter (?<jobid>[-0-9a-fA-Z]{36,38}):(?<msg>.*)?$|(?<jobid>[-0-9a-fA-Z]{36,38}): (?<jobstate>[a-zA-Z ]+)(?<msg>.*)?", RegexOptions.Compiled | RegexOptions.Singleline);
+        private static Regex regex_JobFinish_SQL = new Regex(@"exec QBM_PJobUpdateState.*@uid = (?<jobid>[-0-9a-fA-Z]{36,38}).*@state = (?<jobstate>[a-zA-Z ]+).*@messages = (?<msg>.*)?", RegexOptions.Compiled | RegexOptions.Singleline);
 
         private Dictionary<string, JobserviceJob> jobs;
 
@@ -79,15 +81,16 @@ namespace LogfileMetaAnalyser.Detectors
         {
             if (!_isEnabled)
                 return;
-                   
-			DateTime procMsgStartpoint = DateTime.Now;
-
-            if (
+            
+            /*if (
                 (msg.messageLogfileType == LogfileType.Jobservice && msg.spid == "") ||
                 (msg.messageLogfileType != LogfileType.Jobservice && msg.loggerSource != "Jobservice" && msg.loggerSource != "SqlLog")
                )
+            */
+            if (msg.loggerSource != "Jobservice" && msg.loggerSource != "SqlLog")
                 return;
 
+            DateTime procMsgStartpoint = DateTime.Now;
 
             var rt = ProcessMessageBase(ref msg);
             if (rt != null)
@@ -108,12 +111,10 @@ namespace LogfileMetaAnalyser.Detectors
                 //job start
                 Match rm_JobStart = null;
 
-                if (msg.messageLogfileType == LogfileType.Jobservice)
-                    rm_JobStart = regex_JobStart_TypeJS.Match(msg.messageText);
-                else if (msg.loggerSource == "Jobservice")
-                    rm_JobStart = regex_JobStart_TypeNLog.Match(msg.messageText);
+                if (msg.loggerSource == "Jobservice")
+                    rm_JobStart = regex_JobStart.Match(msg.messageText);
                 else if (msg.loggerSource == "SqlLog" && msg.loggerLevel == LogLevel.Debug)
-                    rm_JobStart = regex_JobStart_TypeNLog_SQL.Match(msg.messageText);
+                    rm_JobStart = regex_JobStart_SQL.Match(msg.messageText);
 
 
                 if (rm_JobStart != null && rm_JobStart.Success)
@@ -165,12 +166,10 @@ namespace LogfileMetaAnalyser.Detectors
                 //job finish
                 Match rm_JobFinish = null;
 
-                if (msg.messageLogfileType == LogfileType.Jobservice)
-                    rm_JobFinish = regex_JobFinish_TypeJS.Match(msg.messageText);
-                else if (msg.loggerSource == "Jobservice")
-                    rm_JobFinish = regex_JobFinish_TypeNLog.Match(msg.messageText);
+                 if (msg.loggerSource == "Jobservice")
+                    rm_JobFinish = regex_JobFinish.Match(msg.messageText);
                 else if (msg.loggerSource == "SqlLog" && msg.loggerLevel == LogLevel.Debug)
-                    rm_JobFinish = regex_JobFinish_TypeNLog_SQL.Match(msg.messageText);
+                    rm_JobFinish = regex_JobFinish_SQL.Match(msg.messageText);
 
                 if (rm_JobFinish != null && rm_JobFinish.Success)
                 {
