@@ -63,11 +63,24 @@ namespace LogfileMetaAnalyser.Controls
                         _AddFile(fName);
                     }
                 }
+
+                CheckValid();
             }
             catch (Exception ex)
             {
                 
             }
+        }
+
+        private void tsbDelete_Click(object sender, EventArgs e)
+        {
+            // remove all selected items
+            foreach (ListViewItem lvi in lvLogFiles.SelectedItems.OfType<ListViewItem>().ToArray())
+            {
+                lvLogFiles.Items.Remove(lvi);
+            }
+
+            CheckValid();
         }
 
         private void _AddFile(string fName)
@@ -77,6 +90,9 @@ namespace LogfileMetaAnalyser.Controls
             var fInfo = new FileInfo(fName);
 
             lvItem.SubItems.Add(fInfo.Length.ToString());
+
+            lvItem.SubItems.Add(fInfo.CreationTime.ToString());
+            lvItem.SubItems.Add(fInfo.LastWriteTime.ToString());
         }
 
 
@@ -128,5 +144,21 @@ namespace LogfileMetaAnalyser.Controls
                                 MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
+
+        protected override bool OnCheckValid()
+        {
+            bool bValid = base.OnCheckValid();
+
+            bValid &= lvLogFiles.Items.Count>0;
+
+            return bValid;
+        }
+
+        private void lvLogFiles_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            tsbDelete.Enabled = lvLogFiles.SelectedIndices.Count > 0;
+        }
+
+       
     }
 }

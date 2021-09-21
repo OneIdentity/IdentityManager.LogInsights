@@ -16,8 +16,9 @@ namespace LogfileMetaAnalyser.Controls
         public LogReaderForm()
         {
             InitializeComponent();
-        }
 
+            CheckValid();
+        }
 
         public string ConnectionString
         {
@@ -42,6 +43,21 @@ namespace LogfileMetaAnalyser.Controls
 
                 throw new Exception("Invalid provider selection.");
             }
+        }
+
+        private void tabControl_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CheckValid();
+        }
+
+        private void CheckValid()
+        {
+            btnOk.Enabled = SelectedProvider.IsValid;
+        }
+
+        private void SelectedProvider_IsValidChanged(object sender, EventArgs e)
+        {
+           CheckValid();
         }
     }
 }
