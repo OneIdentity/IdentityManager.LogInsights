@@ -87,7 +87,7 @@ jobs:
 
     # Build the application
     - name: Build the application
-      run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration /p:PublishProfile=x64Profile /p:OutputPath=bin/Publish/x64/${{ env.Zip_Name }} /t:Build;Publish
+      run: 'msbuild $env:Solution_Name /p:Configuration=$env:Configuration /p:PublishProfile=x64Profile /p:OutputPath=bin/Publish/x64/${{ env.Zip_Name }} /t:"Build;Publish"'
       env:
         Configuration: ${{ matrix.configuration }}
 
