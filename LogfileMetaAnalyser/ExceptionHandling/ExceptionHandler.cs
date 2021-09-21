@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -13,6 +11,7 @@ namespace LogfileMetaAnalyser.ExceptionHandling
         private static readonly object _lockObj = new();
         private static ExceptionHandler	_instance;
         private static readonly Logger m_Logger = LogManager.GetCurrentClassLogger();
+        private delegate void ExceptionInvoker(Exception ex);
 
         private ExceptionHandler()
         {
@@ -31,7 +30,12 @@ namespace LogfileMetaAnalyser.ExceptionHandling
 
         private void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
         {
-            m_Logger.Fatal(e.Exception, e.Exception.Message);
+            if (MainForm != null)
+            {
+                MainForm?.Invoke(new ExceptionInvoker(ShowException), e.Exception);
+            }            
+            
+            m_Logger.Error(e.Exception, e.Exception.Message);
         }
 
         private bool IsCancellationException(Exception ex)
@@ -47,11 +51,9 @@ namespace LogfileMetaAnalyser.ExceptionHandling
                         return true;
                 }
                 else
-                {
                     for (var e = _ex; e != null; e = e.InnerException)
-                        if ( _type.IsInstanceOfType(e) )
+                        if (_type.IsInstanceOfType(e))
                             return true;
-                }
 
                 return false;
             }            
@@ -61,11 +63,20 @@ namespace LogfileMetaAnalyser.ExceptionHandling
                    _Filter(ex, typeof(TaskCanceledException));
         }
 
+        private void ShowException(Exception exception)
+        {
+            MessageBox.Show(exception.Message + "\r\n" + exception.StackTrace, "Error");
+        }
 
-        public void HandleException(Exception exception)
+        public void HandleException(Exception exception, bool isUserRelevant = true)
         {
             if (exception == null || IsCancellationException(exception))
                 return;
+
+            if (isUserRelevant && MainForm != null)
+            {
+                MainForm?.Invoke(new ExceptionInvoker(ShowException), exception);
+            }
 
             m_Logger.Error(exception, exception.Message);
         }
@@ -83,5 +94,7 @@ namespace LogfileMetaAnalyser.ExceptionHandling
                 return _instance;
             }
         }
+
+        public MainForm MainForm { get; set; }
     }
 }
