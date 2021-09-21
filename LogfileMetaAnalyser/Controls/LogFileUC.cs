@@ -66,9 +66,9 @@ namespace LogfileMetaAnalyser.Controls
 
                 CheckValid();
             }
-            catch (Exception ex)
+            catch
             {
-                
+                // Ignore exceptions
             }
         }
 
