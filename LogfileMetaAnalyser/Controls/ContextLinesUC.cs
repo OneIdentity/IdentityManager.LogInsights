@@ -231,13 +231,17 @@ namespace LogfileMetaAnalyser.Controls
 
         private List<FileInformationContext> _SetData(TextMessage theMessage, bool setCaption, IEnumerable<long> highlightFilePositions, bool jumpToLastMarker = false)
         {
-            rtbLog.SuspendLayout();
+           
             //rtbLog.SuspendPainting();
 
             List<FileInformationContext> filectxLst = new List<FileInformationContext>();
 
             try
             {
+                BeginUpdate();
+
+                rtbLog.SuspendLayout();
+
                 List<Tuple<int, int>> highlightEditorPositions = new List<Tuple<int, int>>();
                 int highlightEditorPositions_tmp_start;
                 if (highlightFilePositions == null)
@@ -258,7 +262,7 @@ namespace LogfileMetaAnalyser.Controls
                         else
                             highlightEditorPositions_tmp_start = -1;
 
-                        rtbLog.AppendText(tm.messageText);
+                        rtbLog.AppendText(tm.messageText+Environment.NewLine);
 
                         if (highlightEditorPositions_tmp_start >= 0)
                         {
@@ -274,7 +278,7 @@ namespace LogfileMetaAnalyser.Controls
                 else
                     highlightEditorPositions_tmp_start = -1;
 
-                rtbLog.AppendText(theMessage.messageText);
+                rtbLog.AppendText(theMessage.messageText + Environment.NewLine);
 
                 if (highlightEditorPositions_tmp_start >= 0)
                 { 
@@ -292,7 +296,7 @@ namespace LogfileMetaAnalyser.Controls
                             else
                                 highlightEditorPositions_tmp_start = -1;
 
-                            rtbLog.AppendText(tm.messageText);
+                            rtbLog.AppendText(tm.messageText + Environment.NewLine);
 
                             if (highlightEditorPositions_tmp_start >= 0)
                             { 
@@ -312,16 +316,7 @@ namespace LogfileMetaAnalyser.Controls
                 //set scrollbar position (go to line)
                 if (highlightEditorPositions.Count > 0)
                 {
-                    int jumpToEditorLine = jumpToLastMarker ? highlightEditorPositions.Last().Item1 -1 : highlightEditorPositions[0].Item1 -1;
-
-                    int stepLinesBack = Math.Min(10, Math.Max(3, ((rtbLog.Height / (16 * 2)) / 2.1).IntDown()));
-
-                    int iLine = Math.Min(jumpToEditorLine - 1, stepLinesBack);
-
-                    //int iCharPos = rtbLog.GetFirstCharIndexFromLine(iLine);
-
-                    //rtbLog.Select(iCharPos, 0);
-                    //rtbLog.ScrollToCaret();
+                    int jumpToEditorLine = jumpToLastMarker ? highlightEditorPositions.Last().Item1 - 1 : highlightEditorPositions[0].Item1 - 1;
 
                     ScrollToLine(jumpToEditorLine);
                 }
@@ -334,8 +329,11 @@ namespace LogfileMetaAnalyser.Controls
             {
                 //rtbLog.ResumePainting();
                 rtbLog.ResumeLayout();
-            }
 
+                EndUpdate();
+
+                rtbLog.Invalidate();
+            }
 
             if (setCaption)
             {
@@ -413,8 +411,14 @@ namespace LogfileMetaAnalyser.Controls
         const int SB_BOTTOM = 7;
         const int SB_ENDSCROLL = 8;
 
+        private const int WM_SETREDRAW = 0x0b;
+
+
         private void ScrollToLine(int iLine)
         {
+            if (iLine < 0)
+                return;
+
             int iChar = rtbLog.GetFirstCharIndexFromLine(iLine);
 
             Point cPos = rtbLog.GetPositionFromCharIndex(iChar);
@@ -446,6 +450,17 @@ namespace LogfileMetaAnalyser.Controls
             rtbLog.Select( iChar, 0);
         }
 
+        public void BeginUpdate()
+        {
+            SendMessage(rtbLog.Handle, WM_SETREDRAW, (IntPtr)0, IntPtr.Zero);
+        }
+
+        public void EndUpdate()
+        {
+            SendMessage(rtbLog.Handle, WM_SETREDRAW, (IntPtr)1, IntPtr.Zero);
+        }
+
+        
         private void button_MessagesUp_Click(object sender, EventArgs e)
         {
             if (comboBox_OpenInEditor.CanSelect && comboBox_OpenInEditor.SelectedIndex > 0) 
