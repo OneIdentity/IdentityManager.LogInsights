@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
-using Newtonsoft.Json;
 
 namespace LogfileMetaAnalyser
 {
@@ -19,28 +19,16 @@ namespace LogfileMetaAnalyser
 
         private Datastore.DatastoreStructure ds;
 
-        private JsonSerializerSettings _jsonSerializerSettings = null;
-
-        private JsonSerializerSettings jsonSerializerSettings
+        private static readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.General)
         {
-            get
-            {
-                if (_jsonSerializerSettings == null)
-                {
-                    _jsonSerializerSettings = new JsonSerializerSettings
-                    {
-                        NullValueHandling = NullValueHandling.Ignore,
-                        Formatting = Formatting.Indented,
-                        ContractResolver = new ExportSettingsJsonContractResolver()
-                    };
-                }
-
-                return _jsonSerializerSettings;
-            }
-        }
+            PropertyNameCaseInsensitive = true,
+            IncludeFields = true, //include public fields even without an explicit getter/setter
+            WriteIndented = true, //write pretty formatted text
+        };
 
 
 
+        //constructor
         public ExportProfiles(Datastore.DatastoreStructure datastore)
         {
             ds = datastore;
@@ -63,8 +51,8 @@ namespace LogfileMetaAnalyser
                 return;
             
             string text = System.IO.File.ReadAllText(fn);
-            
-            data = JsonConvert.DeserializeObject<ExportProfilesDump[]>(text);
+
+            data = JsonSerializer.Deserialize<ExportProfilesDump[]>(text, _jsonOptions);
 
             if (data != null)            
                 foreach (var elem in data)
@@ -84,7 +72,7 @@ namespace LogfileMetaAnalyser
                 ProfileContentJson = d.Value.AsJson()
             }).ToArray();
 
-            string jsonText = JsonConvert.SerializeObject(data, jsonSerializerSettings);
+            string jsonText = JsonSerializer.Serialize(data, _jsonOptions);
             System.IO.File.WriteAllText(jsonFilename_custom, jsonText);
 
 
@@ -99,7 +87,7 @@ namespace LogfileMetaAnalyser
                                                         })
                                         .ToArray();
 
-            jsonText = JsonConvert.SerializeObject(data, jsonSerializerSettings);
+            jsonText = JsonSerializer.Serialize(data, _jsonOptions);
             System.IO.File.WriteAllText(jsonFilename_predef, jsonText);
         }
      
@@ -156,8 +144,8 @@ namespace LogfileMetaAnalyser
         
         private class ExportProfilesDump
         {
-            public string ProfileName;
-            public string ProfileContentJson;
+            public string ProfileName { get; set; }
+            public string ProfileContentJson { get; set; }
         }
 
 
