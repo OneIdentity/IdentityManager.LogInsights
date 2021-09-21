@@ -387,10 +387,10 @@ namespace LogfileMetaAnalyser.Controls
 
                 List<CheckBox> cbLst_LogLevelBoxes = new List<CheckBox>();
 
-                foreach (var iLevel in Enumerable.Range(Loglevel.FewestDetailedLevel, Loglevel.MostDetailedLevel))
+                foreach (var iLevel in Enumerable.Range(LogLevelTools.FewestDetailedLevel, LogLevelTools.MostDetailedLevel))
                 {
-                    Loglevels Llevel = Loglevel.ConvertFromNumberToEnum(Convert.ToByte(iLevel));
-                    string sLevel = Loglevel.ConvertFromEnumToString(Llevel);
+                    var Llevel = LogLevelTools.ConvertFromNumberToEnum(Convert.ToByte(iLevel));
+                    string sLevel = LogLevelTools.ConvertFromEnumToString(Llevel);
 
                     cb = new CheckBox()
                     {
@@ -552,10 +552,10 @@ namespace LogfileMetaAnalyser.Controls
 
 
             //Log level
-            foreach (var iLevel in Enumerable.Range(Loglevel.FewestDetailedLevel, Loglevel.MostDetailedLevel))
+            foreach (var iLevel in Enumerable.Range(LogLevelTools.FewestDetailedLevel, LogLevelTools.MostDetailedLevel))
             {
-                Loglevels Llevel = Loglevel.ConvertFromNumberToEnum(Convert.ToByte(iLevel));
-                string sLevel = Loglevel.ConvertFromEnumToString(Llevel);
+                var Llevel = LogLevelTools.ConvertFromNumberToEnum(Convert.ToByte(iLevel));
+                string sLevel = LogLevelTools.ConvertFromEnumToString(Llevel);
 
                 exportSettings.filterByLogtype.logLevelFilters[Llevel] = ((CheckBox)tableLayoutPanel_FilterByLogProperties.Controls[$"cb_LogLevel {sLevel}"]).Checked;
             }
