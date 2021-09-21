@@ -18,7 +18,7 @@ namespace LogfileMetaAnalyser.Controls
         private string _ConnectionString;
         private bool _isValid;
 
-        public EventHandler IsValidChanged;
+        public event EventHandler IsValidChanged;
 
         public LogReaderControl()
         {
@@ -44,11 +44,22 @@ namespace LogfileMetaAnalyser.Controls
                 if (value == _isValid)
                     return;
 
-                value = _isValid;
+                _isValid = value;
 
                 OnValidChanged();
             }
         }
+
+        public virtual void CheckValid()
+        {
+            IsValid = OnCheckValid();
+        }
+
+        protected virtual bool OnCheckValid()
+        {
+            return true;
+        }
+
 
         protected virtual void OnValidChanged()
         {

@@ -34,9 +34,25 @@ namespace LogfileMetaAnalyser.Controls
             return new AppInsightsLogReader(ConnectionString);
         }
 
-        private void linkExtended_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void textAppID_TextChanged(object sender, EventArgs e)
         {
-            panelExtended.Visible = !panelExtended.Visible;
+            CheckValid();
+        }
+
+        private void textApiKey_TextChanged(object sender, EventArgs e)
+        {
+            CheckValid();
+        }
+
+        protected override bool OnCheckValid()
+        {
+            bool bValid = base.OnCheckValid();
+
+            bValid &= !String.IsNullOrEmpty(textAppID.Text);
+
+            bValid &= !String.IsNullOrEmpty(textApiKey.Text);
+
+            return bValid;
         }
     }
 }

@@ -51,16 +51,16 @@ namespace LogfileMetaAnalyser.Controls
             this.panelButtom.Controls.Add(this.btnCancel);
             this.panelButtom.Controls.Add(this.btnOk);
             this.panelButtom.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelButtom.Location = new System.Drawing.Point(0, 310);
+            this.panelButtom.Location = new System.Drawing.Point(0, 326);
             this.panelButtom.Name = "panelButtom";
-            this.panelButtom.Size = new System.Drawing.Size(623, 53);
+            this.panelButtom.Size = new System.Drawing.Size(758, 53);
             this.panelButtom.TabIndex = 0;
             // 
             // btnCancel
             // 
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(497, 11);
+            this.btnCancel.Location = new System.Drawing.Point(632, 11);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(118, 30);
             this.btnCancel.TabIndex = 1;
@@ -71,7 +71,7 @@ namespace LogfileMetaAnalyser.Controls
             // 
             this.btnOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnOk.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnOk.Location = new System.Drawing.Point(364, 11);
+            this.btnOk.Location = new System.Drawing.Point(499, 11);
             this.btnOk.Name = "btnOk";
             this.btnOk.Size = new System.Drawing.Size(127, 30);
             this.btnOk.TabIndex = 0;
@@ -81,20 +81,24 @@ namespace LogfileMetaAnalyser.Controls
             // ctlLogFile
             // 
             this.ctlLogFile.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ctlLogFile.IsValid = false;
             this.ctlLogFile.Location = new System.Drawing.Point(3, 3);
             this.ctlLogFile.Margin = new System.Windows.Forms.Padding(1);
             this.ctlLogFile.Name = "ctlLogFile";
-            this.ctlLogFile.Size = new System.Drawing.Size(510, 296);
+            this.ctlLogFile.Size = new System.Drawing.Size(645, 312);
             this.ctlLogFile.TabIndex = 1;
+            this.ctlLogFile.IsValidChanged += new System.EventHandler(this.SelectedProvider_IsValidChanged);
             // 
             // ctlAppInsights
             // 
             this.ctlAppInsights.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ctlAppInsights.IsValid = false;
             this.ctlAppInsights.Location = new System.Drawing.Point(3, 3);
             this.ctlAppInsights.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.ctlAppInsights.Name = "ctlAppInsights";
-            this.ctlAppInsights.Size = new System.Drawing.Size(510, 296);
+            this.ctlAppInsights.Size = new System.Drawing.Size(486, 312);
             this.ctlAppInsights.TabIndex = 0;
+            this.ctlAppInsights.IsValidChanged += new System.EventHandler(this.SelectedProvider_IsValidChanged);
             // 
             // tabControl
             // 
@@ -107,8 +111,9 @@ namespace LogfileMetaAnalyser.Controls
             this.tabControl.Multiline = true;
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(623, 310);
+            this.tabControl.Size = new System.Drawing.Size(758, 326);
             this.tabControl.TabIndex = 4;
+            this.tabControl.SelectedIndexChanged += new System.EventHandler(this.tabControl_SelectedIndexChanged);
             // 
             // tabPageLogFiles
             // 
@@ -117,7 +122,7 @@ namespace LogfileMetaAnalyser.Controls
             this.tabPageLogFiles.Location = new System.Drawing.Point(103, 4);
             this.tabPageLogFiles.Name = "tabPageLogFiles";
             this.tabPageLogFiles.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageLogFiles.Size = new System.Drawing.Size(516, 302);
+            this.tabPageLogFiles.Size = new System.Drawing.Size(651, 318);
             this.tabPageLogFiles.TabIndex = 0;
             this.tabPageLogFiles.ToolTipText = "Log files";
             this.tabPageLogFiles.UseVisualStyleBackColor = true;
@@ -129,7 +134,7 @@ namespace LogfileMetaAnalyser.Controls
             this.tabPageAppInsights.Location = new System.Drawing.Point(103, 4);
             this.tabPageAppInsights.Name = "tabPageAppInsights";
             this.tabPageAppInsights.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageAppInsights.Size = new System.Drawing.Size(516, 302);
+            this.tabPageAppInsights.Size = new System.Drawing.Size(492, 318);
             this.tabPageAppInsights.TabIndex = 1;
             this.tabPageAppInsights.ToolTipText = "Application Insights";
             this.tabPageAppInsights.UseVisualStyleBackColor = true;
@@ -142,16 +147,17 @@ namespace LogfileMetaAnalyser.Controls
             this.imageList.Images.SetKeyName(0, "LogFilest.png");
             this.imageList.Images.SetKeyName(1, "ApplicationInsights.png");
             // 
-            // ProviderFrm
+            // LogReaderForm
             // 
             this.AcceptButton = this.btnOk;
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(623, 363);
+            this.ClientSize = new System.Drawing.Size(758, 379);
             this.Controls.Add(this.tabControl);
             this.Controls.Add(this.panelButtom);
-            this.Name = "ProviderFrm";
+            this.MinimumSize = new System.Drawing.Size(610, 320);
+            this.Name = "LogReaderForm";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
