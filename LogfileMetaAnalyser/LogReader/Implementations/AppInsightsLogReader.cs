@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading;
@@ -7,6 +8,8 @@ using System.Threading;
 using LogfileMetaAnalyser.Helpers;
 
 using Microsoft.Azure.ApplicationInsights.Query;
+
+// ReSharper disable UnusedMember.Local
 
 namespace LogfileMetaAnalyser.LogReader
 {
@@ -25,6 +28,22 @@ namespace LogfileMetaAnalyser.LogReader
 			public string LoggerName { get; set; }
 			public string AppName { get; set; }
 		}
+
+		private class _ExceptionDetail
+		{
+			public string Message { get; set; }
+			public string Type { get; set; }
+			public _StackFrame[] ParsedStack { get; set; }
+		}
+
+		private class _StackFrame
+		{
+			public string Method { get; set; }
+			public string Assembly { get; set; }
+			public int Level { get; set; }
+			public int Line { get; set; }
+		}
+
 
 		public AppInsightsLogReader(string connectionString)
 			: this(new AppInsightsLogReaderConnectionStringBuilder(connectionString))
@@ -73,6 +92,7 @@ namespace LogfileMetaAnalyser.LogReader
 			var itemTypeIdx = -1;
 			var customDimensionsIdx = -1;
 			var outerMessageIdx = -1;
+			var detailsIdx = -1;
 
 			for (var i = 0; i < table.Columns.Count; i++)
 			{
@@ -107,6 +127,10 @@ namespace LogfileMetaAnalyser.LogReader
 					case "outerMessage":
 						outerMessageIdx = i;
 						break;
+
+					case "details":
+						detailsIdx = i;
+						break;
 				}
 			}
 
@@ -122,10 +146,6 @@ namespace LogfileMetaAnalyser.LogReader
 				var id = (string) row[itemIdIdx];
 				var timeStamp = (DateTime) row[timestampIdx];
 				var message = (string) row[messageIdx];
-
-				if (string.IsNullOrEmpty(message) && outerMessageIdx > -1)
-					message = (string)row[outerMessageIdx];
-
 				var severity = severityIdx > -1 ? (long) row[severityIdx] : 0;
 				var itemTypeStr = itemTypeIdx > -1 ? (string) row[itemTypeIdx] : null;
 
@@ -137,18 +157,49 @@ namespace LogfileMetaAnalyser.LogReader
 
 				if ( customDimensionsIdx > 0 )
 				{
-					var customDimensions = (string)row[customDimensionsIdx];
-					if ( !string.IsNullOrEmpty(customDimensions) )
+					try
 					{
-						var r = JsonSerializer.Deserialize<_CustomDimensions>(customDimensions, _jsonOptions);
-
-						if ( r != null )
+						var customDimensions = (string) row[customDimensionsIdx];
+						if ( !string.IsNullOrEmpty(customDimensions) )
 						{
-							logger = r.LoggerName;
-							appName = r.AppName;
+							var r = JsonSerializer.Deserialize<_CustomDimensions>(customDimensions, _jsonOptions);
+
+							if ( r != null )
+							{
+								logger = r.LoggerName;
+								appName = r.AppName;
+							}
 						}
 					}
+					catch
+					{
+						// Ignore exception
+					}
 				}
+
+				_ExceptionDetail[] exceptionDetails = null;
+				if (detailsIdx > -1)
+				{
+					try
+					{
+						var details = (string)row[detailsIdx];
+						if (!string.IsNullOrEmpty(details))
+						{
+							exceptionDetails = JsonSerializer.Deserialize<_ExceptionDetail[]>(details, _jsonOptions);
+						}
+					}
+					catch
+					{
+						// Ignore exception
+					}
+				}
+
+				if (string.IsNullOrEmpty(message) && exceptionDetails != null && exceptionDetails.Length > 0)
+					message = string.Join(Environment.NewLine, exceptionDetails.Select(d => d.Message));
+
+				if (string.IsNullOrEmpty(message) && outerMessageIdx > -1)
+					message = (string)row[outerMessageIdx];
+
 
 				yield return new LogEntry(locator, id, timeStamp, type, (int)severity, message, logger, appName, "", "");
 			}
