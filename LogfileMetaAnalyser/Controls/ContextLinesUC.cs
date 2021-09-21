@@ -116,8 +116,8 @@ namespace LogfileMetaAnalyser.Controls
 
             foreach (var msg in theMessages)
             {
-                if (msg.contextMsgBefore == null) msg.contextMsgBefore = new TextMessage[] { };
-                if (msg.contextMsgAfter == null) msg.contextMsgAfter = new TextMessage[] { };
+                //if (msg.contextMsgBefore == null) msg.contextMsgBefore = new TextMessage[] { };
+                //if (msg.contextMsgAfter == null) msg.contextMsgAfter = new TextMessage[] { };
                 
                 if (!isOpenGap && !isSingleMsg)
                 {
