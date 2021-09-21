@@ -19,14 +19,6 @@
     <Compile Remove="TextReading\ReadLogByBlock.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="ActiproSoftware.Shared.WinForms, Version=16.1.330.0, Culture=neutral, PublicKeyToken=c27e062d3c1a4763, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>_Alien\ActiproSoftware.Shared.WinForms.dll</HintPath>
-    </Reference>
-    <Reference Include="ActiproSoftware.SyntaxEditor.WinForms, Version=16.1.330.0, Culture=neutral, PublicKeyToken=c27e062d3c1a4763, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>_Alien\ActiproSoftware.SyntaxEditor.WinForms.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>_Alien\Newtonsoft.Json.dll</HintPath>
@@ -34,26 +26,8 @@
     <Reference Include="NLog">
       <HintPath>_Alien\NLog.dll</HintPath>
     </Reference>
-    <Reference Include="SandBar">
-      <HintPath>_Alien\SandBar.dll</HintPath>
-    </Reference>
-    <Reference Include="VI.Base">
-      <HintPath>_Alien\VI.Base.dll</HintPath>
-    </Reference>
     <Reference Include="VI.Controls">
       <HintPath>_Alien\VI.Controls.dll</HintPath>
-    </Reference>
-    <Reference Include="VI.Controls.AlienSupport">
-      <HintPath>_Alien\VI.Controls.AlienSupport.dll</HintPath>
-    </Reference>
-    <Reference Include="VI.Controls.Design">
-      <HintPath>_Alien\VI.Controls.Design.dll</HintPath>
-    </Reference>
-    <Reference Include="VI.Controls.SyntaxEdit">
-      <HintPath>_Alien\VI.Controls.SyntaxEdit.dll</HintPath>
-    </Reference>
-    <Reference Include="VI.DB">
-      <HintPath>_Alien\VI.DB.dll</HintPath>
     </Reference>
     <Reference Include="VI.FormBase">
       <HintPath>_Alien\VI.FormBase.dll</HintPath>
@@ -65,7 +39,6 @@
     <PackageReference Include="GitVersion.MsBuild" Version="5.7.0">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="System.Linq.Async" Version="5.0.0" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Controls\ContextLinesUC.cs">
