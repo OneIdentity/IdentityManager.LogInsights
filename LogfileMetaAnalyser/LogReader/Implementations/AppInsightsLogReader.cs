@@ -1,214 +1,255 @@
-﻿using System;
+﻿using LogfileMetaAnalyser.Helpers;
+using Microsoft.Azure.ApplicationInsights.Query;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading;
 
-using LogfileMetaAnalyser.Helpers;
-
-using Microsoft.Azure.ApplicationInsights.Query;
-
 // ReSharper disable UnusedMember.Local
 
 namespace LogfileMetaAnalyser.LogReader
 {
-	public class AppInsightsLogReader : LogReader
-	{
-		private readonly ApplicationInsightsDataClient _client;
-		private readonly AppInsightsLogReaderConnectionStringBuilder _connString;
+    public class AppInsightsLogReader : LogReader
+    {
+        private readonly ApplicationInsightsDataClient _client;
+        private readonly AppInsightsLogReaderConnectionStringBuilder _connString;
 
-		private static readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.General)
-		{
-			PropertyNameCaseInsensitive = true
-		};
+        private static readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.General) {
+            PropertyNameCaseInsensitive = true
+        };
 
-		private class _CustomDimensions
-		{
-			public string LoggerName { get; set; }
-			public string AppName { get; set; }
-		}
+        private class _CustomDimensions
+        {
+            public string LoggerName
+            {
+                get;
+                set;
+            }
 
-		private class _ExceptionDetail
-		{
-			public string Message { get; set; }
-			public string Type { get; set; }
-			public _StackFrame[] ParsedStack { get; set; }
-		}
+            public string AppName
+            {
+                get;
+                set;
+            }
+        }
 
-		private class _StackFrame
-		{
-			public string Method { get; set; }
-			public string Assembly { get; set; }
-			public int Level { get; set; }
-			public int Line { get; set; }
-		}
+        private class _ExceptionDetail
+        {
+            public string Message
+            {
+                get;
+                set;
+            }
+
+            public string Type
+            {
+                get;
+                set;
+            }
+
+            public _StackFrame[] ParsedStack
+            {
+                get;
+                set;
+            }
+        }
+
+        private class _StackFrame
+        {
+            public string Method
+            {
+                get;
+                set;
+            }
+
+            public string Assembly
+            {
+                get;
+                set;
+            }
+
+            public int Level
+            {
+                get;
+                set;
+            }
+
+            public int Line
+            {
+                get;
+                set;
+            }
+        }
 
 
-		public AppInsightsLogReader(string connectionString)
-			: this(new AppInsightsLogReaderConnectionStringBuilder(connectionString))
-		{ }
+        public AppInsightsLogReader(string connectionString)
+            : this(new AppInsightsLogReaderConnectionStringBuilder(connectionString))
+        {
+        }
 
-		public AppInsightsLogReader(AppInsightsLogReaderConnectionStringBuilder connectionString)
-		{
-			_connString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
+        public AppInsightsLogReader(AppInsightsLogReaderConnectionStringBuilder connectionString)
+        {
+            _connString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
 
-			var appId = connectionString.AppId;
-			var apiKey = connectionString.ApiKey;
+            var appId = connectionString.AppId;
+            var apiKey = connectionString.ApiKey;
 
-			if (string.IsNullOrEmpty(appId))
-				throw new Exception($"Missing {nameof(appId)} value.");
-			if (string.IsNullOrEmpty(apiKey))
-				throw new Exception($"Missing {nameof(apiKey)} value.");
+            if ( string.IsNullOrEmpty(appId) )
+                throw new Exception($"Missing {nameof(appId)} value.");
+            if ( string.IsNullOrEmpty(apiKey) )
+                throw new Exception($"Missing {nameof(apiKey)} value.");
 
-			_client = new ApplicationInsightsDataClient(new ApiKeyClientCredentials(apiKey));
-		}
+            _client = new ApplicationInsightsDataClient(new ApiKeyClientCredentials(apiKey));
+        }
 
-		protected override void OnDispose()
-		{
-			_client.Dispose();
-		}
+        protected override void OnDispose()
+        {
+            _client.Dispose();
+        }
 
-		protected override async IAsyncEnumerable<LogEntry> OnReadAsync(
-			[EnumeratorCancellation] CancellationToken cancellationToken)
-		{
-			var events = new Events(_client);
+        protected override async IAsyncEnumerable<LogEntry> OnReadAsync(
+            [EnumeratorCancellation] CancellationToken cancellationToken)
+        {
+            var events = new Events(_client);
 
-			var result = await events.Client.Query.ExecuteAsync(
-					_connString.AppId,
-					_connString.Query,
-					cancellationToken: cancellationToken)
-				.ConfigureAwait(false);
+            var result = await events.Client.Query.ExecuteAsync(
+                    _connString.AppId,
+                    _connString.Query,
+                    cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
 
-			if (result.Tables.Count < 1)
-				throw new Exception("Missing result table");
+            if ( result.Tables.Count < 1 )
+                throw new Exception("Missing result table");
 
-			var table = result.Tables[0];
+            var table = result.Tables[0];
 
-			var timestampIdx = -1;
-			var messageIdx = -1;
-			var severityIdx = -1;
-			var itemIdIdx = -1;
-			var itemTypeIdx = -1;
-			var customDimensionsIdx = -1;
-			var outerMessageIdx = -1;
-			var detailsIdx = -1;
+            var timestampIdx = -1;
+            var messageIdx = -1;
+            var severityIdx = -1;
+            var itemIdIdx = -1;
+            var itemTypeIdx = -1;
+            var customDimensionsIdx = -1;
+            var outerMessageIdx = -1;
+            var detailsIdx = -1;
 
-			for (var i = 0; i < table.Columns.Count; i++)
-			{
-				var column = table.Columns[i];
+            for (var i = 0; i < table.Columns.Count; i++)
+            {
+                var column = table.Columns[i];
 
-				switch (column.Name)
-				{
-					case "itemId":
-						itemIdIdx = i;
-						break;
+                switch (column.Name)
+                {
+                    case "itemId":
+                        itemIdIdx = i;
+                        break;
 
-					case "timestamp":
-						timestampIdx = i;
-						break;
+                    case "timestamp":
+                        timestampIdx = i;
+                        break;
 
-					case "itemType":
-						itemTypeIdx = i;
-						break;
+                    case "itemType":
+                        itemTypeIdx = i;
+                        break;
 
-					case "message":
-						messageIdx = i;
-						break;
+                    case "message":
+                        messageIdx = i;
+                        break;
 
-					case "severityLevel":
-						severityIdx = i;
-						break;
-					
-					case "customDimensions":
-						customDimensionsIdx = i;
-						break;
+                    case "severityLevel":
+                        severityIdx = i;
+                        break;
 
-					case "outerMessage":
-						outerMessageIdx = i;
-						break;
+                    case "customDimensions":
+                        customDimensionsIdx = i;
+                        break;
 
-					case "details":
-						detailsIdx = i;
-						break;
-				}
-			}
+                    case "outerMessage":
+                        outerMessageIdx = i;
+                        break;
 
-			if (timestampIdx < 0 || messageIdx < 0 || itemIdIdx < 0)
-				throw new Exception("Missing columns");
+                    case "details":
+                        detailsIdx = i;
+                        break;
+                }
+            }
 
-			var pos = 0;
-			foreach (var row in table.Rows)
+            if ( timestampIdx < 0 || messageIdx < 0 || itemIdIdx < 0 )
+                throw new Exception("Missing columns");
+
+            var pos = 0;
+            foreach (var row in table.Rows)
             {
                 pos++;
-				var locator = new Locator(pos, pos, _connString.Query);
+                var locator = new Locator(pos, pos, _connString.Query);
 
-				var id = (string) row[itemIdIdx];
-				var timeStamp = (DateTime) row[timestampIdx];
-				var message = (string) row[messageIdx];
-				var severity = severityIdx > -1 ? (long) row[severityIdx] : 0;
-				var itemTypeStr = itemTypeIdx > -1 ? (string) row[itemTypeIdx] : null;
+                var id = (string)row[itemIdIdx];
+                var timeStamp = (DateTime)row[timestampIdx];
+                var message = (string)row[messageIdx];
+                var severity = severityIdx > -1 ? (long)row[severityIdx] : 0;
+                var itemTypeStr = itemTypeIdx > -1 ? (string)row[itemTypeIdx] : null;
 
-				var type = LogLevelTools.ConvertFromStringToEnum(itemTypeStr);
-				if ( type == LogLevel.Undef )
-					type = LogLevel.Info;
+                var type = LogLevelTools.ConvertFromStringToEnum(itemTypeStr);
+                if ( type == LogLevel.Undef )
+                    type = LogLevel.Info;
 
-				var logger = "";
-				var appName = "";
+                var logger = "";
+                var appName = "";
 
-				if ( customDimensionsIdx > 0 )
-				{
-					try
-					{
-						var customDimensions = (string) row[customDimensionsIdx];
-						if ( !string.IsNullOrEmpty(customDimensions) )
-						{
-							var r = JsonSerializer.Deserialize<_CustomDimensions>(customDimensions, _jsonOptions);
+                if ( customDimensionsIdx > 0 )
+                {
+                    try
+                    {
+                        var customDimensions = (string)row[customDimensionsIdx];
+                        if ( !string.IsNullOrEmpty(customDimensions) )
+                        {
+                            var r = JsonSerializer.Deserialize<_CustomDimensions>(customDimensions, _jsonOptions);
 
-							if ( r != null )
-							{
-								logger = r.LoggerName;
-								appName = r.AppName;
-							}
-						}
-					}
-					catch
-					{
-						// Ignore exception
-					}
-				}
+                            if ( r != null )
+                            {
+                                logger = r.LoggerName;
+                                appName = r.AppName;
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Ignore exception
+                    }
+                }
 
-				_ExceptionDetail[] exceptionDetails = null;
-				if (detailsIdx > -1)
-				{
-					try
-					{
-						var details = (string)row[detailsIdx];
-						if (!string.IsNullOrEmpty(details))
-						{
-							exceptionDetails = JsonSerializer.Deserialize<_ExceptionDetail[]>(details, _jsonOptions);
-						}
-					}
-					catch
-					{
-						// Ignore exception
-					}
-				}
+                _ExceptionDetail[] exceptionDetails = null;
+                if ( detailsIdx > -1 )
+                {
+                    try
+                    {
+                        var details = (string)row[detailsIdx];
+                        if ( !string.IsNullOrEmpty(details) )
+                        {
+                            exceptionDetails = JsonSerializer.Deserialize<_ExceptionDetail[]>(details, _jsonOptions);
+                        }
+                    }
+                    catch
+                    {
+                        // Ignore exception
+                    }
+                }
 
-				if (string.IsNullOrEmpty(message) && exceptionDetails != null && exceptionDetails.Length > 0)
-					message = string.Join(Environment.NewLine, exceptionDetails.Select(d => d.Message));
+                if ( string.IsNullOrEmpty(message) && exceptionDetails != null && exceptionDetails.Length > 0 )
+                    message = string.Join(Environment.NewLine, exceptionDetails.Select(d => d.Message));
 
-				if (string.IsNullOrEmpty(message) && outerMessageIdx > -1)
-					message = (string)row[outerMessageIdx];
+                if ( string.IsNullOrEmpty(message) && outerMessageIdx > -1 )
+                    message = (string)row[outerMessageIdx];
 
 
-				yield return new LogEntry(locator, id, timeStamp, type, (int)severity, message, logger, appName, "", "");
-			}
-		}
+                yield return new LogEntry(locator, id, timeStamp, type, (int)severity, message, logger, appName, "",
+                    "");
+            }
+        }
 
         /// <summary>
         /// Gets a short display of the reader and it's data.
         /// </summary>
         public override string Display => $"App Insights Reader - {_client.BaseUri.OriginalString}";
-	}
+    }
 }
