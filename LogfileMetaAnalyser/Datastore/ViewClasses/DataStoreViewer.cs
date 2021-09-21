@@ -92,7 +92,7 @@ namespace LogfileMetaAnalyser.Datastore
                 ExportAsNavigationTreeView_ProjectionActivity(ref tw);
 
                 //99.) Statistics
-                ExportAsNavigationTreeView_Statistics(ref tw);
+        //        ExportAsNavigationTreeView_Statistics(ref tw);
             }
             finally
             {
