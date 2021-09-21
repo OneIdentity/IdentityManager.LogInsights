@@ -1,4 +1,6 @@
-﻿namespace LogfileMetaAnalyser.Controls
+﻿using System.Windows.Forms;
+
+namespace LogfileMetaAnalyser.Controls
 {
     partial class ContextLinesUC
     {
@@ -28,10 +30,9 @@
         /// </summary>
         private void InitializeComponent()
         {
-            ActiproSoftware.SyntaxEditor.Document document3 = new ActiproSoftware.SyntaxEditor.Document();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.label1 = new System.Windows.Forms.Label();
-            this.syntaxEditor1 = new VI.Controls.SyntaxEdit.SyntaxEdit();
+            this.syntaxEditor1 = new RichTextBox();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.buttonShowInEditor = new System.Windows.Forms.Button();
             this.buttonExport = new System.Windows.Forms.Button();
@@ -75,19 +76,11 @@
             // syntaxEditor1
             // 
             this.syntaxEditor1.Dock = System.Windows.Forms.DockStyle.Fill;
-            document3.SemanticParsingEnabled = false;
-            this.syntaxEditor1.Document = document3;
             this.syntaxEditor1.HideSelection = true;
-            this.syntaxEditor1.IndentType = ActiproSoftware.SyntaxEditor.IndentType.None;
-            this.syntaxEditor1.IndicatorMarginVisible = false;
-            this.syntaxEditor1.LineNumberMarginVisible = true;
             this.syntaxEditor1.Location = new System.Drawing.Point(3, 23);
             this.syntaxEditor1.Name = "syntaxEditor1";
-            this.syntaxEditor1.SelectionMarginWidth = 1;
             this.syntaxEditor1.Size = new System.Drawing.Size(774, 387);
-            this.syntaxEditor1.SplitType = ActiproSoftware.SyntaxEditor.SyntaxEditorSplitType.DualHorizontal;
             this.syntaxEditor1.TabIndex = 1;
-            this.syntaxEditor1.UseDisabledRenderingForReadOnlyMode = true;
             // 
             // tableLayoutPanel2
             // 
@@ -200,7 +193,7 @@
         private System.Windows.Forms.Button buttonShowInEditor;
         private System.Windows.Forms.Button buttonExport;
         private System.Windows.Forms.ComboBox comboBox_OpenInEditor;
-        private VI.Controls.SyntaxEdit.SyntaxEdit syntaxEditor1;
+        private RichTextBox syntaxEditor1;
         private System.Windows.Forms.Button button_MessagesJumpBack;
         private System.Windows.Forms.Button button_MessagesJumpForward;
     }
