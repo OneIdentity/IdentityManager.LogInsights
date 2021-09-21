@@ -136,16 +136,36 @@ namespace LogfileMetaAnalyser
             logger.Info($"Starting reading {logReader.GetType().Name}");
 
             // TODO respect Constants.NumberOfContextMessages
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
 
-            await foreach (var entry in logReader.ReadAsync())
+            var enumerator = logReader.ReadAsync()
+                .Partition(1024)
+                .GetAsyncEnumerator();
+
+            var preloader = new DataPreloader<IReadOnlyList<LogEntry>>(async () =>
             {
+                if (!await enumerator.MoveNextAsync())
+                    return null;
+
+                return enumerator.Current;
+            });
+
+            IReadOnlyCollection<LogEntry> partition;
+            while ((partition = await preloader.GetNextAsync().ConfigureAwait(false)) != null)
+            {
+                var textMsgs = partition.Select(p => new TextMessage(p)).ToArray();
+
                 Parallel.ForEach(detectors, new ParallelOptions {MaxDegreeOfParallelism = AnalyzeDOP},
                     detector =>
                     {
-                        detector.ProcessMessage(new TextMessage(entry));
+                        foreach (var entry in textMsgs)
+                            detector.ProcessMessage(entry);
                     });
             }
 
+            sw.Stop();
+            Debug.WriteLine(sw.Elapsed, nameof(TextReading));
 
             /*
             var parseStatisticPerTextfile = new List<ParseStatistic>();
