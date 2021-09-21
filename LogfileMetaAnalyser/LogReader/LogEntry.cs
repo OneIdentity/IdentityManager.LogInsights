@@ -25,8 +25,8 @@ namespace LogfileMetaAnalyser.LogReader
             return Message;
         }
 
-        public LogEntry[] PreviousEntries { get; internal set; }
-        public LogEntry[] NextEntries { get; internal set; }
+        public LogEntry[] ContextPreviousEntries { get; internal set; }
+        public LogEntry[] ContextNextEntries { get; internal set; }
 
         public Locator Locator { get; }
 

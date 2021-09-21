@@ -140,7 +140,7 @@ namespace LogfileMetaAnalyser
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
-            var reader = await LogContextReader.CreateAsync(logReader, 10, 10).ConfigureAwait(false);
+            var reader = await LogContextReader.CreateAsync(logReader, Constants.NumberOfContextMessages, Constants.NumberOfContextMessages).ConfigureAwait(false);
             var enumerator = reader.ReadAsync()
                 .Partition(1024)
                 .GetAsyncEnumerator();
