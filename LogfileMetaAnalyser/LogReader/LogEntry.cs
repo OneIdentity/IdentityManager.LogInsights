@@ -20,6 +20,14 @@ namespace LogfileMetaAnalyser.LogReader
             Spid = spid;
         }
 
+        public override string ToString()
+        {
+            return Message;
+        }
+
+        public LogEntry[] PreviousEntries { get; internal set; }
+        public LogEntry[] NextEntries { get; internal set; }
+
         public Locator Locator { get; }
 
         public DateTime TimeStamp { get; }
@@ -39,5 +47,7 @@ namespace LogfileMetaAnalyser.LogReader
         public string Pid { get; }
 
         public string Spid { get; }
+
+        public object Tag { get; set; }
     }
 }
