@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Data;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text; 
 using System.Windows.Forms;
 
@@ -24,10 +25,10 @@ namespace LogfileMetaAnalyser.Controls
 
             this.logfileFilterExporter = logfileFilterExporter;
 
-//          syntaxEditor1.Document.ReadOnly = true;
-//          syntaxEditor1.Document.Multiline = true;
-//          syntaxEditor1.CurrentLineHighlightingVisible = true;
-//            syntaxEditor1.LineNumberMarginVisible = true;
+//          rtbLog.Document.ReadOnly = true;
+//          rtbLog.Document.Multiline = true;
+//          rtbLog.CurrentLineHighlightingVisible = true;
+//            rtbLog.LineNumberMarginVisible = true;
 
             buttonExport.Enabled = false;
             buttonShowInEditor.Enabled = false; 
@@ -52,16 +53,16 @@ namespace LogfileMetaAnalyser.Controls
                     return;
 
                 //jump to the end first 
-                if (syntaxEditor1.Lines.Length > 5)
+                if (rtbLog.Lines.Length > 5)
                 {
-                    syntaxEditor1.SelectionStart = syntaxEditor1.Text.Length;
+                    rtbLog.SelectionStart = rtbLog.Text.Length;
                     // scroll it automatically
-                    syntaxEditor1.ScrollToCaret();
+                    rtbLog.ScrollToCaret();
                 }
 
                 //now jump to the correct pos
                 //int jumppos = Math.Max(1, SelectedItem.data.fileposRelativeInView - 3);
-                //syntaxEditor1.SelectedView.GoToLine(jumppos);
+                //rtbLog.SelectedView.GoToLine(jumppos);
             });
 
             SetupCaption("");
@@ -179,7 +180,7 @@ namespace LogfileMetaAnalyser.Controls
                     .ToArray();
             }
 
-            //syntaxEditor1.LineNumberMarginVisible = !isOpenGap && theMessages[0].textLocator?.fileLinePosition > 0;
+            //rtbLog.LineNumberMarginVisible = !isOpenGap && theMessages[0].textLocator?.fileLinePosition > 0;
 
             bool fullyCompleteMessage = theMessages[0].textLocator?.fileLinePosition > 0;
 
@@ -230,8 +231,8 @@ namespace LogfileMetaAnalyser.Controls
 
         private List<FileInformationContext> _SetData(TextMessage theMessage, bool setCaption, IEnumerable<long> highlightFilePositions, bool jumpToLastMarker = false)
         {
-            syntaxEditor1.SuspendLayout();
-            //syntaxEditor1.SuspendPainting();
+            rtbLog.SuspendLayout();
+            //rtbLog.SuspendPainting();
 
             List<FileInformationContext> filectxLst = new List<FileInformationContext>();
 
@@ -242,10 +243,10 @@ namespace LogfileMetaAnalyser.Controls
                 if (highlightFilePositions == null)
                     highlightFilePositions = new long[] { };
                 
-                syntaxEditor1.Text = "";
+                rtbLog.Text = "";
 
-                //if (syntaxEditor1.LineNumberMarginVisible)
-                //    syntaxEditor1.Document.AutoLineNumberingBase = theMessage.contextMsgBefore.GetFirstElemOrDefault(theMessage).textLocator.fileLinePosition.Int();
+                //if (rtbLog.LineNumberMarginVisible)
+                //    rtbLog.Document.AutoLineNumberingBase = theMessage.contextMsgBefore.GetFirstElemOrDefault(theMessage).textLocator.fileLinePosition.Int();
                 
 
                 //pre lines
@@ -253,15 +254,15 @@ namespace LogfileMetaAnalyser.Controls
                     foreach (TextMessage tm in theMessage.contextMsgBefore)
                     {
                         if (highlightFilePositions.Contains(tm.textLocator.fileLinePosition))
-                            highlightEditorPositions_tmp_start = Math.Max(0, syntaxEditor1.Lines.Length - 1);
+                            highlightEditorPositions_tmp_start = Math.Max(0, rtbLog.Lines.Length - 1);
                         else
                             highlightEditorPositions_tmp_start = -1;
 
-                        syntaxEditor1.AppendText(tm.messageText);
+                        rtbLog.AppendText(tm.messageText);
 
                         if (highlightEditorPositions_tmp_start >= 0)
                         {
-                            highlightEditorPositions.Add(new Tuple<int, int>(highlightEditorPositions_tmp_start, syntaxEditor1.Lines.Length - 1));
+                            highlightEditorPositions.Add(new Tuple<int, int>(highlightEditorPositions_tmp_start, rtbLog.Lines.Length - 1));
                             filectxLst.Add(new FileInformationContext(tm.textLocator.fileName, tm.textLocator.fileLinePosition, highlightEditorPositions_tmp_start));
                         }
                     }
@@ -269,15 +270,15 @@ namespace LogfileMetaAnalyser.Controls
 
                 //the message itself
                 if (highlightFilePositions.Contains(theMessage.textLocator.fileLinePosition))
-                    highlightEditorPositions_tmp_start = Math.Max(0, syntaxEditor1.Lines.Length - 1);
+                    highlightEditorPositions_tmp_start = Math.Max(0, rtbLog.Lines.Length - 1);
                 else
                     highlightEditorPositions_tmp_start = -1;
 
-                syntaxEditor1.AppendText(theMessage.messageText);
+                rtbLog.AppendText(theMessage.messageText);
 
                 if (highlightEditorPositions_tmp_start >= 0)
                 { 
-                    highlightEditorPositions.Add(new Tuple<int, int>(highlightEditorPositions_tmp_start, syntaxEditor1.Lines.Length - 1));
+                    highlightEditorPositions.Add(new Tuple<int, int>(highlightEditorPositions_tmp_start, rtbLog.Lines.Length - 1));
                     filectxLst.Add(new FileInformationContext(theMessage.textLocator.fileName, theMessage.textLocator.fileLinePosition, highlightEditorPositions_tmp_start));
                 }
 
@@ -287,44 +288,52 @@ namespace LogfileMetaAnalyser.Controls
                     foreach (TextMessage tm in theMessage.contextMsgAfter)
                         {
                             if (highlightFilePositions.Contains(tm.textLocator.fileLinePosition))
-                                highlightEditorPositions_tmp_start = Math.Max(0, syntaxEditor1.Lines.Length - 1);
+                                highlightEditorPositions_tmp_start = Math.Max(0, rtbLog.Lines.Length - 1);
                             else
                                 highlightEditorPositions_tmp_start = -1;
 
-                            syntaxEditor1.AppendText(tm.messageText);
+                            rtbLog.AppendText(tm.messageText);
 
                             if (highlightEditorPositions_tmp_start >= 0)
                             { 
-                                highlightEditorPositions.Add(new Tuple<int, int>(highlightEditorPositions_tmp_start, syntaxEditor1.Lines.Length - 1));
+                                highlightEditorPositions.Add(new Tuple<int, int>(highlightEditorPositions_tmp_start, rtbLog.Lines.Length - 1));
                                 filectxLst.Add(new FileInformationContext(tm.textLocator.fileName, tm.textLocator.fileLinePosition, highlightEditorPositions_tmp_start));
                             }
                         }
 
 
-                /*
+                
                 //highlighting
                 foreach (var tp in highlightEditorPositions)
-                    for (int linePos = tp.Item1; linePos < Math.Min(syntaxEditor1.Lines.Length, tp.Item2); linePos++)
-                        syntaxEditor1.Lines[linePos].BackColor = Constants.contextLinesUcHighlightColor;
+                    for (int linePos = tp.Item1; linePos < Math.Min(rtbLog.Lines.Length, tp.Item2); linePos++)
+                        SetLineColor( linePos, Constants.contextLinesUcHighlightColor);
 
-
+                
                 //set scrollbar position (go to line)
                 if (highlightEditorPositions.Count > 0)
                 {
                     int jumpToEditorLine = jumpToLastMarker ? highlightEditorPositions.Last().Item1 -1 : highlightEditorPositions[0].Item1 -1;
 
-                    var stepLinesBack = Math.Min(10, Math.Max(3, ((syntaxEditor1.ClipBounds.Height / (syntaxEditor1.SelectedView.DisplayLineHeight * 2)) / 2.1).IntDown()));
-                    syntaxEditor1.SelectedView.GoToLine(Math.Max(0, jumpToEditorLine), Math.Min(jumpToEditorLine-1, stepLinesBack));
+                    int stepLinesBack = Math.Min(10, Math.Max(3, ((rtbLog.Height / (16 * 2)) / 2.1).IntDown()));
+
+                    int iLine = Math.Min(jumpToEditorLine - 1, stepLinesBack);
+
+                    //int iCharPos = rtbLog.GetFirstCharIndexFromLine(iLine);
+
+                    //rtbLog.Select(iCharPos, 0);
+                    //rtbLog.ScrollToCaret();
+
+                    ScrollToLine(jumpToEditorLine);
                 }
-                */
+                
 
                 //save the displayed msg for later use
                 currentMsg = theMessage;
             }
             finally
             {
-                //syntaxEditor1.ResumePainting();
-                syntaxEditor1.ResumeLayout();
+                //rtbLog.ResumePainting();
+                rtbLog.ResumeLayout();
             }
 
 
@@ -356,6 +365,87 @@ namespace LogfileMetaAnalyser.Controls
             return filectxLst;
         }
 
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool GetScrollInfo(IntPtr hwnd, int fnBar, ref SCROLLINFO lpsi);
+
+        [DllImport("user32.dll")]
+        static extern int SetScrollInfo(IntPtr hwnd, int fnBar, [In] ref SCROLLINFO lpsi, bool fRedraw);
+
+        [DllImport("User32.dll", CharSet = CharSet.Auto, EntryPoint = "SendMessage")]
+        static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
+        struct SCROLLINFO
+        {
+            public uint cbSize;
+            public uint fMask;
+            public int nMin;
+            public int nMax;
+            public uint nPage;
+            public int nPos;
+            public int nTrackPos;
+        }
+
+        enum ScrollBarDirection
+        {
+            SB_HORZ = 0,
+            SB_VERT = 1,
+            SB_CTL = 2,
+            SB_BOTH = 3
+        }
+
+        enum ScrollInfoMask
+        {
+            SIF_RANGE = 0x1,
+            SIF_PAGE = 0x2,
+            SIF_POS = 0x4,
+            SIF_DISABLENOSCROLL = 0x8,
+            SIF_TRACKPOS = 0x10,
+            SIF_ALL = SIF_RANGE + SIF_PAGE + SIF_POS + SIF_TRACKPOS
+        }
+
+        const int WM_VSCROLL = 277;
+        const int SB_LINEUP = 0;
+        const int SB_LINEDOWN = 1;
+        const int SB_THUMBPOSITION = 4;
+        const int SB_THUMBTRACK = 5;
+        const int SB_TOP = 6;
+        const int SB_BOTTOM = 7;
+        const int SB_ENDSCROLL = 8;
+
+        private void ScrollToLine(int iLine)
+        {
+            int iChar = rtbLog.GetFirstCharIndexFromLine(iLine);
+
+            Point cPos = rtbLog.GetPositionFromCharIndex(iChar);
+
+            IntPtr handle = rtbLog.Handle;
+
+                // Get current scroller position
+
+                SCROLLINFO si = new SCROLLINFO();
+                si.cbSize = (uint)Marshal.SizeOf(si);
+                si.fMask = (uint)ScrollInfoMask.SIF_ALL;
+                GetScrollInfo(handle, (int)ScrollBarDirection.SB_VERT, ref si);
+
+                // Increase position by pixles
+                si.nPos += cPos.Y;
+
+                // Reposition scroller
+                SetScrollInfo(handle, (int)ScrollBarDirection.SB_VERT, ref si, true);
+
+                // Send a WM_VSCROLL scroll message using SB_THUMBTRACK as wParam
+                // SB_THUMBTRACK: low-order word of wParam, si.nPos high-order word of  wParam
+
+                IntPtr ptrWparam = new IntPtr(SB_THUMBTRACK + 0x10000 * si.nPos);
+                IntPtr ptrLparam = new IntPtr(0);
+                SendMessage(handle, WM_VSCROLL, ptrWparam, ptrLparam);
+
+                //SendMessage(rtbLog.Handle, WM_VSCROLL, (IntPtr)SB_PAGEBOTTOM, IntPtr.Zero);
+
+            rtbLog.Select( iChar, 0);
+        }
+
         private void button_MessagesUp_Click(object sender, EventArgs e)
         {
             if (comboBox_OpenInEditor.CanSelect && comboBox_OpenInEditor.SelectedIndex > 0) 
@@ -366,6 +456,16 @@ namespace LogfileMetaAnalyser.Controls
         {
             if (comboBox_OpenInEditor.CanSelect && comboBox_OpenInEditor.SelectedIndex+1 < comboBox_OpenInEditor.Items.Count)
                 comboBox_OpenInEditor.SelectedIndex++;
+        }
+
+        public void SetLineColor(int iLine, Color c)
+        {
+            int firstCharIndex = rtbLog.GetFirstCharIndexFromLine(iLine);
+
+            string s = rtbLog.Lines[iLine];
+
+            rtbLog.Select(firstCharIndex, s.Length);
+            rtbLog.SelectionBackColor = c;
         }
     }
 }
