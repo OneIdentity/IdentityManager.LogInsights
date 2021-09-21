@@ -72,6 +72,7 @@ namespace LogfileMetaAnalyser.LogReader
 			var itemIdIdx = -1;
 			var itemTypeIdx = -1;
 			var customDimensionsIdx = -1;
+			var outerMessageIdx = -1;
 
 			for (var i = 0; i < table.Columns.Count; i++)
 			{
@@ -102,6 +103,10 @@ namespace LogfileMetaAnalyser.LogReader
 					case "customDimensions":
 						customDimensionsIdx = i;
 						break;
+
+					case "outerMessage":
+						outerMessageIdx = i;
+						break;
 				}
 			}
 
@@ -117,6 +122,10 @@ namespace LogfileMetaAnalyser.LogReader
 				var id = (string) row[itemIdIdx];
 				var timeStamp = (DateTime) row[timestampIdx];
 				var message = (string) row[messageIdx];
+
+				if (string.IsNullOrEmpty(message) && outerMessageIdx > -1)
+					message = (string)row[outerMessageIdx];
+
 				var severity = severityIdx > -1 ? (long) row[severityIdx] : 0;
 				var itemTypeStr = itemTypeIdx > -1 ? (string) row[itemTypeIdx] : null;
 
