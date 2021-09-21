@@ -2,9 +2,12 @@
 using System.Linq;
 using System.Text;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 using LogfileMetaAnalyser.Helpers;
 using LogfileMetaAnalyser.LogReader;
+
+
 
 namespace LogfileMetaAnalyser
 {
@@ -35,8 +38,14 @@ namespace LogfileMetaAnalyser
         public long textLocator.fileLinePosition = -1;
         public long messageNumber = -1;*/
 
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
         public TextMessage[] contextMsgBefore;
+
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
         public TextMessage[] contextMsgAfter;
+
 
         private string _payloadmessage;
         public string payloadmessage

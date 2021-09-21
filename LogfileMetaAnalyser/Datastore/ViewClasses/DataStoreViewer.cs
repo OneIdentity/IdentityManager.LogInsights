@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using LogfileMetaAnalyser.Helpers; 
-using Newtonsoft.Json;
+using LogfileMetaAnalyser.Helpers;
+using System.Text.Json;
 
 
 namespace LogfileMetaAnalyser.Datastore
@@ -46,15 +45,15 @@ namespace LogfileMetaAnalyser.Datastore
                 return ("Datastore is empty because no analysis was yet performed!");
 
             try
-            {
-                var jssett = new JsonSerializerSettings
+            {                                 
+                return JsonSerializer.Serialize(datastore, new JsonSerializerOptions()
                 {
-                    NullValueHandling = NullValueHandling.Ignore,
-                    Formatting = Formatting.Indented,
-                    ContractResolver = new TextReading.TextMessageJsonContractResolver()
-                };
-
-                return JsonConvert.SerializeObject(datastore, jssett);
+                    
+                    PropertyNameCaseInsensitive = true,
+                    IncludeFields = true, //include public fields even without an explicit getter/setter
+                    WriteIndented = true, //write pretty formatted text
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                });
             }
             catch (Exception E)
             {
