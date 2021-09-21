@@ -24,10 +24,10 @@ namespace LogfileMetaAnalyser.Controls
 
             this.logfileFilterExporter = logfileFilterExporter;
 
-            syntaxEditor1.Document.ReadOnly = true;
-            syntaxEditor1.Document.Multiline = true;
-            syntaxEditor1.CurrentLineHighlightingVisible = true;
-            syntaxEditor1.LineNumberMarginVisible = true;
+//          syntaxEditor1.Document.ReadOnly = true;
+//          syntaxEditor1.Document.Multiline = true;
+//          syntaxEditor1.CurrentLineHighlightingVisible = true;
+//            syntaxEditor1.LineNumberMarginVisible = true;
 
             buttonExport.Enabled = false;
             buttonShowInEditor.Enabled = false; 
@@ -52,12 +52,16 @@ namespace LogfileMetaAnalyser.Controls
                     return;
 
                 //jump to the end first 
-                if (syntaxEditor1.Document.Lines.Count > 5)
-                    syntaxEditor1.SelectedView.GoToLine(syntaxEditor1.Document.Lines.Count - 1);
+                if (syntaxEditor1.Lines.Length > 5)
+                {
+                    syntaxEditor1.SelectionStart = syntaxEditor1.Text.Length;
+                    // scroll it automatically
+                    syntaxEditor1.ScrollToCaret();
+                }
 
                 //now jump to the correct pos
-                int jumppos = Math.Max(1, SelectedItem.data.fileposRelativeInView - 3);
-                syntaxEditor1.SelectedView.GoToLine(jumppos);
+                //int jumppos = Math.Max(1, SelectedItem.data.fileposRelativeInView - 3);
+                //syntaxEditor1.SelectedView.GoToLine(jumppos);
             });
 
             SetupCaption("");
@@ -175,7 +179,7 @@ namespace LogfileMetaAnalyser.Controls
                     .ToArray();
             }
 
-            syntaxEditor1.LineNumberMarginVisible = !isOpenGap && theMessages[0].textLocator?.fileLinePosition > 0;
+            //syntaxEditor1.LineNumberMarginVisible = !isOpenGap && theMessages[0].textLocator?.fileLinePosition > 0;
 
             bool fullyCompleteMessage = theMessages[0].textLocator?.fileLinePosition > 0;
 
@@ -227,7 +231,7 @@ namespace LogfileMetaAnalyser.Controls
         private List<FileInformationContext> _SetData(TextMessage theMessage, bool setCaption, IEnumerable<long> highlightFilePositions, bool jumpToLastMarker = false)
         {
             syntaxEditor1.SuspendLayout();
-            syntaxEditor1.SuspendPainting();
+            //syntaxEditor1.SuspendPainting();
 
             List<FileInformationContext> filectxLst = new List<FileInformationContext>();
 
@@ -238,10 +242,10 @@ namespace LogfileMetaAnalyser.Controls
                 if (highlightFilePositions == null)
                     highlightFilePositions = new long[] { };
                 
-                syntaxEditor1.Document.Text = "";
+                syntaxEditor1.Text = "";
 
-                if (syntaxEditor1.LineNumberMarginVisible)
-                    syntaxEditor1.Document.AutoLineNumberingBase = theMessage.contextMsgBefore.GetFirstElemOrDefault(theMessage).textLocator.fileLinePosition.Int();
+                //if (syntaxEditor1.LineNumberMarginVisible)
+                //    syntaxEditor1.Document.AutoLineNumberingBase = theMessage.contextMsgBefore.GetFirstElemOrDefault(theMessage).textLocator.fileLinePosition.Int();
                 
 
                 //pre lines
@@ -249,15 +253,15 @@ namespace LogfileMetaAnalyser.Controls
                     foreach (TextMessage tm in theMessage.contextMsgBefore)
                     {
                         if (highlightFilePositions.Contains(tm.textLocator.fileLinePosition))
-                            highlightEditorPositions_tmp_start = Math.Max(0, syntaxEditor1.Document.Lines.Count - 1);
+                            highlightEditorPositions_tmp_start = Math.Max(0, syntaxEditor1.Lines.Length - 1);
                         else
                             highlightEditorPositions_tmp_start = -1;
 
-                        syntaxEditor1.Document.AppendText(tm.messageText);
+                        syntaxEditor1.AppendText(tm.messageText);
 
                         if (highlightEditorPositions_tmp_start >= 0)
                         {
-                            highlightEditorPositions.Add(new Tuple<int, int>(highlightEditorPositions_tmp_start, syntaxEditor1.Document.Lines.Count - 1));
+                            highlightEditorPositions.Add(new Tuple<int, int>(highlightEditorPositions_tmp_start, syntaxEditor1.Lines.Length - 1));
                             filectxLst.Add(new FileInformationContext(tm.textLocator.fileName, tm.textLocator.fileLinePosition, highlightEditorPositions_tmp_start));
                         }
                     }
@@ -265,15 +269,15 @@ namespace LogfileMetaAnalyser.Controls
 
                 //the message itself
                 if (highlightFilePositions.Contains(theMessage.textLocator.fileLinePosition))
-                    highlightEditorPositions_tmp_start = Math.Max(0, syntaxEditor1.Document.Lines.Count - 1);
+                    highlightEditorPositions_tmp_start = Math.Max(0, syntaxEditor1.Lines.Length - 1);
                 else
                     highlightEditorPositions_tmp_start = -1;
 
-                syntaxEditor1.Document.AppendText(theMessage.messageText);
+                syntaxEditor1.AppendText(theMessage.messageText);
 
                 if (highlightEditorPositions_tmp_start >= 0)
                 { 
-                    highlightEditorPositions.Add(new Tuple<int, int>(highlightEditorPositions_tmp_start, syntaxEditor1.Document.Lines.Count - 1));
+                    highlightEditorPositions.Add(new Tuple<int, int>(highlightEditorPositions_tmp_start, syntaxEditor1.Lines.Length - 1));
                     filectxLst.Add(new FileInformationContext(theMessage.textLocator.fileName, theMessage.textLocator.fileLinePosition, highlightEditorPositions_tmp_start));
                 }
 
@@ -283,25 +287,25 @@ namespace LogfileMetaAnalyser.Controls
                     foreach (TextMessage tm in theMessage.contextMsgAfter)
                         {
                             if (highlightFilePositions.Contains(tm.textLocator.fileLinePosition))
-                                highlightEditorPositions_tmp_start = Math.Max(0, syntaxEditor1.Document.Lines.Count - 1);
+                                highlightEditorPositions_tmp_start = Math.Max(0, syntaxEditor1.Lines.Length - 1);
                             else
                                 highlightEditorPositions_tmp_start = -1;
 
-                            syntaxEditor1.Document.AppendText(tm.messageText);
+                            syntaxEditor1.AppendText(tm.messageText);
 
                             if (highlightEditorPositions_tmp_start >= 0)
                             { 
-                                highlightEditorPositions.Add(new Tuple<int, int>(highlightEditorPositions_tmp_start, syntaxEditor1.Document.Lines.Count - 1));
+                                highlightEditorPositions.Add(new Tuple<int, int>(highlightEditorPositions_tmp_start, syntaxEditor1.Lines.Length - 1));
                                 filectxLst.Add(new FileInformationContext(tm.textLocator.fileName, tm.textLocator.fileLinePosition, highlightEditorPositions_tmp_start));
                             }
                         }
 
 
-
+                /*
                 //highlighting
                 foreach (var tp in highlightEditorPositions)
-                    for (int linePos = tp.Item1; linePos < Math.Min(syntaxEditor1.Document.Lines.Count, tp.Item2); linePos++)
-                        syntaxEditor1.Document.Lines[linePos].BackColor = Constants.contextLinesUcHighlightColor;
+                    for (int linePos = tp.Item1; linePos < Math.Min(syntaxEditor1.Lines.Length, tp.Item2); linePos++)
+                        syntaxEditor1.Lines[linePos].BackColor = Constants.contextLinesUcHighlightColor;
 
 
                 //set scrollbar position (go to line)
@@ -312,14 +316,14 @@ namespace LogfileMetaAnalyser.Controls
                     var stepLinesBack = Math.Min(10, Math.Max(3, ((syntaxEditor1.ClipBounds.Height / (syntaxEditor1.SelectedView.DisplayLineHeight * 2)) / 2.1).IntDown()));
                     syntaxEditor1.SelectedView.GoToLine(Math.Max(0, jumpToEditorLine), Math.Min(jumpToEditorLine-1, stepLinesBack));
                 }
-
+                */
 
                 //save the displayed msg for later use
                 currentMsg = theMessage;
             }
             finally
             {
-                syntaxEditor1.ResumePainting();
+                //syntaxEditor1.ResumePainting();
                 syntaxEditor1.ResumeLayout();
             }
 
