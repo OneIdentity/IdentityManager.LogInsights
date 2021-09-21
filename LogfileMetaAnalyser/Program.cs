@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using LogfileMetaAnalyser.ExceptionHandling;
 
 namespace LogfileMetaAnalyser
 {
@@ -16,14 +14,18 @@ namespace LogfileMetaAnalyser
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            var exHandler = ExceptionHandler.Instance;
+
             try
             {
                 Application.Run(new MainForm());
             }
-            catch (Exception E)
+            catch (Exception ex)
             {
-                Console.WriteLine(E.Message);
-                MessageBox.Show(E.Message + "\r\n" + E.StackTrace, "gen Error");
+                exHandler.HandleException(ex);
+
+                //MessageBox.Show(E.Message + "\r\n" + E.StackTrace, "gen Error");
             }
         }
     }
