@@ -15,8 +15,6 @@ namespace LogfileMetaAnalyser
         //Profile relevant
         public string filenamePostfix = "_filtered";
         public bool mergeFiles = false;  //not yet supported
-        public bool includeFileType_NLog = false;
-        public bool includeFileType_JSLog = false;
 
         //Non-Profile relevant
         [JsonIgnore(Condition = JsonIgnoreCondition.Always)]

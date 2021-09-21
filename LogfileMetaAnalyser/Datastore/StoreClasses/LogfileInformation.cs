@@ -12,8 +12,7 @@ namespace LogfileMetaAnalyser.Datastore
 
         public DateTime logfileTimerange_Start = DateTime.MinValue;
         public DateTime logfileTimerange_Finish;
-
-        public LogfileType logfileType = LogfileType.Undef;        
+                
         public Helpers.LogLevel mostDetailedLogLevel = Helpers.LogLevel.Undef;
 
         public Dictionary<Helpers.LogLevel, long> numberOfEntriesPerLoglevel = new Dictionary<Helpers.LogLevel, long>();
@@ -34,7 +33,7 @@ namespace LogfileMetaAnalyser.Datastore
 
         public string GetLabel()
         {
-            return ($"{filenameBestNotation} ({logfileType}) with log level {mostDetailedLogLevel}");
+            return ($"{filenameBestNotation} with log level {mostDetailedLogLevel} and range '{logfileTimerange_Start}' to '{logfileTimerange_Finish}'");
         }
     }
 }

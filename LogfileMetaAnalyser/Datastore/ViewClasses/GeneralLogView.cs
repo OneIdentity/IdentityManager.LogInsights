@@ -74,12 +74,11 @@ namespace LogfileMetaAnalyser.Datastore
 
 
                 uc[1].SetupCaption("Analyzed files");
-                uc[1].SetupHeaders(new string[] { "File name", "Type", "Log level", "Start", "End", "Duration", "File size", "Bytes read (opt.)", "Cnt lines read (opt.)", "Cnt messages read (opt.)", "avg chars per line", "avg chars per block message", "avg lines per block message" });
+                uc[1].SetupHeaders(new string[] { "File name", "Log level", "Start", "End", "Duration", "File size", "Bytes read (opt.)", "Cnt lines read (opt.)", "Cnt messages read (opt.)", "avg chars per line", "avg chars per block message", "avg lines per block message" });
 
                 foreach (var kp in dsref.logfileInformation)
                     uc[1].AddItemRow(kp.Key, new string[] {
                         kp.Value.filename,
-                        kp.Value.logfileType.ToString(),
                         kp.Value.mostDetailedLogLevel.ToString(),
                         kp.Value.logfileTimerange_Start.ToString("G"),
                         kp.Value.logfileTimerange_Finish.ToString("G"),

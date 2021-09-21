@@ -40,22 +40,7 @@ namespace LogfileMetaAnalyser
                 //try to preselect FileName and Folder
                 exportSettings.inputOutputOptions.includeFiles.AddIfNotPresent(inputMsg.textLocator.fileName);
                 exportSettings.inputOutputOptions.outputFolder = FileHelper.EnsureFolderisWritableOrReturnDefault(Path.GetDirectoryName(inputMsg.textLocator.fileName));
-
-                //try to preselect FileType and Activity
-                switch (inputMsg.messageLogfileType)
-                {
-                    case LogfileType.Jobservice:
-                        exportSettings.inputOutputOptions.includeFileType_JSLog = true;
-                        exportSettings.filterByActivity.isfilterEnabled_JobServiceActivity = true;
-                        break;
-
-                    case LogfileType.NLogDefault:
-                        exportSettings.inputOutputOptions.includeFileType_NLog = true;
-                        exportSettings.filterByActivity.isfilterEnabled_ProjectionActivity = true;
-                        exportSettings.filterByActivity.isfilterEnabled_ProjectionActivity_Projections = true;
-                        break;
-                }
-
+                             
                 //try to preselect ProjectionActivity
                 ProjectionType ptype;
                 string uuid = datastore.projectionActivity.GetUuidByLoggerId(inputMsg.spid, out ptype);
@@ -103,8 +88,6 @@ namespace LogfileMetaAnalyser
             var files = datastore.generalLogData.logfileInformation
                             .Where(f => frm.exportSettings.inputOutputOptions.includeFiles.Count == 0 ||
                                         frm.exportSettings.inputOutputOptions.includeFiles.Contains(f.Value.filename))
-                            .Where(f => frm.exportSettings.inputOutputOptions.includeFileType_NLog && f.Value.logfileType == LogfileType.NLogDefault ||
-                                        frm.exportSettings.inputOutputOptions.includeFileType_JSLog && f.Value.logfileType == LogfileType.Jobservice)
                             .OrderBy(f => f.Value.logfileTimerange_Start)
                             .Select(f => f.Key)
                             .ToArray();
