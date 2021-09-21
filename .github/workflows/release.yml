@@ -58,6 +58,7 @@ jobs:
 
     env:
       Solution_Name: LogfileMetaAnalyser.sln                      # Replace with your solution name, i.e. MyWpfApp.sln.
+      Project_Dir: LogfileMetaAnalyser
       # Test_Project_Path: your-test-project-path                 # Replace with the path to your test project, i.e. MyWpfApp.Tests\MyWpfApp.Tests.csproj.
       # Wap_Project_Directory: your-wap-project-directory-name    # Replace with the Wap project directory relative to the solution, i.e. MyWpfApp.Package.
       # Wap_Project_Path: your-wap-project-path                   # Replace with the path to your Wap project, i.e. MyWpf.App.Package\MyWpfApp.Package.wapproj.
@@ -97,14 +98,14 @@ jobs:
       with:
         type: zip
         filename: ${{ env.Zip_Name }}.zip
-        directory: bin/Publish/x64
+        directory: ${{ env.Project_Dir }}/bin/Publish/x64
         path: ${{ env.Zip_Name }}
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v2
       with:
         name: ZIP file
-        path: bin/Publish/x64/${{ env.Zip_Name }}.zip
+        path: ${{ env.Project_Dir }}/bin/Publish/x64/${{ env.Zip_Name }}.zip
 
     # # Decode the base 64 encoded pfx and save the Signing_Certificate
     # - name: Decode the pfx
