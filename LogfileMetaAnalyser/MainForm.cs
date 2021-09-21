@@ -67,8 +67,8 @@ namespace LogfileMetaAnalyser
             {
                 GuiHelper.SetGuiSave(statusStrip1, () =>
                 {
-                    toolStripProgressBar1.Visible = (d > 0d && d < 100d);
-                    toolStripProgressBar1.Value = d.Int();
+                    toolStripProgressBar1.Visible = d < 1D;
+               //     toolStripProgressBar1.Value = d.Int();
                 });
             });
 
@@ -76,8 +76,8 @@ namespace LogfileMetaAnalyser
             {
                 GuiHelper.SetGuiSave(statusStrip1, () =>
                 {
-                    toolStripProgressBar1.Visible = (d > 0d && d < 100d);
-                    toolStripProgressBar1.Value = d.Int();
+                    toolStripProgressBar1.Visible = d < 1D;
+                    //toolStripProgressBar1.Value = d.Int();
                 });
             });
 

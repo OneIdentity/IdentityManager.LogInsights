@@ -96,7 +96,7 @@ namespace LogfileMetaAnalyser
             //text reading
             logger.Info("Starting reading the text");
             GlobalStopWatch.StartWatch("TextReading");
-            await TextReading(m_LogReader, detectors).ConfigureAwait(false);
+            await _TextReadingAsync(m_LogReader, detectors).ConfigureAwait(false);
 
             GlobalStopWatch.StopWatch("TextReading");
 
@@ -128,12 +128,13 @@ namespace LogfileMetaAnalyser
             logger.Info("Analyzer done!");
         }
 
-        private async Task TextReading(ILogReader logReader, List<Detectors.ILogDetector> detectors)
+        private async Task _TextReadingAsync(ILogReader logReader, List<Detectors.ILogDetector> detectors)
         {
             if (detectors == null)
                 return;
 
             logger.Info($"Starting reading {logReader.GetType().Name}");
+            OnReadProgressChanged?.Invoke(this, 0.5D); // trigger progress
 
             // TODO respect Constants.NumberOfContextMessages
             Stopwatch sw = new Stopwatch();
@@ -165,8 +166,9 @@ namespace LogfileMetaAnalyser
             }
 
             sw.Stop();
-            Debug.WriteLine(sw.Elapsed, nameof(TextReading));
+            Debug.WriteLine(sw.Elapsed, nameof(_TextReadingAsync));
 
+            OnReadProgressChanged?.Invoke(this, 1D);
             /*
             var parseStatisticPerTextfile = new List<ParseStatistic>();
              
