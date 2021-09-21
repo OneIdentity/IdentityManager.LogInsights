@@ -42,28 +42,29 @@ namespace LogfileMetaAnalyser.LogReader
                 using var reader = new StreamReader(file, m_Encoding, true);
 
                 sb.Length = 0;
-                int lineNumber = 0;
+                int lineNumberTotal = 0;
+                int lineNumber = 1;
                 int entryNumber = 0;
 
                 await foreach(var line in _ReadAsync(reader, ct).ConfigureAwait(false))
                 {
                     string entry = null;
-                    lineNumber++;
+                    lineNumberTotal++;
 
                     bool isStart = line == null || _IsLineStart(line);
                     if (!isStart)
                     {
-                        sb.AppendLine(line);
+                        sb.AppendLine();
+                        sb.Append(line);
                         continue;
                     }
 
-                    entryNumber++;
                     entry = sb.ToString();
                     sb.Clear();
 
                     // the last one is <null>
                     if (line != null)
-                        sb.AppendLine(line);
+                        sb.Append(line);
 
                     if (entry.Length == 0)
                         continue;
@@ -76,7 +77,7 @@ namespace LogfileMetaAnalyser.LogReader
                         match.Groups["SID"].Value,
                         match.Groups["NSourceExt"].Value.Length > 0 ? match.Groups["NSourceExt"].Value : match.Groups["NSourceExt2"].Value.Trim());
                     
-                    var logEntry = new LogEntry(new Locator(entryNumber, lineNumber, file), 
+                    var logEntry = new LogEntry(new Locator(++entryNumber, lineNumber, file), 
                         lineNumber.ToString(),
                         DateTime.TryParse(match.Groups["Timestamp"].Value, out var timeStamp) ? timeStamp : DateTime.MinValue,
                         _GetLogLevel(match.Groups["NLevel"].Value),
@@ -86,6 +87,8 @@ namespace LogfileMetaAnalyser.LogReader
                         "",
                         match.Groups["PID"].Value,
                         spid);
+
+                    lineNumber = lineNumberTotal;
 
                     yield return logEntry;
                 }
