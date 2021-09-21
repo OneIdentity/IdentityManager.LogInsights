@@ -6,6 +6,7 @@
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <StartupObject>LogfileMetaAnalyser.Program</StartupObject>
     <ApplicationIcon>AppIcon.ico</ApplicationIcon>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <Company>One Identity LLC.</Company>
     <Copyright>© 2021 One Identity LLC.  All rights reserved.</Copyright>
     <PackageProjectUrl>https://github.com/OneIdentity/IdentityManager.LogInsights</PackageProjectUrl>
