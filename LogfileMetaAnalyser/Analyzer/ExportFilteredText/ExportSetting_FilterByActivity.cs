@@ -1,24 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq; 
-using Newtonsoft.Json;
+using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 using LogfileMetaAnalyser.Datastore;
 using LogfileMetaAnalyser.Helpers;
 
 namespace LogfileMetaAnalyser 
 {
-    public class ExportSetting_FilterByActivity : IExportSetting
+    public class ExportSetting_FilterByActivity : ExportSettingBase, IExportSetting
     {
-        private DatastoreStructure dsref;
-        private static string[] jsonExportTakeAttributeLst = new string[] { "isfilterEnabled_ProjectionActivity",
-                                                                            "isfilterEnabled_ProjectionActivity_Projections",
-                                                                            "isfilterEnabled_ProjectionActivity_Projections_AdHoc", "isfilterEnabled_ProjectionActivity_Projections_Sync",
-                                                                            "isfilterEnabled_JobServiceActivity",
-                                                                            "isfilterEnabled_JobServiceActivity_ByComponent", "isfilterEnabled_JobServiceActivity_ByQueue"
-                                                                            };
-
-
         //Profile relevant
         public bool isfilterEnabled_ProjectionActivity = false;
         public bool isfilterEnabled_ProjectionActivity_Projections = false;
@@ -28,28 +20,32 @@ namespace LogfileMetaAnalyser
         public bool isfilterEnabled_JobServiceActivity = false;
         public bool isfilterEnabled_JobServiceActivity_ByComponent = false;
         public bool isfilterEnabled_JobServiceActivity_ByQueue = false;
- 
+
         //Non-Profile relevant
+        [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
         public List<string> filterProjectionActivity_Projections_AdHocLst = new List<string>();  //list of uuids
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
         public List<string> filterProjectionActivity_Projections_SyncLst = new List<string>();  //list of uuids
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
         public List<string> filterJobServiceActivity_ByComponentLst = new List<string>();  //list of fulltaskname 
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.Always)] 
         public List<string> filterJobServiceActivity_ByQueueLst = new List<string>();  //list of queuename
 
+        [JsonIgnore(Condition = JsonIgnoreCondition.Always)] 
         private bool isfilterByActivity_SpidFilter_passUnseen = false;  //do not check, pass the filter
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.Always)] 
         private HashSet<string> filterByActivitySpidHashLst = new HashSet<string>();    //https://stackoverflow.com/questions/2728500/hashsett-versus-dictionaryk-v-w-r-t-searching-time-to-find-if-an-item-exist
 
 
 
+        //constructor
+        public ExportSetting_FilterByActivity(DatastoreStructure datastore) : base(datastore)
+        {}
 
-        public ExportSetting_FilterByActivity(DatastoreStructure datastore)
-        {
-            dsref = datastore; 
-        }
-
-        public DatastoreStructure datastore
-        {
-            set { dsref = value; }
-        }
 
 
         public void Prepare()
@@ -218,18 +214,7 @@ namespace LogfileMetaAnalyser
             }
         }
 
-        public string ExportAsJson()
-        {
-            var jssett = new JsonSerializerSettings
-            {
-                NullValueHandling = NullValueHandling.Ignore,
-                Formatting = Formatting.Indented,
-                ContractResolver = new ExportSettingsJsonContractResolver(jsonExportTakeAttributeLst, null)
-            };
-
-            return JsonConvert.SerializeObject(this, jssett);
-        }
-
+     
         public MessageMatchResult IsMessageMatch(TextMessage msg, object additionalData)
         {
             //check incoming SPID ... 
