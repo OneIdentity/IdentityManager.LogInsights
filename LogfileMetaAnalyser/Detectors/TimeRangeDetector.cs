@@ -116,8 +116,7 @@ namespace LogfileMetaAnalyser.Detectors
             {
                 _datastore.generalLogData.logfileInformation.GetOrAdd(msg.textLocator.fileName).filename = msg.textLocator.fileName;
                 _datastore.generalLogData.logfileInformation[msg.textLocator.fileName].firstMessage = msg;
-                _datastore.generalLogData.logfileInformation[msg.textLocator.fileName].logfileTimerange_Start = msg.messageTimestamp;
-                _datastore.generalLogData.logfileInformation[msg.textLocator.fileName].logfileType = msg.messageLogfileType;
+                _datastore.generalLogData.logfileInformation[msg.textLocator.fileName].logfileTimerange_Start = msg.messageTimestamp;                
                 _datastore.generalLogData.logfileInformation[msg.textLocator.fileName].filesize = Helpers.FileHelper.GetFileSizes(new String[] { msg.textLocator.fileName });
             }
 

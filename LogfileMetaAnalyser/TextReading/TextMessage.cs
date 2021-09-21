@@ -11,7 +11,7 @@ using LogfileMetaAnalyser.LogReader;
 
 namespace LogfileMetaAnalyser
 {
-    public enum LogfileType
+    public enum LogfileType__
     {
         Undef,
         NLogDefault,
@@ -102,7 +102,7 @@ namespace LogfileMetaAnalyser
 
 
         //calculated attributes
-        public LogfileType messageLogfileType { get;  set; } = LogfileType.Undef;
+        //public LogfileType messageLogfileType { get;  set; } = LogfileType.Undef;
         public DateTime messageTimestamp { get; private set; }         
         public int numberOfLines { get; private set; }
         public LogLevel loggerLevel { get; private set; }
@@ -204,7 +204,7 @@ namespace LogfileMetaAnalyser
             //ensure all data from this text message will be available in the transfer msg too, so populate attributes which were not populated in the constructor
             tm._contextMsgAfter = contextMsgAfter;
             tm._contextMsgBefore = contextMsgBefore;
-            tm.messageLogfileType = messageLogfileType;
+            //tm.messageLogfileType = messageLogfileType;
 
             //special handling for count of lines as this attribute is not handled by the finalized method below
             int newNumberOfLines = numberOfLines;

@@ -146,21 +146,10 @@ namespace LogfileMetaAnalyser.Controls
                 
                 gridInputfiles.Rows[rowIdx].Height = 20;
                 gridInputfiles.Rows[rowIdx].Cells[0].Value = true;
-                gridInputfiles.Rows[rowIdx].Cells[1].Value = value.filename;
-                gridInputfiles.Rows[rowIdx].Cells[2].Value = value.logfileType.ToString();
+                gridInputfiles.Rows[rowIdx].Cells[1].Value = value.filename; 
                 gridInputfiles.Rows[rowIdx].Tag = value;
             }
-            
-
-            //file type
-            if (!exportSettings.inputOutputOptions.includeFileType_NLog && !exportSettings.inputOutputOptions.includeFileType_JSLog)
-            {
-                exportSettings.inputOutputOptions.includeFileType_NLog = true;
-                exportSettings.inputOutputOptions.includeFileType_JSLog = true;
-            }
-
-            checkBox_inputOpt_nlog.Checked = exportSettings.inputOutputOptions.includeFileType_NLog;
-            checkBox_inputOpt_jobservice.Checked = exportSettings.inputOutputOptions.includeFileType_JSLog;
+             
         }
 
         /// <summary>
@@ -510,10 +499,7 @@ namespace LogfileMetaAnalyser.Controls
                 var lfi = (LogfileInformation)row.Tag;
                 exportSettings.inputOutputOptions.includeFiles.Add(lfi!.filename);
             }
-
-            exportSettings.inputOutputOptions.includeFileType_JSLog = checkBox_inputOpt_jobservice.Checked;
-            exportSettings.inputOutputOptions.includeFileType_NLog = checkBox_inputOpt_nlog.Checked;
-            
+                        
             //output file options
             exportSettings.inputOutputOptions.filenamePostfix = textBox_postfix.Text;
             exportSettings.inputOutputOptions.outputFolder = textBox_destFolder.Text;
