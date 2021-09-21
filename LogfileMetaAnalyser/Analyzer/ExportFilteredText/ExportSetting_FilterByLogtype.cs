@@ -2,19 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text; 
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 using LogfileMetaAnalyser.Datastore;
 using LogfileMetaAnalyser.Helpers;
 
 namespace LogfileMetaAnalyser 
 {
-    public class ExportSetting_FilterByLogtype : IExportSetting
+    public class ExportSetting_FilterByLogtype : ExportSettingBase, IExportSetting
     {
-        private DatastoreStructure dsref;
-        private static string[] jsonExportTakeAttributeLst = new string[] { "logLevelFilters", "logSourceFilters" };
-
-
         //Profile relevant
         public Dictionary<LogLevel, bool> logLevelFilters = new();
         public Dictionary<string, bool> logSourceFilters = new();
@@ -22,7 +19,9 @@ namespace LogfileMetaAnalyser
 
         //Non-Profile relevant
         private bool _startDate_valid = false;
-        private DateTime _startDate;
+        
+        private DateTime _startDate = DateTime.MinValue;
+        [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
         public DateTime startDate
         {
             set { _startDate = value; _startDate_valid = false; }
@@ -43,7 +42,9 @@ namespace LogfileMetaAnalyser
         }
 
         private bool _endDate_valid = false;
-        private DateTime _endDate;
+
+        private DateTime _endDate = DateTime.MaxValue; 
+        [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
         public DateTime endDate
         {
             set { _endDate = value; _endDate_valid = false; }
@@ -59,22 +60,13 @@ namespace LogfileMetaAnalyser
             }
         }
 
-        public DatastoreStructure datastore
-        {
-            set { dsref = value; }
-        }
-
         private bool logLevelFilters_passUnseen = false;  //do not check, pass the filter
         private bool logSourceFilters_passUnseen = false; //do not check, pass the filter
 
 
-
-        public ExportSetting_FilterByLogtype(DatastoreStructure datastore)
-        {
-            dsref = datastore;
-            _startDate = DateTime.MinValue;
-            _endDate = DateTime.MaxValue;            
-        }
+        //constructor
+        public ExportSetting_FilterByLogtype(DatastoreStructure datastore): base(datastore)
+        {}
 
 
         public void Prepare()
@@ -89,17 +81,6 @@ namespace LogfileMetaAnalyser
                 logSourceFilters_passUnseen = true;
         }
 
-        public string ExportAsJson()
-        {
-            var jssett = new JsonSerializerSettings
-            {
-                NullValueHandling = NullValueHandling.Ignore,
-                Formatting = Formatting.Indented,
-                ContractResolver = new ExportSettingsJsonContractResolver(jsonExportTakeAttributeLst, null)
-            };
-
-            return JsonConvert.SerializeObject(this, jssett);
-        }
 
         public MessageMatchResult IsMessageMatch(TextMessage msg, object additionalData)
         {

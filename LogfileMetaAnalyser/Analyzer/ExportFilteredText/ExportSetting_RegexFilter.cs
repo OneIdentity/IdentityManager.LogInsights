@@ -2,22 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 using LogfileMetaAnalyser.Datastore;
 
 
 namespace LogfileMetaAnalyser
 {
-    public class ExportSetting_RegexFilter : IExportSetting    
-    {        
-        private DatastoreStructure dsref;
-        private static string[] jsonExportTakeAttributeLst = new string[] { "rxFilters" };
+    public class ExportSetting_RegexFilter : ExportSettingBase, IExportSetting
+    {
+        //Profile relevant
+        public List<ExportRegex> rxFilters { get; private set; }
 
-        public readonly List<ExportRegex> rxFilters = new List<ExportRegex>();
-
-        
+        //Non-Profile relevant
         private List<ExportRegexInstance> filterByRegex_AppliedAtStart_RegexLst = new List<ExportRegexInstance>();
         private List<ExportRegexInstance> filterByRegex_AppliedAtEnd_RegexLst = new List<ExportRegexInstance>();
 
@@ -25,19 +23,15 @@ namespace LogfileMetaAnalyser
         private bool isEnabledAtEnd = false;
 
 
-        public ExportSetting_RegexFilter(DatastoreStructure datastore)
+        //constructor
+        public ExportSetting_RegexFilter(DatastoreStructure datastore) : base(datastore)
         {
-            dsref = datastore;
-
+            rxFilters = new List<ExportRegex>();
             for (int i = 1; i <= 10; i++)
                 rxFilters.Add(new ExportRegex());
         }
 
-        public DatastoreStructure datastore
-        {
-            set { dsref = value; }
-        }
-
+        
         public void Prepare()
         {
             filterByRegex_AppliedAtStart_RegexLst.Clear();
@@ -61,17 +55,7 @@ namespace LogfileMetaAnalyser
             isEnabledAtEnd = filterByRegex_AppliedAtEnd_RegexLst.Count > 0;
         }
 
-        public string ExportAsJson()
-        {
-            var jssett = new JsonSerializerSettings
-            {
-                NullValueHandling = NullValueHandling.Ignore,
-                Formatting = Formatting.Indented,
-                ContractResolver = new ExportSettingsJsonContractResolver(jsonExportTakeAttributeLst, null)
-            };
-
-            return JsonConvert.SerializeObject(this, jssett);
-        }
+        
 
         public MessageMatchResult IsMessageMatch(TextMessage msg, object additionalData)
         {

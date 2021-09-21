@@ -17,8 +17,6 @@ namespace LogfileMetaAnalyser
 
     public enum MessageMatchResult
     {
-
-
         /// <summary>
         /// //the filter was not applied, means it could not decide whether to include or exclude the message from the exported result
         /// </summary>
@@ -33,7 +31,6 @@ namespace LogfileMetaAnalyser
         /// include this message in the result export
         /// </summary>
         positive = 2
-
         
     }
 
