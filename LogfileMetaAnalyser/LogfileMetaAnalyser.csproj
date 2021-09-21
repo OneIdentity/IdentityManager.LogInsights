@@ -4,11 +4,7 @@
     <OutputType>WinExe</OutputType>
     <UseWindowsForms>true</UseWindowsForms>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
-  </PropertyGroup>
-  <PropertyGroup>
     <StartupObject>LogfileMetaAnalyser.Program</StartupObject>
-  </PropertyGroup>
-  <PropertyGroup>
     <ApplicationIcon>AppIcon.ico</ApplicationIcon>
     <Company>One Identity LLC.</Company>
     <Copyright>© 2021 One Identity LLC.  All rights reserved.</Copyright>
@@ -27,9 +23,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>_Alien\ActiproSoftware.SyntaxEditor.WinForms.dll</HintPath>
     </Reference>
-    <Reference Include="NLog">
-      <HintPath>_Alien\NLog.dll</HintPath>
-    </Reference>
     <Reference Include="VI.Controls.SyntaxEdit">
       <HintPath>_Alien\VI.Controls.SyntaxEdit.dll</HintPath>
     </Reference>
@@ -37,6 +30,7 @@
     <PackageReference Include="GitVersion.MsBuild" Version="5.7.0">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="NLog" Version="4.7.11" />
     <PackageReference Include="System.Linq.Async" Version="5.0.0" />
   </ItemGroup>
   <ItemGroup>
@@ -61,12 +55,5 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AppIcon.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Microsoft.DotNet.UpgradeAssistant.Extensions.Default.Analyzers" Version="0.3.242703">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Windows.Compatibility" Version="5.0.2" />
   </ItemGroup>
 </Project>

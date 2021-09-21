@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -28,7 +29,7 @@ namespace LogfileMetaAnalyser.LogReader
 			: this(new NLogReaderConnectionStringBuilder(connectionString))
         {}
 
-        protected override  async IAsyncEnumerable<LogEntry> OnReadAsync(CancellationToken ct)
+        protected override  async IAsyncEnumerable<LogEntry> OnReadAsync([EnumeratorCancellation] CancellationToken ct)
         {
             StringBuilder sb = new StringBuilder(1024);
 
@@ -144,7 +145,7 @@ namespace LogfileMetaAnalyser.LogReader
         }
 
 
-        private static async IAsyncEnumerable<string> _ReadAsync(StreamReader reader, CancellationToken ct)
+        private static async IAsyncEnumerable<string> _ReadAsync(StreamReader reader, [EnumeratorCancellation] CancellationToken ct)
         {
             string line;
 
