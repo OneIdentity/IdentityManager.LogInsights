@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -66,7 +67,7 @@ namespace LogfileMetaAnalyser.LogReader
         }
 
 
-        protected override async IAsyncEnumerable<LogEntry> OnReadAsync(CancellationToken ct)
+        protected override async IAsyncEnumerable<LogEntry> OnReadAsync([EnumeratorCancellation] CancellationToken ct)
         {
             if (m_Candidate == null)
                 yield break;
@@ -149,7 +150,6 @@ namespace LogfileMetaAnalyser.LogReader
         private readonly int m_CountPreviousContextEntries;
         private readonly int m_CountNextContextEntries;
         private readonly ILogReader m_BaseReader;
-        private int m_Position;
         private IAsyncEnumerator<LogEntry> m_Enumerator;
     }
 }
