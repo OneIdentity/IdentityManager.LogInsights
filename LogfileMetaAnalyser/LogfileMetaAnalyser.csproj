@@ -30,32 +30,8 @@
     <Reference Include="NLog">
       <HintPath>_Alien\NLog.dll</HintPath>
     </Reference>
-    <Reference Include="SandBar">
-      <HintPath>_Alien\SandBar.dll</HintPath>
-    </Reference>
-    <Reference Include="VI.Base">
-      <HintPath>_Alien\VI.Base.dll</HintPath>
-    </Reference>
-    <Reference Include="VI.Controls">
-      <HintPath>_Alien\VI.Controls.dll</HintPath>
-    </Reference>
-    <Reference Include="VI.Controls.AlienSupport">
-      <HintPath>_Alien\VI.Controls.AlienSupport.dll</HintPath>
-    </Reference>
-    <Reference Include="VI.Controls.Design">
-      <HintPath>_Alien\VI.Controls.Design.dll</HintPath>
-    </Reference>
     <Reference Include="VI.Controls.SyntaxEdit">
       <HintPath>_Alien\VI.Controls.SyntaxEdit.dll</HintPath>
-    </Reference>
-    <Reference Include="VI.DB">
-      <HintPath>_Alien\VI.DB.dll</HintPath>
-    </Reference>
-    <Reference Include="VI.FormBase">
-      <HintPath>_Alien\VI.FormBase.dll</HintPath>
-    </Reference>
-    <Reference Include="VI.ImageLibrary">
-      <HintPath>_Alien\VI.ImageLibrary.dll</HintPath>
     </Reference>
     <PackageReference Include="Microsoft.Azure.ApplicationInsights.Query" Version="1.0.0" />
     <PackageReference Include="GitVersion.MsBuild" Version="5.7.0">
