@@ -149,7 +149,8 @@ namespace LogfileMetaAnalyser.LogReader
 				var severity = severityIdx > -1 ? (long) row[severityIdx] : 0;
 				var itemTypeStr = itemTypeIdx > -1 ? (string) row[itemTypeIdx] : null;
 
-				if ( !Enum.TryParse(itemTypeStr, out LogLevel type) )
+				var type = LogLevelTools.ConvertFromStringToEnum(itemTypeStr);
+				if ( type == LogLevel.Undef )
 					type = LogLevel.Info;
 
 				var logger = "";
