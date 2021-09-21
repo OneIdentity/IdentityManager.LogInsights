@@ -19,7 +19,7 @@ namespace LogfileMetaAnalyser.Detectors
 
         private static Regex regex_NonSystemTable = new Regex(@"^(?!(DPR|QBM|dbo.QBM|Dialog|Job|RAW|Mon))", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static Regex regex_BasicStatement = new Regex(@"\((?<dura>\d+) ms\) .*?((?<cmdSelect>Select.*from.+)|(?<cmdUpdate>Update (?<cmdUpdateTable>[^ \r\t\n\(\)\""']+) .+)|(?<cmdInsert>Insert into (?<cmdInsertTable>[^ \r\t\n\(\)\""']+).+)|(?<cmdDelete>Delete (from )?(?<cmdDeleteTable>[^ \r\t\n\(\)\""']+).+))", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase);
+        private static Regex regex_BasicStatement = new Regex(@"\((?<dura>\d+) ms\) .*?((?<cmdSelect>Select.*from.+)|(?<cmdUpdate>Update (?<cmdUpdateTable>[^ \r\t\n\(\)\""']+) .+)|(?<cmdInsert>Insert into (?<cmdInsertTable>[^ \r\t\n\(\)\""']+).+)|(?<cmdDelete>Delete (from )?(?<cmdDeleteTable>[^ \r\t\n\(\)\""']+).+)|(?<cmdExec>exec \w{3}_.+))", RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.IgnoreCase);
         private static Regex regex_SelectTableStatement = new Regex(@"((from|join) (?'cmdSelectTable'[^ \r\t\n\(\)\""']+))+", RegexOptions.Singleline | RegexOptions.Compiled);
         
 
