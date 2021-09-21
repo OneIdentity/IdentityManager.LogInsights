@@ -47,8 +47,7 @@ namespace LogfileMetaAnalyser.Datastore
             try
             {                                 
                 return JsonSerializer.Serialize(datastore, new JsonSerializerOptions()
-                {
-                    
+                {                    
                     PropertyNameCaseInsensitive = true,
                     IncludeFields = true, //include public fields even without an explicit getter/setter
                     WriteIndented = true, //write pretty formatted text
