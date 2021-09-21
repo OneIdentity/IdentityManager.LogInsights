@@ -46,4 +46,9 @@
   <ItemGroup>
     <Content Include="AppIcon.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <None Update="nlog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>
