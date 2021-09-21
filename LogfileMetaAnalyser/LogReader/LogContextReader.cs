@@ -92,8 +92,8 @@ namespace LogfileMetaAnalyser.LogReader
 
         private LogEntry _FinalizeCandidate(LogEntry candidate)
         {
-            candidate.NextEntries = m_Next.ToArray();
-            candidate.PreviousEntries = m_Previous.ToArray();
+            candidate.ContextNextEntries = m_Next.ToArray();
+            candidate.ContextPreviousEntries = m_Previous.ToArray();
             return candidate;
         }
 

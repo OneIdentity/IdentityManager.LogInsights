@@ -27,7 +27,7 @@ namespace LogfileMetaAnalyser
         public TextLocator textLocator;
 
 
-        public TextMessage[] contextMsgBefore=> _contextMsgBefore ??= (m_Entry.PreviousEntries ?? Enumerable.Empty<LogEntry>()).Select(e => e.Tag).OfType<TextMessage>().ToArray();
+        public TextMessage[] contextMsgBefore=> _contextMsgBefore ??= (m_Entry.ContextPreviousEntries ?? Enumerable.Empty<LogEntry>()).Select(e => e.Tag).OfType<TextMessage>().ToArray();
 
         [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
         private TextMessage[] _contextMsgBefore;
@@ -35,7 +35,7 @@ namespace LogfileMetaAnalyser
 
         public TextMessage[] contextMsgAfter
         {
-            get { return _contextMsgAfter ??= (m_Entry.NextEntries ?? Enumerable.Empty<LogEntry>()).Select(e => e.Tag).OfType<TextMessage>().ToArray(); }
+            get { return _contextMsgAfter ??= (m_Entry.ContextNextEntries ?? Enumerable.Empty<LogEntry>()).Select(e => e.Tag).OfType<TextMessage>().ToArray(); }
             set { _contextMsgAfter = value; }
         }
 
