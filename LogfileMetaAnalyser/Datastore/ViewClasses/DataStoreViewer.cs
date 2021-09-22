@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LogfileMetaAnalyser.ExceptionHandling;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -34,7 +35,14 @@ namespace LogfileMetaAnalyser.Datastore
 
             datastore.storeInvalidation += new EventHandler((object s, EventArgs args) => 
             {
-                ucCache.ClearCache();
+                try
+                {
+                    ucCache.ClearCache();
+                }
+                catch (Exception e)
+                {
+                    ExceptionHandler.Instance.HandleException(e);
+                }
             });
         }
 

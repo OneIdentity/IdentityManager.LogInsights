@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LogfileMetaAnalyser.ExceptionHandling;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -67,8 +68,15 @@ namespace LogfileMetaAnalyser.Controls
 
         private void button2_Click(object sender, EventArgs e)
         {
-            if (!string.IsNullOrEmpty(textBox1.Text))
-                Clipboard.SetText(textBox1.Text);
+            try
+            {
+                if (!string.IsNullOrEmpty(textBox1.Text))
+                    Clipboard.SetText(textBox1.Text);
+            }
+            catch (Exception exception)
+            {
+                ExceptionHandler.Instance.HandleException(exception);
+            }
         }
     }
 }
