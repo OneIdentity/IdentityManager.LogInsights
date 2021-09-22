@@ -96,14 +96,18 @@ namespace LogfileMetaAnalyser.LogReader
                     var spid = string.Format("{1}{0}", 
                         match.Groups["SID"].Value,
                         match.Groups["NSourceExt"].Value.Length > 0 ? match.Groups["NSourceExt"].Value : match.Groups["NSourceExt2"].Value.Trim());
-                    
+
+                    var logger = match.Groups["NSource"].Value;
+                    if (logFormat == LogFormat.JobService && string.IsNullOrEmpty(logger))
+                        logger = "Jobservice";
+
                     var logEntry = new LogEntry(new Locator(++entryNumber, lineNumber, file), 
                         lineNumber.ToString(),
                         DateTime.TryParse(match.Groups["Timestamp"].Value, out var timeStamp) ? timeStamp : DateTime.MinValue,
                         _GetLogLevel(match.Groups["NLevel"].Value),
                         0,
                         match.Groups["Payload"].Value,
-                        match.Groups["NSource"].Value, 
+                        logger, 
                         "",
                         match.Groups["PID"].Value,
                         spid);
