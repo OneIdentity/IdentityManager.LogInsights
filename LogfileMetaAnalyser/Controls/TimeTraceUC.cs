@@ -1060,9 +1060,9 @@ namespace LogfileMetaAnalyser.Controls
                 {
                     //does the track event fit into a free place in a lane?
                     //var foundLane = lanes.Where(l => !trEvt.eventStart.InRange(l.Value.Item1, l.Value.Item2) && !trEvt.eventEnd.InRange(l.Value.Item1, l.Value.Item2));
-                    var foundLane = lanes.Where(l => trEvt.baseTrackEvent.eventStart >= l.Value.Item2 || trEvt.baseTrackEvent.eventEnd <= l.Value.Item1);  //we require: trEvt.eventEnd > trEvt.eventStart
+                    var foundLane = lanes.Where(l => trEvt.baseTrackEvent.eventStart >= l.Value.Item2 || trEvt.baseTrackEvent.eventEnd <= l.Value.Item1).ToArray();  //we require: trEvt.eventEnd > trEvt.eventStart
 
-                    if (!foundLane.Any())
+                    if (foundLane.Length == 0)
                     {
                         if (lanes.Count == 255)  //no more than 255 lanes please!
                             curLaneId = 0; //warning: expect overlapping 

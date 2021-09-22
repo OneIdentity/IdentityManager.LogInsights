@@ -154,9 +154,9 @@ namespace LogfileMetaAnalyser.Datastore
                 }
                 else
                 {
-                    var distGrps = data.GroupBy(m => m.message.payloadMessageDevalued);
+                    var distGrps = data.GroupBy(m => m.message.payloadMessageDevalued).ToArray();
 
-                    uc.SetupCaption($"{caption} ({distGrps.Count()})");
+                    uc.SetupCaption($"{caption} ({distGrps.Length})");
                     uc.SetupHeaders(new string[] { "Type", "Timestamp min", "Timestamp max", "Message count", "Distinct message" });
 
                     foreach (var grp in distGrps)

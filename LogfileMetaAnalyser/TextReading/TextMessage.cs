@@ -11,14 +11,6 @@ using System.Threading;
 
 namespace LogfileMetaAnalyser
 {
-    public enum LogfileType__
-    {
-        Undef,
-        NLogDefault,
-        Jobservice
-    }
-
-
     public class TextMessage
     {
         private readonly LogEntry m_Entry;

@@ -224,6 +224,11 @@ namespace LogfileMetaAnalyser.LogReader
                 case 'E':
                 case 'e':
                     return LogLevel.Error;
+                
+                // r=serious
+                case 'R':
+                case 'r':
+                    return LogLevel.Critical;
             }
 
             // slow path for multiple tags ^<x><i>....
@@ -235,6 +240,9 @@ namespace LogfileMetaAnalyser.LogReader
 
             if (value.IndexOf("<e>", StringComparison.OrdinalIgnoreCase) >= 0)
                 return LogLevel.Error;
+
+            if (value.IndexOf("<r>", StringComparison.OrdinalIgnoreCase) >= 0)
+                return LogLevel.Critical;
 
             return LogLevel.Info;
         }

@@ -102,7 +102,7 @@ namespace LogfileMetaAnalyser.Detectors
                 }
 
                 //get the connection from the steps up to the projection objects
-                if (proj.projectionSteps.Any())
+                if (proj.projectionSteps.Count>0)
                 {
                     proj.conn_TargetSystem = proj.projectionSteps[0].rightConnection;
                     proj.conn_IdentityManager = proj.projectionSteps[0].leftConnection;

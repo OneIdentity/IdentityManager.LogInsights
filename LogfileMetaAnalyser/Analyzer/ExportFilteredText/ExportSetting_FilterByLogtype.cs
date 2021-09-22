@@ -76,8 +76,8 @@ namespace LogfileMetaAnalyser
             if (checkedLLFilters == 0 || checkedLLFilters == LogLevelTools.MostDetailedLevel) //none or all are checked
                 logLevelFilters_passUnseen = true;
 
-            int checkedLSFilters = logSourceFilters.Where(di => di.Value).Count();
-            if (checkedLSFilters == 0 | !logSourceFilters.Any(di => !di.Value)) //none or all are checked (not any one option is not checked)
+            int checkedLSFilters = logSourceFilters.Count(di => di.Value);
+            if (checkedLSFilters == 0 || logSourceFilters.All(di => di.Value)) //none or all are checked (not any one option is not checked)
                 logSourceFilters_passUnseen = true;
         }
 

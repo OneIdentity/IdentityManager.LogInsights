@@ -106,23 +106,23 @@ namespace LogfileMetaAnalyser
             //b): filters are partially set
 
             bool takeAllAdHoc = isfilterEnabled_ProjectionActivity_Projections_AdHoc && (
-                                    !filterProjectionActivity_Projections_AdHocLst.Any()
+                                    filterProjectionActivity_Projections_AdHocLst.Count == 0
                                      || 
                                     filterProjectionActivity_Projections_AdHocLst.Count == dsref.projectionActivity.NumberOfAdHocProjections);
 
             bool takeAllSync = isfilterEnabled_ProjectionActivity_Projections_Sync && (
-                                    !filterProjectionActivity_Projections_SyncLst.Any()
+                                    filterProjectionActivity_Projections_SyncLst.Count == 0
                                      ||
                                     filterProjectionActivity_Projections_SyncLst.Count == dsref.projectionActivity.NumberOfSyncProjections);
 
             //here the option isfilterEnabled_JobServiceActivity_ByX has another meaning: when enabled, respect the filterJobServiceActivity_ByXLst, otherwise take all
             bool takeAllJsJobByComponent = isfilterEnabled_JobServiceActivity_ByComponent && (
-                                    !filterJobServiceActivity_ByComponentLst.Any()
+                                    filterJobServiceActivity_ByComponentLst.Count == 0
                                      ||
                                     filterJobServiceActivity_ByComponentLst.Count == dsref.jobserviceActivities.distinctTaskfull.Count);
 
             bool takeAllJsJobByQueue = isfilterEnabled_JobServiceActivity_ByQueue && (
-                                    !filterJobServiceActivity_ByQueueLst.Any()
+                                    filterJobServiceActivity_ByQueueLst.Count == 0
                                      ||
                                     filterJobServiceActivity_ByQueueLst.Count == dsref.jobserviceActivities.distinctQueuename.Count);
 

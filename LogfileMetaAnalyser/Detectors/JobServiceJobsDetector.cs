@@ -57,8 +57,8 @@ namespace LogfileMetaAnalyser.Detectors
             logger.Debug("entering FinalizeDetector()");
             DateTime finStartpoint = DateTime.Now;
 
-            var jobLst = jobs.Values.Where(j => j.jobserviceJobattempts.Any());
-            int cnt = jobLst.Count();
+            var jobLst = jobs.Values.Where(j => j.jobserviceJobattempts.Count > 0).ToArray();
+            int cnt = jobLst.Length;
             foreach (var job in jobLst)
             {
                 if (cnt < 100)
