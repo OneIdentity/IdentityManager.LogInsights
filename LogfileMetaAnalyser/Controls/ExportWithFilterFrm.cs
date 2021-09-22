@@ -257,34 +257,33 @@ namespace LogfileMetaAnalyser.Controls
 
                 category = "by Component";
                 on = exportSettings.filterByActivity.isfilterEnabled_JobServiceActivity_ByComponent;
-                var cNode = treeActivities.Nodes[1].Nodes
+                var treeNodeByComponent = treeActivities.Nodes[1].Nodes
                     .Add($"{category} ({myDataStore.jobserviceActivities.distinctTaskfull.Count})");
-                cNode.Checked = on;
-                joblst.Push(new Tuple<TreeNode, bool>(cNode, on));
+                treeNodeByComponent.Checked = on;
+                joblst.Push(new Tuple<TreeNode, bool>(treeNodeByComponent, on));
+
+                foreach (var taskname in myDataStore.jobserviceActivities.jobserviceJobs.Select(job => job.taskfull).OrderBy(x => x).Distinct())
+                {
+                    on = exportSettings.filterByActivity.filterJobServiceActivity_ByComponentLst.Contains(taskname);
+                    var xNode = treeNodeByComponent.Nodes.Add(taskname);
+                    xNode.Checked = on;
+                }
 
                 category = "by Queue";
                 on = exportSettings.filterByActivity.isfilterEnabled_JobServiceActivity_ByQueue;
-                var dNode = treeActivities.Nodes[1].Nodes
+                var treeNodeByQueuename = treeActivities.Nodes[1].Nodes
                     .Add($"{category} ({myDataStore.jobserviceActivities.distinctQueuename.Count})");
-                dNode.Checked = on;
-                joblst.Push(new Tuple<TreeNode, bool>(dNode, on));
-
-                if (myDataStore.jobserviceActivities.jobserviceJobs.Count > 0)
+                treeNodeByQueuename.Checked = on;
+                joblst.Push(new Tuple<TreeNode, bool>(treeNodeByQueuename, on));
+                 
+                foreach (var queuename in myDataStore.jobserviceActivities.jobserviceJobs.Select(job => job.queuename).OrderBy(x => x).Distinct())
                 {
-                    foreach (var task in myDataStore.jobserviceActivities.jobserviceJobs)
-                    {
-                        on = exportSettings.filterByActivity.filterJobServiceActivity_ByComponentLst.Contains(
-                            task.taskfull);
-                        var xNode = cNode.Nodes.Add(task.taskfull);
-                        xNode.Checked = on;
+                    on = exportSettings.filterByActivity.filterJobServiceActivity_ByQueueLst.Contains(queuename);
+                    var xNode = treeNodeByQueuename.Nodes.Add(queuename);
+                    xNode.Checked = on;
+                } 
 
-                        on = exportSettings.filterByActivity.filterJobServiceActivity_ByQueueLst.Contains(
-                            task.queuename);
-                         xNode = dNode.Nodes.Add(task.queuename);
-                         xNode.Checked = on;
-                    }
-                }
-
+            
                 //change gui
                 while (joblst.Count > 0)
                 {
@@ -317,7 +316,7 @@ namespace LogfileMetaAnalyser.Controls
 
                 Label l1 = new Label()
                 {
-                    Text = "include messages later than Start Time:",
+                    Text = "Start time:",
                     Anchor = AnchorStyles.Left | AnchorStyles.Right
                 };
                 l1.Font = new Font(l1.Font, FontStyle.Bold | FontStyle.Underline);
@@ -343,7 +342,7 @@ namespace LogfileMetaAnalyser.Controls
                 tableLayoutPanel_FilterByLogProperties.RowStyles.Add(new RowStyle(SizeType.AutoSize, 40F));
                 Label l2 = new Label()
                 {
-                    Text = "include messages earlier than End Time:",
+                    Text = "End time:",
                     Anchor = AnchorStyles.Left | AnchorStyles.Right
                 };
                 l2.Font = new Font(l2.Font, FontStyle.Bold | FontStyle.Underline);

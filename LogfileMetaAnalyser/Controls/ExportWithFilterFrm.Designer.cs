@@ -199,7 +199,7 @@
             this.tabPage1.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage1.Size = new System.Drawing.Size(927, 157);
             this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "input files";
+            this.tabPage1.Text = "Input data";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
             // tableLayoutPanel5
@@ -281,7 +281,7 @@
             this.tabPage2.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tabPage2.Size = new System.Drawing.Size(927, 157);
             this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "output files";
+            this.tabPage2.Text = "Output files";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
             // panel1
@@ -384,7 +384,7 @@
             this.groupBox1.Size = new System.Drawing.Size(935, 183);
             this.groupBox1.TabIndex = 3;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "filter by activity (job):";
+            this.groupBox1.Text = "Filter by activity (job):";
             // 
             // treeActivities
             // 
@@ -409,7 +409,7 @@
             this.groupBox2.Size = new System.Drawing.Size(935, 183);
             this.groupBox2.TabIndex = 4;
             this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "filter by log type, log source and log level:";
+            this.groupBox2.Text = "Filter by log type, log source and log level:";
             // 
             // tableLayoutPanel_FilterByLogProperties
             // 
@@ -475,7 +475,7 @@
             this.groupBox3.Size = new System.Drawing.Size(935, 183);
             this.groupBox3.TabIndex = 5;
             this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "filter by regex:";
+            this.groupBox3.Text = "Filter by regex:";
             // 
             // tableLayoutPanel4
             // 

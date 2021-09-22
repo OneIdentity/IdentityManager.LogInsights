@@ -50,8 +50,6 @@
             this.treeViewLeft = new System.Windows.Forms.TreeView();
             this.imageListForTreeview = new System.Windows.Forms.ImageList(this.components);
             this.splitContainerRightIn = new System.Windows.Forms.SplitContainer();
-            this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
-            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerOutVert)).BeginInit();
@@ -156,11 +154,11 @@
             // 
             // toolStripProgressBar1
             // 
-            this.toolStripProgressBar1.Name = "toolStripProgressBar1";
-            this.toolStripProgressBar1.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
             this.toolStripProgressBar1.MarqueeAnimationSpeed = 30;
+            this.toolStripProgressBar1.Name = "toolStripProgressBar1";
             this.toolStripProgressBar1.Size = new System.Drawing.Size(292, 18);
             this.toolStripProgressBar1.Step = 1;
+            this.toolStripProgressBar1.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
             this.toolStripProgressBar1.Visible = false;
             // 
             // toolStripStatusLabel
@@ -242,12 +240,6 @@
             this.splitContainerRightIn.SplitterWidth = 5;
             this.splitContainerRightIn.TabIndex = 0;
             // 
-            // openFileDialog1
-            // 
-            this.openFileDialog1.FileName = "openFileDialog1";
-            this.openFileDialog1.Filter = "Logfiles|*.log;*.txt|all files|*";
-            this.openFileDialog1.Multiselect = true;
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -261,7 +253,7 @@
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Log file meta analyzer - One Identity Manager";
+            this.Text = "Log Messages Analyzer - One Identity";
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.statusStrip1.ResumeLayout(false);
@@ -274,7 +266,6 @@
             this.splitContainerRightIn.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
-
         }
 
         #endregion
@@ -290,8 +281,6 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.TreeView treeViewLeft;
-        private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
-        private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.ImageList imageListForTreeview;
         private System.Windows.Forms.ToolStripMenuItem infoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem debugDatastoreToolStripMenuItem;
