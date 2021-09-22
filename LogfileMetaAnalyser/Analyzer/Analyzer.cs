@@ -9,7 +9,10 @@ using System.Windows.Forms;
 
 using LogfileMetaAnalyser.Helpers;
 using LogfileMetaAnalyser.Datastore;
+using LogfileMetaAnalyser.Detectors;
 using LogfileMetaAnalyser.LogReader;
+using System.Globalization;
+using System.Reflection;
 
 
 namespace LogfileMetaAnalyser
@@ -50,6 +53,37 @@ namespace LogfileMetaAnalyser
             m_LogReader = reader;
         }
 
+        private IEnumerable<ILogDetector> BuildDetectorsRepo()
+        {
+            const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+
+            var mainAsm = typeof(ILogDetector).Assembly;
+            var path = Path.GetDirectoryName(mainAsm.Location);
+            var assemblies = new List<Assembly> { mainAsm };
+
+            var files = Directory.GetFiles(path!, "*Detector.dll", SearchOption.TopDirectoryOnly);
+            foreach (var file in files)
+                assemblies.Add(Assembly.LoadFile(file));
+
+            var types =  assemblies.SelectMany(a => a.GetTypes())
+                .Where(t => typeof(ILogDetector).IsAssignableFrom(t))
+                .Where(t => !t.IsAbstract);
+
+            foreach (var type in types) 
+                yield return CreateDetectorInstance(type, flags, Array.Empty<object>());
+        }
+
+        private ILogDetector CreateDetectorInstance(Type t, BindingFlags flags, object[] parms)
+        {
+            return (ILogDetector)Activator.CreateInstance(
+                t, 
+                flags,
+                default(Binder),
+                parms,
+                default(CultureInfo));
+        }
+
+
         //main procedure to analyze a log file
         public async Task AnalyzeStructureAsync()
         {
@@ -61,16 +95,18 @@ namespace LogfileMetaAnalyser
 
             logger.Info($"Starting analyzing {m_LogReader.Display ?? "?"}.");
 
-            List<Detectors.ILogDetector> detectors = new List<Detectors.ILogDetector> {
-                new Detectors.TimeRangeDetector(),
-                new Detectors.TimeGapDetector(),
-                new Detectors.SyncStructureDetector(),
-                new Detectors.ConnectorsDetector(),
-                new Detectors.SyncStepDetailsDetector(),
-                new Detectors.SQLStatementDetector(),
-                new Detectors.JobServiceJobsDetector(),
-                new Detectors.SyncJournalDetector()
-            };
+            //List<Detectors.ILogDetector> detectors = new List<Detectors.ILogDetector> {
+            //    new Detectors.TimeRangeDetector(),
+            //    new Detectors.TimeGapDetector(),
+            //    new Detectors.SyncStructureDetector(),
+            //    new Detectors.ConnectorsDetector(),
+            //    new Detectors.SyncStepDetailsDetector(),
+            //    new Detectors.SQLStatementDetector(),
+            //    new Detectors.JobServiceJobsDetector(),
+            //    new Detectors.SyncJournalDetector()
+            //};
+
+            var detectors =  new List<ILogDetector>(BuildDetectorsRepo());
 
 
             //Auslesen der Required Parent Detectors und zuweisen der resourcen

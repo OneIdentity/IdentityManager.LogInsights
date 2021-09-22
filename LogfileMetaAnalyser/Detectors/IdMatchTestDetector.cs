@@ -7,7 +7,7 @@ using LogfileMetaAnalyser.Helpers;
 
 namespace LogfileMetaAnalyser.Detectors
 {
-    class IdMatchTestDetector : DetectorBase, ILogDetector
+    class IdMatchTestDetector : DetectorBase /*,  ILogDetector */ //prevent autoload -> uncomment if needed
     {
         private static Regex regex_Uid = new Regex(@"(?<uid>[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12})", RegexOptions.Compiled);
 
@@ -146,6 +146,6 @@ namespace LogfileMetaAnalyser.Detectors
                 return string.Format("{0}: \"{1}\"-\"{2}\" <- {3}", loggerSrc, uid1, uid2, text);
             }
         }
-        
+ 
     }
 }
