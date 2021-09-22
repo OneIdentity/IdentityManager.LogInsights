@@ -27,18 +27,22 @@ namespace LogfileMetaAnalyser
 
         public int AnalyzeDOP
         {
-            get { return _AnalyzeDOP; }
-            set { _AnalyzeDOP = Math.Max(1, Math.Min(value, Environment.ProcessorCount - 1)); }
+            get {
+                return _AnalyzeDOP;
+            }
+            set {
+                _AnalyzeDOP = Math.Max(1, Math.Min(value, Environment.ProcessorCount - 1));
+            }
         }
 
-        
+
         //Constructor
         public Analyzer()
         {
             logger = new Helpers.NLog("Analyzer");
             logger.Info("Starting analyzer");
 
-            AnalyzeDOP = 2; 
+            AnalyzeDOP = 2;
         }
 
         public void Initialize(ILogReader reader)
@@ -57,8 +61,7 @@ namespace LogfileMetaAnalyser
 
             logger.Info($"Starting analyzing {m_LogReader.Display ?? "?"}.");
 
-            List<Detectors.ILogDetector> detectors = new List<Detectors.ILogDetector>
-            {
+            List<Detectors.ILogDetector> detectors = new List<Detectors.ILogDetector> {
                 new Detectors.TimeRangeDetector(),
                 new Detectors.TimeGapDetector(),
                 new Detectors.SyncStructureDetector(),
@@ -68,7 +71,7 @@ namespace LogfileMetaAnalyser
                 new Detectors.JobServiceJobsDetector(),
                 new Detectors.SyncJournalDetector()
             };
-            
+
 
             //Auslesen der Required Parent Detectors und zuweisen der resourcen
             foreach (var childDetector in detectors.Where(d => d.requiredParentDetectors.Any()))
@@ -80,6 +83,7 @@ namespace LogfileMetaAnalyser
                     if (parentDetector != null)
                         listOfParentDetectors.Add(parentDetector);
                 }
+
                 childDetector.parentDetectors = listOfParentDetectors.ToArray();
             }
 
@@ -100,14 +104,14 @@ namespace LogfileMetaAnalyser
 
             //detecor finilize; call the finalize in that order, that "child" detectors's finalize is called after the parent's finalize is done
             logger.Info("Starting to perform finalizedDetector");
-            
+
             List<string> finalizedDetectorIds = new List<string>();
             while (true)
             {
-                var detectorsToFinalize = detectors.Where(d => d.requiredParentDetectors.Length == 0 ||  //the ones which are parents and not child detectors
-                                                               d.requiredParentDetectors.Any(f => finalizedDetectorIds.Any(kk => kk == f)))  //all child detectors for which the parent is already finalized prior
-                                                    .Where(d => finalizedDetectorIds.All(kk => kk != d.identifier))  //exclude already finalized detecrtors
-                                                    .ToArray();
+                var detectorsToFinalize = detectors.Where(d => d.requiredParentDetectors.Length == 0 || //the ones which are parents and not child detectors
+                                                               d.requiredParentDetectors.Any(f => finalizedDetectorIds.Any(kk => kk == f))) //all child detectors for which the parent is already finalized prior
+                    .Where(d => finalizedDetectorIds.All(kk => kk != d.identifier)) //exclude already finalized detecrtors
+                    .ToArray();
                 if (detectorsToFinalize.Length == 0)
                     break;
 
@@ -117,7 +121,7 @@ namespace LogfileMetaAnalyser
                     finalizedDetectorIds.Add(detector.identifier);
                 }
             }
-      
+
             logger.Info("Analyzer done!");
         }
 
@@ -126,45 +130,43 @@ namespace LogfileMetaAnalyser
             if (detectors == null)
                 return;
 
-            logger.Info($"Starting reading {logReader.GetType().Name}");
-            ReadProgressChanged?.Invoke(this, 0.5D); // trigger progress
-
-            // TODO respect Constants.NumberOfContextMessages
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-
-            var reader = await LogContextReader.CreateAsync(logReader, Constants.NumberOfContextMessages, Constants.NumberOfContextMessages).ConfigureAwait(false);
-            var enumerator = reader.ReadAsync()
-                .Partition(1024)
-                .GetAsyncEnumerator();
-
-            var preloader = new DataPreloader<IReadOnlyList<LogEntry>>(async () =>
+            try
             {
-                if (!await enumerator.MoveNextAsync())
-                    return null;
+                logger.Info($"Starting reading {logReader.GetType().Name}");
+                ReadProgressChanged?.Invoke(this, 0.5D); // trigger progress
 
-                return enumerator.Current;
-            });
+                // TODO respect Constants.NumberOfContextMessages
+                var reader = await LogContextReader.CreateAsync(logReader, Constants.NumberOfContextMessages, Constants.NumberOfContextMessages).ConfigureAwait(false);
+                var enumerator = reader.ReadAsync()
+                    .Partition(1024)
+                    .GetAsyncEnumerator();
 
-            IReadOnlyCollection<LogEntry> partition;
-            while ((partition = await preloader.GetNextAsync().ConfigureAwait(false)) != null)
-            {
-                var textMsgs = partition.Select(p => new TextMessage(p)).ToArray();
+                var preloader = new DataPreloader<IReadOnlyList<LogEntry>>(async () =>
+                {
+                    if (!await enumerator.MoveNextAsync())
+                        return null;
 
-                Parallel.ForEach(detectors, new ParallelOptions { MaxDegreeOfParallelism = AnalyzeDOP },
-                    detector =>
-                    {
-                        foreach (var entry in textMsgs)
-                            detector.ProcessMessage(entry);
-                    });
+                    return enumerator.Current;
+                });
+
+                IReadOnlyCollection<LogEntry> partition;
+                while ((partition = await preloader.GetNextAsync().ConfigureAwait(false)) != null)
+                {
+                    var textMsgs = partition.Select(p => new TextMessage(p)).ToArray();
+
+                    Parallel.ForEach(detectors, new ParallelOptions {MaxDegreeOfParallelism = AnalyzeDOP},
+                        detector =>
+                        {
+                            foreach (var entry in textMsgs)
+                                detector.ProcessMessage(entry);
+                        });
+                }
             }
-
-            sw.Stop();
-            Debug.WriteLine(sw.Elapsed, nameof(_TextReadingAsync));
-            MessageBox.Show(sw.Elapsed.ToString());
-            ReadProgressChanged?.Invoke(this, 1D);
-         
-        } 
-        
+            finally
+            {
+                ReadProgressChanged?.Invoke(this, 1D);
+            }
+        }
     }
+
 }

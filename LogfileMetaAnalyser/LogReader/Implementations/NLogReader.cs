@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using LogfileMetaAnalyser.Helpers;
+using System.IO.Enumeration;
 
 namespace LogfileMetaAnalyser.LogReader
 {
@@ -24,7 +25,7 @@ namespace LogfileMetaAnalyser.LogReader
         public NLogReader(string[] fileNames, Encoding encoding = null)
         {
             // check the parameters
-            m_FileNames = fileNames ?? throw new ArgumentNullException(nameof(fileNames));
+            m_FileNames = ResolveAndSortFiles(fileNames ?? throw new ArgumentNullException(nameof(fileNames))).ToArray();
             m_Encoding = encoding ?? Encoding.Default;
         }
 
@@ -35,6 +36,31 @@ namespace LogfileMetaAnalyser.LogReader
         public NLogReader(string connectionString)
 			: this(new NLogReaderConnectionStringBuilder(connectionString))
         {}
+
+        public static IEnumerable<string> ResolveAndSortFiles(string[] filesAndDirectories)
+        {
+            return _ResolveAndSortFiles(filesAndDirectories)
+                .OrderBy(f => f.CreationTimeUtc)
+                .Select(f => f.FullName);
+        }
+
+        private static IEnumerable<FileInfo> _ResolveAndSortFiles(string[] filesAndDirectories)
+        {
+            foreach (var ford in filesAndDirectories ?? Enumerable.Empty<string>())
+            {
+                var file = new FileInfo(ford);
+                if (file.Exists)
+                    yield return file;
+
+                var directory = new DirectoryInfo(ford);
+                if (!directory.Exists)
+                    continue;
+
+                foreach (var f in directory.GetFiles("*.log", SearchOption.AllDirectories))
+                    yield return f;
+
+            }
+        }
 
         protected override  async IAsyncEnumerable<LogEntry> OnReadAsync([EnumeratorCancellation] CancellationToken ct)
         {
