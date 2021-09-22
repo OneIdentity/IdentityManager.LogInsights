@@ -109,14 +109,8 @@ namespace LogfileMetaAnalyser.LogReader
             _client.Dispose();
         }
 
-        protected override IAsyncEnumerable<LogEntry> OnReadAsync(
-            CancellationToken cancellationToken)
-        {
-            return _ReadUnOrdered(cancellationToken)
-                .OrderBy(e => e.TimeStamp);
-        }
-
-        private async IAsyncEnumerable<LogEntry> _ReadUnOrdered([EnumeratorCancellation] CancellationToken cancellationToken)
+        protected override async IAsyncEnumerable<LogEntry> OnReadAsync(
+            [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             var events = new Events(_client);
 
@@ -184,11 +178,11 @@ namespace LogfileMetaAnalyser.LogReader
             if ( timestampIdx < 0 || messageIdx < 0 || itemIdIdx < 0 )
                 throw new Exception("Missing columns");
 
-            var pos = 0;
-            foreach (var row in table.Rows)
+            var entryNo = 1;
+            var lineNo = 1;
+            foreach (var row in table.Rows.OrderBy(r => (DateTime)r[timestampIdx]))
             {
-                pos++;
-                var locator = new Locator(pos, pos, _connString.Query);
+                var locator = new Locator(entryNo, lineNo, _connString.Query);
 
                 var id = (string)row[itemIdIdx];
                 var timeStamp = (DateTime)row[timestampIdx];
@@ -248,6 +242,7 @@ namespace LogfileMetaAnalyser.LogReader
                 if ( string.IsNullOrEmpty(message) && outerMessageIdx > -1 )
                     message = (string)row[outerMessageIdx];
 
+                lineNo += _NumberOfLines(message);
 
                 yield return new LogEntry(locator, id, timeStamp, type, (int)severity, message, logger, appName, "",
                     "");
@@ -258,5 +253,21 @@ namespace LogfileMetaAnalyser.LogReader
         /// Gets a short display of the reader and it's data.
         /// </summary>
         public override string Display => $"App Insights Reader - {_client.BaseUri.OriginalString}";
+
+        private static int _NumberOfLines(string msg)
+        {
+            if ( msg == null )
+                return 1;
+
+            var cnt = 1;
+
+            foreach (char c in msg)
+            {
+                if ( c == '\n' )
+                    cnt++;
+            }
+
+            return cnt;
+        }
     }
 }
