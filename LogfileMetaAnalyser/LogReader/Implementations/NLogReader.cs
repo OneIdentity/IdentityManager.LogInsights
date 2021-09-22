@@ -40,8 +40,10 @@ namespace LogfileMetaAnalyser.LogReader
         public static IEnumerable<string> ResolveAndSortFiles(string[] filesAndDirectories)
         {
             return _ResolveAndSortFiles(filesAndDirectories)
-                .OrderBy(f => f.CreationTimeUtc)
-                .Select(f => f.FullName);
+                .Select(f => _TryDetectFileFormatAsync(f.FullName).Result)
+                .Where(f =>f.Format != LogFormat.Unknown)
+                .OrderBy(f=>f.FirstTimeStamp) // sort by the first timestamp and NOT by the creation time, because the log may lost it's creation time when send by email
+                .Select(f => f.FileName);
         }
 
         private static IEnumerable<FileInfo> _ResolveAndSortFiles(string[] filesAndDirectories)
@@ -58,7 +60,9 @@ namespace LogfileMetaAnalyser.LogReader
 
                 foreach (var f in directory.GetFiles("*.log", SearchOption.AllDirectories))
                     yield return f;
-
+                
+                foreach (var f in directory.GetFiles("*.txt", SearchOption.AllDirectories))
+                    yield return f;
             }
         }
 
@@ -69,8 +73,9 @@ namespace LogfileMetaAnalyser.LogReader
             // todo read order of files?
             foreach (var file in m_FileNames)
             {
-                var logFormat = await _TryDetectFileFormatAsync(file).ConfigureAwait(false);
-
+                var data = await _TryDetectFileFormatAsync(file).ConfigureAwait(false);
+                var logFormat = data.Format;
+                
                 Regex regex = null;
                 switch (logFormat)
                 {
@@ -130,7 +135,7 @@ namespace LogfileMetaAnalyser.LogReader
                     var logEntry = new LogEntry(new Locator(++entryNumber, lineNumber, file), 
                         lineNumber.ToString(),
                         DateTime.TryParse(match.Groups["Timestamp"].Value, out var timeStamp) ? timeStamp : DateTime.MinValue,
-                        _GetLogLevel(match.Groups["NLevel"].Value),
+                        logFormat == LogFormat.JobService ? _GetServiceLogLevel(match.Groups["tag"].Value) : _GetNLogLevel(match.Groups["NLevel"].Value),
                         0,
                         match.Groups["Payload"].Value,
                         logger, 
@@ -145,7 +150,8 @@ namespace LogfileMetaAnalyser.LogReader
             }
         }
 
-        private async Task<LogFormat> _TryDetectFileFormatAsync(string file)
+        
+        private static async Task<(string FileName, LogFormat Format, DateTime FirstTimeStamp)> _TryDetectFileFormatAsync(string file)
         {
             using (StreamReader reader = new StreamReader(file))
             {
@@ -153,21 +159,23 @@ namespace LogfileMetaAnalyser.LogReader
                 int idx = 0;
                 while ((line = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
                 {
-                    if (Constants.regexMessageMetaDataNLogDefault.IsMatch(line))
-                        return LogFormat.NLog;
+                    var match = Constants.regexMessageMetaDataNLogDefault.Match(line);
+                    if (match.Success)
+                        return (file, LogFormat.NLog, DateTime.TryParse(match.Groups["Timestamp"].Value, out var timeStamp) ? timeStamp : DateTime.MinValue);
 
-                    if (Constants.regexMessageMetaDataJobservice.IsMatch(line))
-                        return LogFormat.JobService;
+                    match = Constants.regexMessageMetaDataJobservice.Match(line);
+                    if (match.Success)
+                        return (file, LogFormat.JobService, DateTime.TryParse(match.Groups["Timestamp"].Value, out var timeStamp) ? timeStamp : DateTime.MinValue);
 
                     if (idx++ == 32)
                         break;
                 }
             }
 
-            return LogFormat.Unknown;
+            return (file, LogFormat.Unknown, DateTime.MinValue);
         }
 
-        private LogLevel _GetLogLevel(string value)
+        private LogLevel _GetNLogLevel(string value)
         {
             if (value.Length == 0)
                 return LogLevel.Critical;
@@ -197,6 +205,39 @@ namespace LogfileMetaAnalyser.LogReader
             }
         }
 
+        private LogLevel _GetServiceLogLevel(string value)
+        {
+            if (value.Length < 3)
+                return LogLevel.Critical;
+
+            // fast path for single tags^<.>
+            switch (value[1])
+            {
+                case 'I':
+                case 'i':
+                    return LogLevel.Info;
+
+                case 'W':
+                case 'w':
+                    return LogLevel.Warn;
+
+                case 'E':
+                case 'e':
+                    return LogLevel.Error;
+            }
+
+            // slow path for multiple tags ^<x><i>....
+            if (value.IndexOf("<i>", StringComparison.OrdinalIgnoreCase)>=0)
+                return LogLevel.Info;
+
+            if (value.IndexOf("<w>", StringComparison.OrdinalIgnoreCase) >= 0)
+                return LogLevel.Warn;
+
+            if (value.IndexOf("<e>", StringComparison.OrdinalIgnoreCase) >= 0)
+                return LogLevel.Error;
+
+            return LogLevel.Info;
+        }
 
         private static async IAsyncEnumerable<string> _ReadAsync(StreamReader reader, [EnumeratorCancellation] CancellationToken ct)
         {
@@ -224,7 +265,6 @@ namespace LogfileMetaAnalyser.LogReader
                     return line.Length > 30
                            && line[0] == '<'
                            && line[2] == '>'
-                           && line[7] == '-'
                            && m_LineStartRegexJobService.IsMatch(line);
             }
 
@@ -240,6 +280,6 @@ namespace LogfileMetaAnalyser.LogReader
         private readonly Encoding m_Encoding;
 
         private static readonly Regex m_LineStartRegexNLog = new (@"^\d\d\d\d-\d\d-\d\d\s+\d\d:\d\d:\d\d", RegexOptions.CultureInvariant | RegexOptions.Compiled);
-        private static readonly Regex m_LineStartRegexJobService = new(@"^<\w>\d\d\d\d-\d\d-\d\d\s+\d\d:\d\d:\d\d", RegexOptions.CultureInvariant | RegexOptions.Compiled);
+        private static readonly Regex m_LineStartRegexJobService = new(@"^(<\w>)+\d\d\d\d-\d\d-\d\d\s+\d\d:\d\d:\d\d", RegexOptions.CultureInvariant | RegexOptions.Compiled);
     }
 }
