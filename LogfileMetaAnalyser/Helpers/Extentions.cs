@@ -266,19 +266,13 @@ namespace LogfileMetaAnalyser.Helpers
     {    
         public static T GetLastOrNull<T>(this List<T> list)
         {
-            if (list.Any())
-                return list.Last();
-            else
-                return default(T);
+            if (list.Count>0)
+                return list[^1];
+            
+            return default(T);
         }
 
-        public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T> arr)
-        {
-            if (arr == null)
-                return new T[] { } as IEnumerable<T>;
-            else
-                return arr;
-        }
+        public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T> arr) => arr ?? Enumerable.Empty<T>();
 
         public static void AddIfNotPresent<T>(this List<T> list, T elem)
         {
@@ -307,7 +301,7 @@ namespace LogfileMetaAnalyser.Helpers
             if (theArray == null || theArray.Length == 0)
                 return theDefault;
 
-            return theArray.Last();
+            return theArray[^1];
         }
 
     }
@@ -321,7 +315,7 @@ namespace LogfileMetaAnalyser.Helpers
             if (timespan.TotalMilliseconds >= 0)
                 return timespan;
 
-            return (new TimeSpan(0));
+            return TimeSpan.Zero;
         }
 
         public static string ToHumanString(this TimeSpan timespan)
