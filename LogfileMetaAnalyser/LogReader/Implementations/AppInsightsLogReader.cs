@@ -123,6 +123,7 @@ namespace LogfileMetaAnalyser.LogReader
             var result = await events.Client.Query.ExecuteAsync(
                     _connString.AppId,
                     _connString.Query,
+                    !string.IsNullOrEmpty(_connString.TimeSpan) ? _connString.TimeSpan : null,
                     cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
 

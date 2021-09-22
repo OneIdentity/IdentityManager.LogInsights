@@ -30,5 +30,11 @@ namespace LogfileMetaAnalyser.LogReader
             get => TryGetValue(nameof(Query), out var ret) ? ret as string : string.Empty;
             set => this[nameof(Query)] = value;
         }
+
+        public string TimeSpan
+        {
+            get => TryGetValue(nameof(TimeSpan), out var ret) ? ret as string : string.Empty;
+            set => this[nameof(TimeSpan)] = value;
+        }
     }
 }
