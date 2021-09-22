@@ -30,9 +30,10 @@ namespace LogfileMetaAnalyser.Controls
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ContextLinesUC));
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.label1 = new System.Windows.Forms.Label();
-            this.rtbLog = new System.Windows.Forms.RichTextBox();
+            this.rtbLog = new LogfileMetaAnalyser.Controls.ExRichTextBox();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.buttonShowInEditor = new System.Windows.Forms.Button();
             this.buttonExport = new System.Windows.Forms.Button();
@@ -77,15 +78,16 @@ namespace LogfileMetaAnalyser.Controls
             // 
             // rtbLog
             // 
-            this.rtbLog.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.rtbLog.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.rtbLog.Dock = System.Windows.Forms.DockStyle.Fill;
             this.rtbLog.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.rtbLog.LineNumberWidth = 64;
             this.rtbLog.Location = new System.Drawing.Point(4, 26);
             this.rtbLog.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.rtbLog.Name = "rtbLog";
             this.rtbLog.Size = new System.Drawing.Size(902, 447);
             this.rtbLog.TabIndex = 1;
-            this.rtbLog.Text = "";
+            this.rtbLog.Text = resources.GetString("rtbLog.Text");
             this.rtbLog.WordWrap = false;
             // 
             // tableLayoutPanel2
@@ -201,7 +203,7 @@ namespace LogfileMetaAnalyser.Controls
         private System.Windows.Forms.Button buttonShowInEditor;
         private System.Windows.Forms.Button buttonExport;
         private System.Windows.Forms.ComboBox comboBox_OpenInEditor;
-        private RichTextBox rtbLog;
+        private ExRichTextBox rtbLog;
         private System.Windows.Forms.Button button_MessagesJumpBack;
         private System.Windows.Forms.Button button_MessagesJumpForward;
     }
