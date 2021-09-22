@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LogfileMetaAnalyser.ExceptionHandling;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Configuration;
@@ -74,13 +75,20 @@ namespace LogfileMetaAnalyser.Controls
 
         private void tsbDelete_Click(object sender, EventArgs e)
         {
-            // remove all selected items
-            foreach (ListViewItem lvi in lvLogFiles.SelectedItems.OfType<ListViewItem>().ToArray())
+            try
             {
-                lvLogFiles.Items.Remove(lvi);
-            }
+                // remove all selected items
+                foreach (ListViewItem lvi in lvLogFiles.SelectedItems.OfType<ListViewItem>().ToArray())
+                {
+                    lvLogFiles.Items.Remove(lvi);
+                }
 
-            CheckValid();
+                CheckValid();
+            }
+            catch (Exception exception)
+            {
+                ExceptionHandler.Instance.HandleException(exception);
+            }
         }
 
         private void _AddFile(string fName)
@@ -156,7 +164,14 @@ namespace LogfileMetaAnalyser.Controls
 
         private void lvLogFiles_SelectedIndexChanged(object sender, EventArgs e)
         {
-            tsbDelete.Enabled = lvLogFiles.SelectedIndices.Count > 0;
+            try
+            {
+                tsbDelete.Enabled = lvLogFiles.SelectedIndices.Count > 0;
+            }
+            catch (Exception exception)
+            {
+                ExceptionHandler.Instance.HandleException(exception);
+            }
         }
 
        

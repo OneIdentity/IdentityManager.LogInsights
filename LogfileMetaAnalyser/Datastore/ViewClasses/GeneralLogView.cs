@@ -6,6 +6,7 @@ using System.Drawing;
 
 using LogfileMetaAnalyser.Helpers;
 using LogfileMetaAnalyser.Controls;
+using LogfileMetaAnalyser.ExceptionHandling;
 
 namespace LogfileMetaAnalyser.Datastore
 {
@@ -95,11 +96,18 @@ namespace LogfileMetaAnalyser.Datastore
 
                 uc[1].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
                 {
-                    string k = args.Item.Name;
-                    var firstmsg = dsref.logfileInformation[k].firstMessage;
+                    try
+                    {
+                        string k = args.Item.Name;
+                        var firstmsg = dsref.logfileInformation[k].firstMessage;
 
-                    if (firstmsg != null)
-                        contextLinesUc.SetData(firstmsg);
+                        if (firstmsg != null)
+                            contextLinesUc.SetData(firstmsg);
+                    }
+                    catch (Exception e)
+                    {
+                        ExceptionHandler.Instance.HandleException(e);
+                    }
                 });
 
                 uc.Resume();
@@ -165,13 +173,20 @@ namespace LogfileMetaAnalyser.Datastore
                 if (uc.HasData())
                 {
                     uc.ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
-                    {
-                        string k = args.Item.Name;
-
-                        var msg = dsref.messageErrors.Union(dsref.messageWarnings).FirstOrDefault(t => t.uuid == k);
-                        if (msg != null)
-                            contextLinesUC.SetData(msg.message);
-                    }
+                        {
+                            try
+                            {
+                                string k = args.Item.Name;
+                                var msg = dsref.messageErrors.Union(dsref.messageWarnings)
+                                    .FirstOrDefault(t => t.uuid == k);
+                                if (msg != null)
+                                    contextLinesUC.SetData(msg.message);
+                            }
+                            catch (Exception e)
+                            {
+                                ExceptionHandler.Instance.HandleException(e);
+                            }
+                        }
                     );
 
                     uc.Resume();
@@ -202,11 +217,18 @@ namespace LogfileMetaAnalyser.Datastore
                 {
                     uc.ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
                     {
-                        string k = args.Item.Name;
+                        try
+                        {
+                            string k = args.Item.Name;
 
-                        var msg = dsref.timegaps.FirstOrDefault(t => t.uuid == k);
-                        if (msg != null)
-                            contextLinesUC.SetData(msg.message);
+                            var msg = dsref.timegaps.FirstOrDefault(t => t.uuid == k);
+                            if (msg != null)
+                                contextLinesUC.SetData(msg.message);
+                        }
+                        catch (Exception e)
+                        {
+                            ExceptionHandler.Instance.HandleException(e);
+                        }
                     }
                     );
 

@@ -6,6 +6,7 @@ using System.Drawing;
 
 using LogfileMetaAnalyser.Helpers;
 using LogfileMetaAnalyser.Controls;
+using LogfileMetaAnalyser.ExceptionHandling;
 
 
 namespace LogfileMetaAnalyser.Datastore
@@ -174,20 +175,27 @@ namespace LogfileMetaAnalyser.Datastore
             if (dsref.jobserviceJobs.Count > 0)
                 uc[0].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
                 {
-                    string uuidAttemp = args.Item.Name;
-                    var jsAttempSelect = dsref.jobserviceJobs.SelectMany(t => t.jobserviceJobattempts).Where(a => a.uuid == uuidAttemp).FirstOrDefault();
+                    try
+                    {
+                        string uuidAttemp = args.Item.Name;
+                        var jsAttempSelect = dsref.jobserviceJobs.SelectMany(t => t.jobserviceJobattempts).Where(a => a.uuid == uuidAttemp).FirstOrDefault();
 
-                    if (jsAttempSelect == null)
-                        return;
+                        if (jsAttempSelect == null)
+                            return;
 
-                    if (jsAttempSelect.message != null && jsAttempSelect.endmessage == null)
-                        contextLinesUc.SetData(jsAttempSelect.message);
+                        if (jsAttempSelect.message != null && jsAttempSelect.endmessage == null)
+                            contextLinesUc.SetData(jsAttempSelect.message);
 
-                    else if (jsAttempSelect.message == null && jsAttempSelect.endmessage != null)
-                        contextLinesUc.SetData(jsAttempSelect.endmessage);
+                        else if (jsAttempSelect.message == null && jsAttempSelect.endmessage != null)
+                            contextLinesUc.SetData(jsAttempSelect.endmessage);
 
-                    else if (jsAttempSelect.message != null && jsAttempSelect.endmessage != null)
-                        contextLinesUc.SetData(jsAttempSelect.message, jsAttempSelect.endmessage);
+                        else if (jsAttempSelect.message != null && jsAttempSelect.endmessage != null)
+                            contextLinesUc.SetData(jsAttempSelect.message, jsAttempSelect.endmessage);
+                    }
+                    catch (Exception e)
+                    {
+                        ExceptionHandler.Instance.HandleException(e);
+                    }
                 });
 
 
@@ -245,25 +253,32 @@ namespace LogfileMetaAnalyser.Datastore
             if (dsref.jobserviceJobs.Count > 0)
                 uc[0].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
                 {
-                    int pos = args.Item.Name.LastIndexOf("#");
+                    try
+                    {
+                        int pos = args.Item.Name.LastIndexOf("#");
 
-                    if (pos < 0)
-                        return;
+                        if (pos < 0)
+                            return;
 
-                    string uuidAttemp = args.Item.Name.Substring(pos+1);
-                    var jsAttempSelect = dsref.jobserviceJobs.SelectMany(t => t.jobserviceJobattempts).Where(a => a.uuid == uuidAttemp).FirstOrDefault();
+                        string uuidAttemp = args.Item.Name.Substring(pos+1);
+                        var jsAttempSelect = dsref.jobserviceJobs.SelectMany(t => t.jobserviceJobattempts).Where(a => a.uuid == uuidAttemp).FirstOrDefault();
 
-                    if (jsAttempSelect == null)
-                        return;
+                        if (jsAttempSelect == null)
+                            return;
 
-                    if (jsAttempSelect.message != null && jsAttempSelect.endmessage == null)
-                        contextLinesUc.SetData(jsAttempSelect.message);
+                        if (jsAttempSelect.message != null && jsAttempSelect.endmessage == null)
+                            contextLinesUc.SetData(jsAttempSelect.message);
 
-                    else if (jsAttempSelect.message == null && jsAttempSelect.endmessage != null)
-                        contextLinesUc.SetData(jsAttempSelect.endmessage);
+                        else if (jsAttempSelect.message == null && jsAttempSelect.endmessage != null)
+                            contextLinesUc.SetData(jsAttempSelect.endmessage);
 
-                    else if (jsAttempSelect.message != null && jsAttempSelect.endmessage != null)
-                        contextLinesUc.SetData(jsAttempSelect.message, jsAttempSelect.endmessage);
+                        else if (jsAttempSelect.message != null && jsAttempSelect.endmessage != null)
+                            contextLinesUc.SetData(jsAttempSelect.message, jsAttempSelect.endmessage);
+                    }
+                    catch (Exception e)
+                    {
+                        ExceptionHandler.Instance.HandleException(e);
+                    }
                 });
 
             return new Tuple<MultiListViewUC, ContextLinesUC>(uc, contextLinesUc);
