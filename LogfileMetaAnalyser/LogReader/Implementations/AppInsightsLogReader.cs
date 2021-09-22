@@ -109,8 +109,14 @@ namespace LogfileMetaAnalyser.LogReader
             _client.Dispose();
         }
 
-        protected override async IAsyncEnumerable<LogEntry> OnReadAsync(
-            [EnumeratorCancellation] CancellationToken cancellationToken)
+        protected override IAsyncEnumerable<LogEntry> OnReadAsync(
+            CancellationToken cancellationToken)
+        {
+            return _ReadUnOrdered(cancellationToken)
+                .OrderBy(e => e.TimeStamp);
+        }
+
+        private async IAsyncEnumerable<LogEntry> _ReadUnOrdered([EnumeratorCancellation] CancellationToken cancellationToken)
         {
             var events = new Events(_client);
 
