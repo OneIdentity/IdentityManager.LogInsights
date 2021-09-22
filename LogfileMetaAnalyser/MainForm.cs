@@ -448,6 +448,7 @@ namespace LogfileMetaAnalyser
 
                 if (dr == DialogResult.OK)
                 {
+                    dlgProvider.StoreCredentials();
                     // start Load
                     _Load(dlgProvider.ConnectToReader());
                 }

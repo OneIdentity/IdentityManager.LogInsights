@@ -1,27 +1,42 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Data.Common;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+
 using LogfileMetaAnalyser.LogReader;
+
+using Windows.Security.Credentials;
 
 namespace LogfileMetaAnalyser.Controls
 {
     public partial class ApplicationInsightsUC : LogReaderControl
     {
+        private const string VaultResource = "LogInsights_ApplicationInsights";
+
         public ApplicationInsightsUC()
         {
             InitializeComponent();
+
+            try
+            {
+                var vault = new PasswordVault();
+                var entry = _TryGetCredential(vault);
+
+                if ( entry != null )
+                {
+                    entry.RetrievePassword();
+                    textAppID.Text = entry.UserName;
+                    textApiKey.Text = entry.Password;
+                }
+
+                CheckValid();
+            }
+            catch
+            {
+                // Ignore exceptions
+            }
         }
 
         protected override string GetConnectionString()
 		{
-			AppInsightsLogReaderConnectionStringBuilder csb = new AppInsightsLogReaderConnectionStringBuilder
+			var csb = new AppInsightsLogReaderConnectionStringBuilder
 				{
 					AppId = textAppID.Text,
 					ApiKey = textApiKey.Text,
@@ -36,12 +51,7 @@ namespace LogfileMetaAnalyser.Controls
             return new AppInsightsLogReader(ConnectionString);
         }
 
-        private void textAppID_TextChanged(object sender, EventArgs e)
-        {
-            CheckValid();
-        }
-
-        private void textApiKey_TextChanged(object sender, EventArgs e)
+        private void text_TextChanged(object sender, EventArgs e)
         {
             CheckValid();
         }
@@ -55,6 +65,40 @@ namespace LogfileMetaAnalyser.Controls
             bValid &= !String.IsNullOrEmpty(textApiKey.Text);
 
             return bValid;
+        }
+
+        public override void StoreCredentials()
+        {
+            base.StoreCredentials();
+
+            var vault = new PasswordVault();
+            var entry = _TryGetCredential(vault);
+
+            if ( entry != null )
+            {
+                entry.UserName = textAppID.Text;
+                entry.Password = textApiKey.Text;
+
+                entry.RetrievePassword();
+            }
+            else
+            {
+                entry = new PasswordCredential(VaultResource, textAppID.Text, textApiKey.Text);
+                vault.Add(entry);
+            }
+        }
+
+        private static PasswordCredential _TryGetCredential(PasswordVault vault)
+        {
+            try
+            {
+                var entries = vault.FindAllByResource(VaultResource);
+                return entries.Count > 0 ? entries[0] : null;
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }
