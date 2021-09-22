@@ -6,6 +6,7 @@ using System.Drawing;
 
 using LogfileMetaAnalyser.Helpers;
 using LogfileMetaAnalyser.Controls;
+using LogfileMetaAnalyser.ExceptionHandling;
 
 
 namespace LogfileMetaAnalyser.Datastore
@@ -69,11 +70,18 @@ namespace LogfileMetaAnalyser.Datastore
 
                 uc[0].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
                 {
-                    string uuid = args.Item.Name;
-                    var tra = dsref.sqlSessions.FirstOrDefault(t => t.uuid == uuid);
+                    try
+                    {
+                        string uuid = args.Item.Name;
+                        var tra = dsref.sqlSessions.FirstOrDefault(t => t.uuid == uuid);
 
-                    if (tra != null && tra.message != null)
-                        contextLinesUc.SetData(tra.message);
+                        if (tra != null && tra.message != null)
+                            contextLinesUc.SetData(tra.message);
+                    }
+                    catch (Exception e)
+                    {
+                        ExceptionHandler.Instance.HandleException(e);
+                    }
                 });
             }
 
@@ -129,32 +137,53 @@ namespace LogfileMetaAnalyser.Datastore
                     //show the session start lines
                     uc[0].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
                     {
-                        //string k = args.Item.Name;
-                        var sqlsess = dsref.sqlSessions.FirstOrDefault(t => t.uuid == uuid);
+                        try
+                        {
+                            //string k = args.Item.Name;
+                            var sqlsess = dsref.sqlSessions.FirstOrDefault(t => t.uuid == uuid);
 
-                        var msg = sqlsess.message;
-                        if (msg != null)
-                            contextLinesUc.SetData(msg);
+                            var msg = sqlsess.message;
+                            if (msg != null)
+                                contextLinesUc.SetData(msg);
+                        }
+                        catch (Exception e)
+                        {
+                            ExceptionHandler.Instance.HandleException(e);
+                        }
                     });
 
                     //show the long running statement
                     uc[1].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
                     {
-                        string k = args.Item.Name;
-                        var statement = dsref.sqlSessions.FirstOrDefault(t => t.uuid == uuid).longRunningStatements.FirstOrDefault(st => st.uuid == k);
+                        try
+                        {
+                            string k = args.Item.Name;
+                            var statement = dsref.sqlSessions.FirstOrDefault(t => t.uuid == uuid).longRunningStatements.FirstOrDefault(st => st.uuid == k);
 
-                        if (statement != null && statement.message != null)
-                            contextLinesUc.SetData(statement.message);
+                            if (statement != null && statement.message != null)
+                                contextLinesUc.SetData(statement.message);
+                        }
+                        catch (Exception e)
+                        {
+                            ExceptionHandler.Instance.HandleException(e);
+                        }
                     });
 
                     //show the transaction
                     uc[2].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
                     {
-                        string k = args.Item.Name;
-                        var tra = dsref.sqlSessions.FirstOrDefault(t => t.uuid == uuid).transactions.FirstOrDefault(st => st.uuid == k);
+                        try
+                        {
+                            string k = args.Item.Name;
+                            var tra = dsref.sqlSessions.FirstOrDefault(t => t.uuid == uuid).transactions.FirstOrDefault(st => st.uuid == k);
 
-                        if (tra != null && tra.message != null)
-                            contextLinesUc.SetData(tra.message, tra.messageEnd);
+                            if (tra != null && tra.message != null)
+                                contextLinesUc.SetData(tra.message, tra.messageEnd);
+                        }
+                        catch (Exception e)
+                        {
+                            ExceptionHandler.Instance.HandleException(e);
+                        }
                     });
                 }
             }

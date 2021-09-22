@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LogfileMetaAnalyser.ExceptionHandling;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -52,7 +53,14 @@ namespace LogfileMetaAnalyser.Controls
 
         private void CheckValid()
         {
-            btnOk.Enabled = SelectedProvider.IsValid;
+            try
+            {
+                btnOk.Enabled = SelectedProvider.IsValid;
+            }
+            catch (Exception e)
+            {
+                ExceptionHandler.Instance.HandleException(e);
+            }
         }
 
         private void SelectedProvider_IsValidChanged(object sender, EventArgs e)

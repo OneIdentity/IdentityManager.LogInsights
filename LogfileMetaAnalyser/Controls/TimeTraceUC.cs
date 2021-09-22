@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LogfileMetaAnalyser.ExceptionHandling;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Reflection;
@@ -143,115 +144,150 @@ namespace LogfileMetaAnalyser.Controls
             thePanel.Paint += ThePanel_OnPaint;
 
             thePanel.Resize += new EventHandler((object o, EventArgs a) => {
-                RefreshControl();
+                try
+                {
+                    RefreshControl();
+                }
+                catch (Exception e)
+                {
+                    ExceptionHandler.Instance.HandleException(e);
+                }
             });
 
             thePanel.MouseWheel += new MouseEventHandler((object o, MouseEventArgs args) => {
-                if (args.Delta != 0)
+                try
                 {
-                    int mx = (-1.0f * args.Delta * SystemInformation.MouseWheelScrollLines / 120f).Int();
-                    int dl = vScrollBar1.Value + (mx * vScrollBar1.SmallChange);
-                    vScrollBar1.Value = Math.Max(vScrollBar1.Minimum, Math.Min(vScrollBar1.Maximum, dl));
+                    if (args.Delta != 0)
+                    {
+                        int mx = (-1.0f * args.Delta * SystemInformation.MouseWheelScrollLines / 120f).Int();
+                        int dl = vScrollBar1.Value + (mx * vScrollBar1.SmallChange);
+                        vScrollBar1.Value = Math.Max(vScrollBar1.Minimum, Math.Min(vScrollBar1.Maximum, dl));
+                    }
+                }
+                catch (Exception e)
+                {
+                    ExceptionHandler.Instance.HandleException(e);
                 }
             });
 
             thePanel.MouseMove += new MouseEventHandler((object o, MouseEventArgs args) => {
-                thePanel.Focus();
-
-                if (args.Button == MouseButtons.Left)
+                try
                 {
-                    if (zoomRect.Location.X == 0 && zoomRect.Location.Y == 0)
+                    thePanel.Focus();
+
+                    if (args.Button == MouseButtons.Left)
                     {
-                        zoomRect.Location = new Point(Math.Max(0, args.Location.X), trackArea.Top);
-                        zoomRect.Size = new Size(0, trackArea.Height);
+                        if (zoomRect.Location.X == 0 && zoomRect.Location.Y == 0)
+                        {
+                            zoomRect.Location = new Point(Math.Max(0, args.Location.X), trackArea.Top);
+                            zoomRect.Size = new Size(0, trackArea.Height);
                                                
-                    }
-                    else
+                        }
+                        else
                         if (args.Location.X - zoomRect.Left > 0)
                             zoomRect.Size = new Size(args.Location.X - zoomRect.Left, trackArea.Height);
                         else
-                    {
-                        int oldX = zoomRect.Left;
-                        zoomRect.Location = new Point(Math.Max(0, args.Location.X), trackArea.Top);
-                        zoomRect.Size = new Size(oldX - args.Location.X, trackArea.Height);
-                    }
+                        {
+                            int oldX = zoomRect.Left;
+                            zoomRect.Location = new Point(Math.Max(0, args.Location.X), trackArea.Top);
+                            zoomRect.Size = new Size(oldX - args.Location.X, trackArea.Height);
+                        }
                             
 
-                    RefreshControl();
+                        RefreshControl();
+                    }
+
+                    if (args.Location != panelToolTipLastMouseLocation && (DateTime.Now - panelToolTipLastShown).TotalMilliseconds > panelToolTipDelay)
+                    {
+                        string ttt = StringHelper.ShortenText(GetToolTipText(args.Location));
+                        if (!string.IsNullOrEmpty(ttt))
+                            panelToolTip.Show(ttt, this, args.Location.Move(16), 4000);
+
+                        panelToolTipLastMouseLocation = args.Location;
+                        panelToolTipLastShown = DateTime.Now;
+                    }
                 }
-
-                if (args.Location != panelToolTipLastMouseLocation && (DateTime.Now - panelToolTipLastShown).TotalMilliseconds > panelToolTipDelay)
+                catch (Exception e)
                 {
-                    string ttt = StringHelper.ShortenText(GetToolTipText(args.Location));
-                    if (!string.IsNullOrEmpty(ttt))
-                        panelToolTip.Show(ttt, this, args.Location.Move(16), 4000);
-
-                    panelToolTipLastMouseLocation = args.Location;
-                    panelToolTipLastShown = DateTime.Now;
+                    ExceptionHandler.Instance.HandleException(e);
                 }
             });
 
             thePanel.MouseUp += new MouseEventHandler((object o, MouseEventArgs args) =>
             {
-                if (zoomRect.X >= 0 && zoomRect.Y >= 0 && zoomRect.Width > 2)
+                try
                 {
-                    timestamp_start_rel = GetClipXPosition(zoomRect.Left);
-                    timestamp_end_rel = GetClipXPosition(zoomRect.Right);
-
-                    if (timestamp_start_rel > timestamp_end_rel)
+                    if (zoomRect.X >= 0 && zoomRect.Y >= 0 && zoomRect.Width > 2)
                     {
-                        DateTime dmy = new DateTime(timestamp_end_rel.Ticks);
-                        timestamp_end_rel = timestamp_start_rel;
-                        timestamp_start_rel = dmy;
-                    }
+                        timestamp_start_rel = GetClipXPosition(zoomRect.Left);
+                        timestamp_end_rel = GetClipXPosition(zoomRect.Right);
 
-                    timeSpan_rel = timestamp_end_rel - timestamp_start_rel;
+                        if (timestamp_start_rel > timestamp_end_rel)
+                        {
+                            DateTime dmy = new DateTime(timestamp_end_rel.Ticks);
+                            timestamp_end_rel = timestamp_start_rel;
+                            timestamp_start_rel = dmy;
+                        }
+
+                        timeSpan_rel = timestamp_end_rel - timestamp_start_rel;
 
                     
-                    RefreshControl();
-                    zoomRect = new Rectangle(0, 0, 0, 0);
+                        RefreshControl();
+                        zoomRect = new Rectangle(0, 0, 0, 0);
+                    }
+                }
+                catch (Exception e)
+                {
+                    ExceptionHandler.Instance.HandleException(e);
                 }
             });
             
             thePanel.MouseClick += new MouseEventHandler((object o, MouseEventArgs args) =>
             {
-                if (args.Y < trackArea.Y)
-                    return;
-
-                panelToolTipLastMouseLocation = args.Location;
-
-                var tripelData = GetTrackDataFromLocationExt(args.Location); //<vrtTimelineTrack, vrtTimelineTrackEvent, string, TextMessage>
-                vrtTimelineTrack track = tripelData.Item1;
-                vrtTimelineTrackEvent trackEvt = tripelData.Item2;
-                string trackText = tripelData.Item3 ?? tripelData.Item4?.messageText;
-                TextMessage trackTextMsg = tripelData.Item4;
-
-                if (track == null)
-                    return;
-
-
-                //fire click event
-                if (TrackClicked != null)
+                try
                 {
-                    var evtData = new TimelineTrackEventClickArgs()
+                    if (args.Y < trackArea.Y)
+                        return;
+
+                    panelToolTipLastMouseLocation = args.Location;
+
+                    var tripelData = GetTrackDataFromLocationExt(args.Location); //<vrtTimelineTrack, vrtTimelineTrackEvent, string, TextMessage>
+                    vrtTimelineTrack track = tripelData.Item1;
+                    vrtTimelineTrackEvent trackEvt = tripelData.Item2;
+                    string trackText = tripelData.Item3 ?? tripelData.Item4?.messageText;
+                    TextMessage trackTextMsg = tripelData.Item4;
+
+                    if (track == null)
+                        return;
+
+
+                    //fire click event
+                    if (TrackClicked != null)
                     {
-                        timelineTrackId = track.baseTrack.id,
-                        timelineTrackEvent = trackEvt?.baseTrackEvent,
-                        timelineTrackTextMessage = trackTextMsg,
-                        timelineTrackText = trackText
-                    };
+                        var evtData = new TimelineTrackEventClickArgs()
+                        {
+                            timelineTrackId = track.baseTrack.id,
+                            timelineTrackEvent = trackEvt?.baseTrackEvent,
+                            timelineTrackTextMessage = trackTextMsg,
+                            timelineTrackText = trackText
+                        };
 
-                    TrackClicked(this, evtData);
+                        TrackClicked(this, evtData);
+                    }
+
+
+                    //show popup
+                    if (showPopupOnTrackClick && !string.IsNullOrEmpty(trackText))
+                    {
+                        TextBoxFrm tbform = new TextBoxFrm();
+                        tbform.SetupLabel("Details ...");
+                        tbform.SetupData(trackText);
+                        tbform.ShowDialog();
+                    }
                 }
-
-
-                //show popup
-                if (showPopupOnTrackClick && !string.IsNullOrEmpty(trackText))
+                catch (Exception e)
                 {
-                    TextBoxFrm tbform = new TextBoxFrm();
-                    tbform.SetupLabel("Details ...");
-                    tbform.SetupData(trackText);
-                    tbform.ShowDialog();
+                    ExceptionHandler.Instance.HandleException(e);
                 }
             });
 
@@ -267,19 +303,40 @@ namespace LogfileMetaAnalyser.Controls
             hScrollBar1.LargeChange = 25;
             hScrollBar1.SmallChange = 8;
             hScrollBar1.ValueChanged += new EventHandler((object o, EventArgs a) => {
-                offset_x = hScrollBar1.Value;
+                try
+                {
+                    offset_x = hScrollBar1.Value;
+                }
+                catch (Exception e)
+                {
+                    ExceptionHandler.Instance.HandleException(e);
+                }
             });
 
             vScrollBar1.LargeChange = 25;
             vScrollBar1.SmallChange = 8;
             vScrollBar1.ValueChanged += new EventHandler((object o, EventArgs a) => {
-                offset_y = vScrollBar1.Value;
+                try
+                {
+                    offset_y = vScrollBar1.Value;
+                }
+                catch (Exception e)
+                {
+                    ExceptionHandler.Instance.HandleException(e);
+                }
             });
 
             //buttons
             button_zoomAll.Click += new EventHandler((object o, EventArgs args) => {
-                isZoomChangeOperation.isOutstanding = true;
-                zoomfactor = 1f;
+                try
+                {
+                    isZoomChangeOperation.isOutstanding = true;
+                    zoomfactor = 1f;
+                }
+                catch (Exception e)
+                {
+                    ExceptionHandler.Instance.HandleException(e);
+                }
             });
             var tt_button_zoomAll = new ToolTip();
             tt_button_zoomAll.SetToolTip(button_zoomAll, "zoom out and show all");
@@ -298,30 +355,44 @@ namespace LogfileMetaAnalyser.Controls
 
             button_ShowAll.Click += new EventHandler((object o, EventArgs args) =>
             {
-                Form fm = new Form();
+                try
+                {
+                    Form fm = new Form();
 
-                fm.Owner = Application.OpenForms[0];                
-                fm.Size = new Size(500, 300);
-                fm.Location = new Point(10, 10);
-                fm.ShowIcon = false;
-                fm.ShowInTaskbar = false;
-                fm.MinimizeBox = false;
-                fm.StartPosition = FormStartPosition.CenterScreen;
-                fm.WindowState = FormWindowState.Maximized;
-                fm.Text = "time trace full screen";
+                    fm.Owner = Application.OpenForms[0];                
+                    fm.Size = new Size(500, 300);
+                    fm.Location = new Point(10, 10);
+                    fm.ShowIcon = false;
+                    fm.ShowInTaskbar = false;
+                    fm.MinimizeBox = false;
+                    fm.StartPosition = FormStartPosition.CenterScreen;
+                    fm.WindowState = FormWindowState.Maximized;
+                    fm.Text = "time trace full screen";
 
-                fm.Controls.Add(thePanel);
-                zoomfactor = 1f;
-                fm.ShowDialog();
+                    fm.Controls.Add(thePanel);
+                    zoomfactor = 1f;
+                    fm.ShowDialog();
 
-                this.tableLayoutPanel1.Controls.Add(this.thePanel, 0, 1);
+                    this.tableLayoutPanel1.Controls.Add(this.thePanel, 0, 1);
+                }
+                catch (Exception e)
+                {
+                    ExceptionHandler.Instance.HandleException(e);
+                }
             });
             var tt_button_ShowAll = new ToolTip();
             tt_button_ShowAll.SetToolTip(button_ShowAll, "extract to own maximized window");
 
             button_exportGraph.Click += new EventHandler((object o, EventArgs args) =>
                {
-                   ExportGraph();
+                   try
+                   {
+                       ExportGraph();
+                   }
+                   catch (Exception e)
+                   {
+                       ExceptionHandler.Instance.HandleException(e);
+                   }
                });
             var tt_button_Export = new ToolTip();
             tt_button_Export.SetToolTip(button_exportGraph, "Export this graph as image file");
@@ -330,32 +401,39 @@ namespace LogfileMetaAnalyser.Controls
             //key press events           
             thePanel.PreviewKeyDown += new PreviewKeyDownEventHandler( (object o, PreviewKeyDownEventArgs args) => 
             {
-                switch (args.KeyCode)
+                try
                 {
-                    case Keys.OemMinus:
-                    case Keys.Subtract:
-                        zoomfactor -= zoomrate;
-                        break;
+                    switch (args.KeyCode)
+                    {
+                        case Keys.OemMinus:
+                        case Keys.Subtract:
+                            zoomfactor -= zoomrate;
+                            break;
 
-                    case Keys.PageDown:
-                        zoomfactor -= zoomrate * 3;
-                        break;
+                        case Keys.PageDown:
+                            zoomfactor -= zoomrate * 3;
+                            break;
 
-                    case Keys.Oemplus:
-                    case Keys.Add:
-                        zoomfactor += zoomrate;
-                        break;
+                        case Keys.Oemplus:
+                        case Keys.Add:
+                            zoomfactor += zoomrate;
+                            break;
 
-                    case Keys.PageUp:
-                        zoomfactor += zoomrate * 3;
-                        break;
+                        case Keys.PageUp:
+                            zoomfactor += zoomrate * 3;
+                            break;
 
-                    case Keys.Multiply:
-                    case Keys.Zoom:
-                        isZoomChangeOperation.isOutstanding = true;
-                        zoomfactor = 1f;
-                        break;
-                } 
+                        case Keys.Multiply:
+                        case Keys.Zoom:
+                            isZoomChangeOperation.isOutstanding = true;
+                            zoomfactor = 1f;
+                            break;
+                    }
+                }
+                catch (Exception e)
+                {
+                    ExceptionHandler.Instance.HandleException(e);
+                }
             });
 
  
@@ -396,30 +474,37 @@ namespace LogfileMetaAnalyser.Controls
 
             track.OnChangeTrackEventList += new EventHandler((object o, EventArgs e) =>
             {
-                var trackInput = (TimelineTrack)o;
-                var vrtTrackInput = timelineTracks.Where(t => t.baseTrack == trackInput).FirstOrDefault();
-
-                if (vrtTrackInput != null)
+                try
                 {
-                    var vrtEventList = trackInput.trackEvents.Select(ev => vrtTimelineTrackEvent.FromTimelineTrackEvent(trackInput, ev));
+                    var trackInput = (TimelineTrack)o;
+                    var vrtTrackInput = timelineTracks.Where(t => t.baseTrack == trackInput).FirstOrDefault();
 
-                    vrtTrackInput.vrtTrackEvents = vrtEventList.ToList();
+                    if (vrtTrackInput != null)
+                    {
+                        var vrtEventList = trackInput.trackEvents.Select(ev => vrtTimelineTrackEvent.FromTimelineTrackEvent(trackInput, ev));
 
-                    vrtTrackInput.RearrangeTrackevents();
-                    vrtTrackInput.SetToolTipText(trackInput);
+                        vrtTrackInput.vrtTrackEvents = vrtEventList.ToList();
+
+                        vrtTrackInput.RearrangeTrackevents();
+                        vrtTrackInput.SetToolTipText(trackInput);
+                    }
+
+                    if (timelineTracks.Where(t => t.isValid).HasNoData() == false)
+                    {
+                        timestamp_start_abs = timelineTracks.Where(t => t.isValid).Min(tx => tx.baseTrack.trackStart);  
+                        timestamp_end_abs = timelineTracks.Where(t => t.isValid).Max(tx => tx.baseTrack.trackEnd);
+                        timeSpan_abs = timestamp_end_abs - timestamp_start_abs;
+                    }
+
+                    zoomfactor = 1f;
+                    isZoomChangeOperation.isOutstanding = true;
+
+                    RefreshControl();
                 }
-
-                if (timelineTracks.Where(t => t.isValid).HasNoData() == false)
+                catch (Exception exception)
                 {
-                    timestamp_start_abs = timelineTracks.Where(t => t.isValid).Min(tx => tx.baseTrack.trackStart);  
-                    timestamp_end_abs = timelineTracks.Where(t => t.isValid).Max(tx => tx.baseTrack.trackEnd);
-                    timeSpan_abs = timestamp_end_abs - timestamp_start_abs;
+                    ExceptionHandler.Instance.HandleException(exception);
                 }
-
-                zoomfactor = 1f;
-                isZoomChangeOperation.isOutstanding = true;
-
-                RefreshControl();
             });
 
 
@@ -464,9 +549,16 @@ namespace LogfileMetaAnalyser.Controls
 
         private void ThePanel_OnPaint(object sender, PaintEventArgs args)
         {
-            RefreshVirtualClip();
-            PanelPaint(args);
-            RefreshVirtualClipPostPaint();
+            try
+            {
+                RefreshVirtualClip();
+                PanelPaint(args);
+                RefreshVirtualClipPostPaint();
+            }
+            catch (Exception e)
+            {
+                ExceptionHandler.Instance.HandleException(e);
+            }
         }
 
         private void RefreshControl()
