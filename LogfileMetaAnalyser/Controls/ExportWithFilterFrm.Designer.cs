@@ -28,10 +28,12 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ExportWithFilterFrm));
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ExportWithFilterFrm));
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.button_delprofile = new System.Windows.Forms.Button();
@@ -40,9 +42,12 @@
             this.label1 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.checkBox_inputOpt_nlog = new System.Windows.Forms.CheckBox();
+            this.checkBox_inputOpt_jobservice = new System.Windows.Forms.CheckBox();
             this.gridInputfiles = new System.Windows.Forms.DataGridView();
-            this.colCheckbox = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.colFilename = new System.Windows.Forms.DataGridViewTextBoxColumn(); 
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.panel1 = new System.Windows.Forms.Panel();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
@@ -52,6 +57,7 @@
             this.checkBox_mergeFiles = new System.Windows.Forms.CheckBox();
             this.textBox_destFolder = new System.Windows.Forms.TextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.treeActivities = new LogfileMetaAnalyser.Controls.ExTreeView();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.tableLayoutPanel_FilterByLogProperties = new System.Windows.Forms.TableLayoutPanel();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
@@ -65,14 +71,20 @@
             this.colIgnoreCase = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.colMustMatch = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.colApplyWhen = new System.Windows.Forms.DataGridViewComboBoxColumn();
+            this.colCheckbox = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.colFilename = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            this.tableLayoutPanel5.SuspendLayout();
+            this.groupBox4.SuspendLayout();
+            this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridInputfiles)).BeginInit();
             this.tabPage2.SuspendLayout();
             this.panel1.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
+            this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -186,7 +198,7 @@
             // 
             // tabPage1
             // 
-            this.tabPage1.Controls.Add(this.gridInputfiles);
+            this.tabPage1.Controls.Add(this.tableLayoutPanel5);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Margin = new System.Windows.Forms.Padding(0);
             this.tabPage1.Name = "tabPage1";
@@ -196,17 +208,96 @@
             this.tabPage1.Text = "input files";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // tableLayoutPanel5
+            // 
+            this.tableLayoutPanel5.ColumnCount = 2;
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 67F));
+            this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33F));
+            this.tableLayoutPanel5.Controls.Add(this.groupBox4, 1, 0);
+            this.tableLayoutPanel5.Controls.Add(this.gridInputfiles, 0, 0);
+            this.tableLayoutPanel5.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel5.Location = new System.Drawing.Point(4, 3);
+            this.tableLayoutPanel5.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.tableLayoutPanel5.Name = "tableLayoutPanel5";
+            this.tableLayoutPanel5.RowCount = 1;
+            this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel5.Size = new System.Drawing.Size(919, 151);
+            this.tableLayoutPanel5.TabIndex = 1;
+            // 
+            // groupBox4
+            // 
+            this.groupBox4.Controls.Add(this.panel2);
+            this.groupBox4.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBox4.Location = new System.Drawing.Point(619, 3);
+            this.groupBox4.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.groupBox4.Size = new System.Drawing.Size(296, 145);
+            this.groupBox4.TabIndex = 1;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Text = "Input options";
+            // 
+            // panel2
+            // 
+            this.panel2.AutoScroll = true;
+            this.panel2.Controls.Add(this.checkBox_inputOpt_nlog);
+            this.panel2.Controls.Add(this.checkBox_inputOpt_jobservice);
+            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.panel2.Location = new System.Drawing.Point(4, 16);
+            this.panel2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(288, 126);
+            this.panel2.TabIndex = 0;
+            // 
+            // checkBox_inputOpt_nlog
+            // 
+            this.checkBox_inputOpt_nlog.AutoSize = true;
+            this.checkBox_inputOpt_nlog.Location = new System.Drawing.Point(7, 3);
+            this.checkBox_inputOpt_nlog.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.checkBox_inputOpt_nlog.Name = "checkBox_inputOpt_nlog";
+            this.checkBox_inputOpt_nlog.Size = new System.Drawing.Size(92, 17);
+            this.checkBox_inputOpt_nlog.TabIndex = 4;
+            this.checkBox_inputOpt_nlog.Text = "NLog log type";
+            this.checkBox_inputOpt_nlog.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_inputOpt_jobservice
+            // 
+            this.checkBox_inputOpt_jobservice.AutoSize = true;
+            this.checkBox_inputOpt_jobservice.Location = new System.Drawing.Point(7, 30);
+            this.checkBox_inputOpt_jobservice.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.checkBox_inputOpt_jobservice.Name = "checkBox_inputOpt_jobservice";
+            this.checkBox_inputOpt_jobservice.Size = new System.Drawing.Size(119, 17);
+            this.checkBox_inputOpt_jobservice.TabIndex = 3;
+            this.checkBox_inputOpt_jobservice.Text = "JobService log type";
+            this.checkBox_inputOpt_jobservice.UseVisualStyleBackColor = true;
+            // 
             // gridInputfiles
             // 
             this.gridInputfiles.AllowUserToAddRows = false;
             this.gridInputfiles.AllowUserToDeleteRows = false;
             this.gridInputfiles.AllowUserToResizeRows = false;
             this.gridInputfiles.BackgroundColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.gridInputfiles.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             this.gridInputfiles.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.gridInputfiles.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.colCheckbox,
-            this.colFilename,
-            this.colFiletype});
+            this.colFilename});
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.gridInputfiles.DefaultCellStyle = dataGridViewCellStyle2;
             this.gridInputfiles.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gridInputfiles.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnEnter;
             this.gridInputfiles.Location = new System.Drawing.Point(4, 3);
@@ -215,35 +306,8 @@
             this.gridInputfiles.RowHeadersVisible = false;
             this.gridInputfiles.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
             this.gridInputfiles.ShowEditingIcon = false;
-            this.gridInputfiles.Size = new System.Drawing.Size(919, 151);
+            this.gridInputfiles.Size = new System.Drawing.Size(607, 145);
             this.gridInputfiles.TabIndex = 2;
-            // 
-            // colCheckbox
-            // 
-            this.colCheckbox.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.colCheckbox.Frozen = true;
-            this.colCheckbox.HeaderText = "";
-            this.colCheckbox.MinimumWidth = 25;
-            this.colCheckbox.Name = "colCheckbox";
-            this.colCheckbox.Width = 25;
-            // 
-            // colFilename
-            // 
-            this.colFilename.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.colFilename.FillWeight = 70F;
-            this.colFilename.HeaderText = "File name";
-            this.colFilename.Name = "colFilename";
-            this.colFilename.ReadOnly = true;
-            this.colFilename.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // colFiletype
-            // 
-            this.colFiletype.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.colFiletype.FillWeight = 30F;
-            this.colFiletype.HeaderText = "File type";
-            this.colFiletype.Name = "colFiletype";
-            this.colFiletype.ReadOnly = true;
-            this.colFiletype.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             // 
             // tabPage2
             // 
@@ -347,6 +411,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.treeActivities);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.groupBox1.Location = new System.Drawing.Point(4, 229);
@@ -357,6 +422,17 @@
             this.groupBox1.TabIndex = 3;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "filter by activity (job):";
+            // 
+            // treeActivities
+            // 
+            this.treeActivities.CheckBoxes = true;
+            this.treeActivities.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.treeActivities.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.treeActivities.Location = new System.Drawing.Point(4, 16);
+            this.treeActivities.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.treeActivities.Name = "treeActivities";
+            this.treeActivities.Size = new System.Drawing.Size(927, 164);
+            this.treeActivities.TabIndex = 0;
             // 
             // groupBox2
             // 
@@ -458,34 +534,6 @@
             this.gridRegexFilter.AllowUserToDeleteRows = false;
             this.gridRegexFilter.AllowUserToResizeRows = false;
             this.gridRegexFilter.BackgroundColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.gridRegexFilter.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            this.gridRegexFilter.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.gridRegexFilter.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.dataGridViewCheckBoxColumn1,
-            this.colRegex,
-            this.colIgnoreCase,
-            this.colMustMatch,
-            this.colApplyWhen});
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.gridRegexFilter.DefaultCellStyle = dataGridViewCellStyle2;
-            this.gridRegexFilter.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gridRegexFilter.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnEnter;
-            this.gridRegexFilter.Location = new System.Drawing.Point(4, 3);
-            this.gridRegexFilter.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.gridRegexFilter.Name = "gridRegexFilter";
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
             dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
@@ -493,7 +541,35 @@
             dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.gridRegexFilter.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            this.gridRegexFilter.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            this.gridRegexFilter.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.gridRegexFilter.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.dataGridViewCheckBoxColumn1,
+            this.colRegex,
+            this.colIgnoreCase,
+            this.colMustMatch,
+            this.colApplyWhen});
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.gridRegexFilter.DefaultCellStyle = dataGridViewCellStyle4;
+            this.gridRegexFilter.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gridRegexFilter.EditMode = System.Windows.Forms.DataGridViewEditMode.EditOnEnter;
+            this.gridRegexFilter.Location = new System.Drawing.Point(4, 3);
+            this.gridRegexFilter.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.gridRegexFilter.Name = "gridRegexFilter";
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.gridRegexFilter.RowHeadersDefaultCellStyle = dataGridViewCellStyle5;
             this.gridRegexFilter.RowHeadersVisible = false;
             this.gridRegexFilter.Size = new System.Drawing.Size(919, 158);
             this.gridRegexFilter.TabIndex = 0;
@@ -542,6 +618,24 @@
             this.colApplyWhen.MaxDropDownItems = 2;
             this.colApplyWhen.Name = "colApplyWhen";
             // 
+            // colCheckbox
+            // 
+            this.colCheckbox.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.colCheckbox.Frozen = true;
+            this.colCheckbox.HeaderText = "";
+            this.colCheckbox.MinimumWidth = 25;
+            this.colCheckbox.Name = "colCheckbox";
+            this.colCheckbox.Width = 25;
+            // 
+            // colFilename
+            // 
+            this.colFilename.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.colFilename.FillWeight = 70F;
+            this.colFilename.HeaderText = "File name";
+            this.colFilename.Name = "colFilename";
+            this.colFilename.ReadOnly = true;
+            this.colFilename.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
             // ExportWithFilterFrm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -560,11 +654,16 @@
             this.tableLayoutPanel2.PerformLayout();
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
+            this.tableLayoutPanel5.ResumeLayout(false);
+            this.groupBox4.ResumeLayout(false);
+            this.panel2.ResumeLayout(false);
+            this.panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridInputfiles)).EndInit();
             this.tabPage2.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.tableLayoutPanel3.ResumeLayout(false);
             this.tableLayoutPanel3.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
             this.flowLayoutPanel1.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
@@ -598,18 +697,22 @@
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_FilterByLogProperties;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel5;
+        private System.Windows.Forms.GroupBox groupBox4;
+        private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.CheckBox checkBox_inputOpt_nlog;
+        private System.Windows.Forms.CheckBox checkBox_inputOpt_jobservice;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox textBox_destFolder;
         private System.Windows.Forms.DataGridView gridInputfiles;
         private System.Windows.Forms.DataGridView gridRegexFilter;
         private ExTreeView treeActivities;
-        private System.Windows.Forms.DataGridViewCheckBoxColumn colCheckbox;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colFilename;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colFiletype;
         private System.Windows.Forms.DataGridViewCheckBoxColumn dataGridViewCheckBoxColumn1;
         private System.Windows.Forms.DataGridViewTextBoxColumn colRegex;
         private System.Windows.Forms.DataGridViewCheckBoxColumn colIgnoreCase;
         private System.Windows.Forms.DataGridViewCheckBoxColumn colMustMatch;
         private System.Windows.Forms.DataGridViewComboBoxColumn colApplyWhen;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn colCheckbox;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colFilename;
     }
 }
