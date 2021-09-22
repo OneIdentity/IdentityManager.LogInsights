@@ -109,14 +109,8 @@ namespace LogfileMetaAnalyser.LogReader
             _client.Dispose();
         }
 
-        protected override IAsyncEnumerable<LogEntry> OnReadAsync(
-            CancellationToken cancellationToken)
-        {
-            return _ReadUnOrdered(cancellationToken)
-                .OrderBy(e => e.TimeStamp);
-        }
-
-        private async IAsyncEnumerable<LogEntry> _ReadUnOrdered([EnumeratorCancellation] CancellationToken cancellationToken)
+        protected override async IAsyncEnumerable<LogEntry> OnReadAsync(
+            [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             var events = new Events(_client);
 
@@ -186,7 +180,7 @@ namespace LogfileMetaAnalyser.LogReader
 
             var entryNo = 1;
             var lineNo = 1;
-            foreach (var row in table.Rows)
+            foreach (var row in table.Rows.OrderBy(r => (DateTime)r[timestampIdx]))
             {
                 var locator = new Locator(entryNo, lineNo, _connString.Query);
 
