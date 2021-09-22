@@ -43,11 +43,9 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
-            this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.panel2 = new System.Windows.Forms.Panel();
-            this.checkBox_inputOpt_nlog = new System.Windows.Forms.CheckBox();
-            this.checkBox_inputOpt_jobservice = new System.Windows.Forms.CheckBox();
             this.gridInputfiles = new System.Windows.Forms.DataGridView();
+            this.colCheckbox = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.colFilename = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.panel1 = new System.Windows.Forms.Panel();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
@@ -71,15 +69,11 @@
             this.colIgnoreCase = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.colMustMatch = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.colApplyWhen = new System.Windows.Forms.DataGridViewComboBoxColumn();
-            this.colCheckbox = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.colFilename = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tableLayoutPanel5.SuspendLayout();
-            this.groupBox4.SuspendLayout();
-            this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridInputfiles)).BeginInit();
             this.tabPage2.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -210,10 +204,9 @@
             // 
             // tableLayoutPanel5
             // 
-            this.tableLayoutPanel5.ColumnCount = 2;
+            this.tableLayoutPanel5.ColumnCount = 1;
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 67F));
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33F));
-            this.tableLayoutPanel5.Controls.Add(this.groupBox4, 1, 0);
             this.tableLayoutPanel5.Controls.Add(this.gridInputfiles, 0, 0);
             this.tableLayoutPanel5.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel5.Location = new System.Drawing.Point(4, 3);
@@ -223,54 +216,6 @@
             this.tableLayoutPanel5.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel5.Size = new System.Drawing.Size(919, 151);
             this.tableLayoutPanel5.TabIndex = 1;
-            // 
-            // groupBox4
-            // 
-            this.groupBox4.Controls.Add(this.panel2);
-            this.groupBox4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.groupBox4.Location = new System.Drawing.Point(619, 3);
-            this.groupBox4.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.groupBox4.Size = new System.Drawing.Size(296, 145);
-            this.groupBox4.TabIndex = 1;
-            this.groupBox4.TabStop = false;
-            this.groupBox4.Text = "Input options";
-            // 
-            // panel2
-            // 
-            this.panel2.AutoScroll = true;
-            this.panel2.Controls.Add(this.checkBox_inputOpt_nlog);
-            this.panel2.Controls.Add(this.checkBox_inputOpt_jobservice);
-            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.panel2.Location = new System.Drawing.Point(4, 16);
-            this.panel2.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(288, 126);
-            this.panel2.TabIndex = 0;
-            // 
-            // checkBox_inputOpt_nlog
-            // 
-            this.checkBox_inputOpt_nlog.AutoSize = true;
-            this.checkBox_inputOpt_nlog.Location = new System.Drawing.Point(7, 3);
-            this.checkBox_inputOpt_nlog.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.checkBox_inputOpt_nlog.Name = "checkBox_inputOpt_nlog";
-            this.checkBox_inputOpt_nlog.Size = new System.Drawing.Size(92, 17);
-            this.checkBox_inputOpt_nlog.TabIndex = 4;
-            this.checkBox_inputOpt_nlog.Text = "NLog log type";
-            this.checkBox_inputOpt_nlog.UseVisualStyleBackColor = true;
-            // 
-            // checkBox_inputOpt_jobservice
-            // 
-            this.checkBox_inputOpt_jobservice.AutoSize = true;
-            this.checkBox_inputOpt_jobservice.Location = new System.Drawing.Point(7, 30);
-            this.checkBox_inputOpt_jobservice.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.checkBox_inputOpt_jobservice.Name = "checkBox_inputOpt_jobservice";
-            this.checkBox_inputOpt_jobservice.Size = new System.Drawing.Size(119, 17);
-            this.checkBox_inputOpt_jobservice.TabIndex = 3;
-            this.checkBox_inputOpt_jobservice.Text = "JobService log type";
-            this.checkBox_inputOpt_jobservice.UseVisualStyleBackColor = true;
             // 
             // gridInputfiles
             // 
@@ -306,8 +251,26 @@
             this.gridInputfiles.RowHeadersVisible = false;
             this.gridInputfiles.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
             this.gridInputfiles.ShowEditingIcon = false;
-            this.gridInputfiles.Size = new System.Drawing.Size(607, 145);
+            this.gridInputfiles.Size = new System.Drawing.Size(911, 145);
             this.gridInputfiles.TabIndex = 2;
+            // 
+            // colCheckbox
+            // 
+            this.colCheckbox.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.colCheckbox.Frozen = true;
+            this.colCheckbox.HeaderText = "";
+            this.colCheckbox.MinimumWidth = 25;
+            this.colCheckbox.Name = "colCheckbox";
+            this.colCheckbox.Width = 25;
+            // 
+            // colFilename
+            // 
+            this.colFilename.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.colFilename.FillWeight = 70F;
+            this.colFilename.HeaderText = "File name";
+            this.colFilename.Name = "colFilename";
+            this.colFilename.ReadOnly = true;
+            this.colFilename.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             // 
             // tabPage2
             // 
@@ -618,24 +581,6 @@
             this.colApplyWhen.MaxDropDownItems = 2;
             this.colApplyWhen.Name = "colApplyWhen";
             // 
-            // colCheckbox
-            // 
-            this.colCheckbox.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.colCheckbox.Frozen = true;
-            this.colCheckbox.HeaderText = "";
-            this.colCheckbox.MinimumWidth = 25;
-            this.colCheckbox.Name = "colCheckbox";
-            this.colCheckbox.Width = 25;
-            // 
-            // colFilename
-            // 
-            this.colFilename.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.colFilename.FillWeight = 70F;
-            this.colFilename.HeaderText = "File name";
-            this.colFilename.Name = "colFilename";
-            this.colFilename.ReadOnly = true;
-            this.colFilename.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
             // ExportWithFilterFrm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -655,9 +600,6 @@
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tableLayoutPanel5.ResumeLayout(false);
-            this.groupBox4.ResumeLayout(false);
-            this.panel2.ResumeLayout(false);
-            this.panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridInputfiles)).EndInit();
             this.tabPage2.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
@@ -698,10 +640,6 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_FilterByLogProperties;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel5;
-        private System.Windows.Forms.GroupBox groupBox4;
-        private System.Windows.Forms.Panel panel2;
-        private System.Windows.Forms.CheckBox checkBox_inputOpt_nlog;
-        private System.Windows.Forms.CheckBox checkBox_inputOpt_jobservice;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox textBox_destFolder;
         private System.Windows.Forms.DataGridView gridInputfiles;
