@@ -28,7 +28,7 @@ namespace LogfileMetaAnalyser.Controls
 //          rtbLog.Document.ReadOnly = true;
 //          rtbLog.Document.Multiline = true;
 //          rtbLog.CurrentLineHighlightingVisible = true;
-//            rtbLog.LineNumberMarginVisible = true;
+            rtbLog.ShowLineNumbers = true;
 
             buttonExport.Enabled = false;
             buttonShowInEditor.Enabled = false; 
@@ -180,7 +180,7 @@ namespace LogfileMetaAnalyser.Controls
                     .ToArray();
             }
 
-            //rtbLog.LineNumberMarginVisible = !isOpenGap && theMessages[0].textLocator?.fileLinePosition > 0;
+            rtbLog.ShowLineNumbers = !isOpenGap && theMessages[0].textLocator?.fileLinePosition > 0;
 
             bool fullyCompleteMessage = theMessages[0].textLocator?.fileLinePosition > 0;
 
@@ -249,9 +249,13 @@ namespace LogfileMetaAnalyser.Controls
                 
                 rtbLog.Text = "";
 
-                //if (rtbLog.LineNumberMarginVisible)
-                //    rtbLog.Document.AutoLineNumberingBase = theMessage.contextMsgBefore.GetFirstElemOrDefault(theMessage).textLocator.fileLinePosition.Int();
-                
+                if (rtbLog.ShowLineNumbers)
+                {
+                    var tmFirst = theMessage.contextMsgBefore.GetFirstElemOrDefault(theMessage);
+
+                    rtbLog.LineNumberOffset = (int) tmFirst.textLocator.fileLinePosition-1;
+                }
+
 
                 //pre lines
                 if (theMessage.contextMsgBefore != null)
