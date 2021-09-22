@@ -247,7 +247,7 @@ namespace LogfileMetaAnalyser.Detectors
                 if (transList.Count == 0) //we ignore open transactions where the start was not logged
                     return;
                                 
-                var tran = transList.Where(t => t.dtTimestampEnd.IsNull() && !t.dtTimestampStart.IsNull()).LastOrDefault();
+                var tran = transList.LastOrDefault(t => t.dtTimestampEnd.IsNull() && !t.dtTimestampStart.IsNull());
                 if (tran != null)
                 {
                     tran.dtTimestampEnd = msg.messageTimestamp; 
@@ -298,7 +298,7 @@ namespace LogfileMetaAnalyser.Detectors
                     var rms = regex_SelectTableStatement.Matches(msg.messageText);
 
                     foreach (Match m in rms)
-                        if (!sqlcmd.assignedTablenames.Any(c => c == m.Groups["cmdSelectTable"].Value))
+                        if (sqlcmd.assignedTablenames.All(c => c != m.Groups["cmdSelectTable"].Value))
                             sqlcmd.assignedTablenames.Add(m.Groups["cmdSelectTable"].Value);
 
                     sqlcmd.sqlCmdType = SQLCmdType.Select;

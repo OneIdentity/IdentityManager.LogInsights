@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 using LogfileMetaAnalyser.Helpers;
 using LogfileMetaAnalyser.LogReader;
-
+using System.Threading;
 
 
 namespace LogfileMetaAnalyser
@@ -88,19 +88,26 @@ namespace LogfileMetaAnalyser
         /// </summary>
         public string messageText
         {
-            get
+            get 
             {
-                //generate a message display
-                string id = pid ?? "";
+                LazyInitializer.EnsureInitialized(ref _MessageText, () =>
+                {
+                    //generate a message display
+                    string id = pid ?? "";
 
-                if (!string.IsNullOrEmpty(spid))
-                    id = $"{id} {spid}";
+                    if (!string.IsNullOrEmpty(spid))
+                        id = $"{id} {spid}";
+					
+					string idspace = (!string.IsNullOrEmpty(id)) ? " " : "";
 
-                string idspace = (!string.IsNullOrEmpty(id)) ? " " : "";
+                    return $"{messageTimestamp:yyyy-MM-dd HH:mm:ss.ffff} {loggerLevel} ({loggerSource ?? ""}{idspace}{id}): {payloadMessage ?? ""}";                
+                });
 
-                return $"{messageTimestamp:yyyy-MM-dd HH:mm:ss.ffff} {loggerLevel} ({loggerSource ?? ""}{idspace}{id}): {payloadMessage ?? ""}";                
+                return _MessageText;
             }
         }
+
+        private string _MessageText;
 
 
         //calculated attributes
@@ -231,14 +238,13 @@ namespace LogfileMetaAnalyser
 
         public bool EqualMetaData(TextMessage refMsg, int tolleranceTimestampDiff_ms = 85)
         {
-            return (
+            return
                 //refMsg.loggerLevel == loggerLevel &&
-                refMsg.loggerSource == loggerSource && 
+                refMsg.loggerSource == loggerSource &&
                 refMsg.textLocator.fileName == textLocator.fileName &&
                 refMsg.spid == spid &&
                 refMsg.pid == pid &&
-                refMsg.messageTimestamp.AlmostEqual(messageTimestamp, tolleranceTimestampDiff_ms)
-                );
+                refMsg.messageTimestamp.AlmostEqual(messageTimestamp, tolleranceTimestampDiff_ms);
         }
 
     }

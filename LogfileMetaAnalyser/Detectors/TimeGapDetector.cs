@@ -27,31 +27,13 @@ namespace LogfileMetaAnalyser.Detectors
 
         private List<TimeGap> timegaps = new List<TimeGap>();
 
-        public override string caption
-        {
-            get
-            {
-                return "Found large time gaps";
-            }
-        }
+        public override string caption => "Found large time gaps";
 
 
-        public override string identifier
-        {
-            get
-            {
-                return "#TimeGapDetector";
-            }
-        }
+        public override string identifier =>"#TimeGapDetector";
 
 
-        public override string[] requiredParentDetectors
-        {
-            get
-            {
-                return new string[] { "#TimeRangeDetector" };
-            }
-        }
+        public override string[] requiredParentDetectors => new []{"#TimeRangeDetector"};
 
 
         public void InitializeDetector()

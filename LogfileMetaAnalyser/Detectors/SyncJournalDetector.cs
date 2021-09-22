@@ -22,29 +22,11 @@ namespace LogfileMetaAnalyser.Detectors
         public SyncJournalDetector() : base(TextReadMode.SingleMessage)
         { }
 
-        public override string caption
-        {
-            get
-            {
-                return "Synchronization step journal";
-            }
-        }
+        public override string caption => "Synchronization step journal";
 
-        public override string identifier
-        {
-            get
-            {
-                return "#SyncJournalDetector";
-            }
-        }
+        public override string identifier => "#SyncJournalDetector";
 
-        public override string[] requiredParentDetectors
-        {
-            get
-            {
-                return new string[] { "#ConnectorsDetector" };
-            }
-        }
+        public override string[] requiredParentDetectors => new string[] { "#ConnectorsDetector" };
 
         public void InitializeDetector()
         {
@@ -117,15 +99,13 @@ namespace LogfileMetaAnalyser.Detectors
                     else
                     {
                         var journal = GetFromDictOrLogWarning(dprJournalDict, uidJournal, "DPRJournalSetup", kp.Value.uuid);
-                        if (journal != null)
-                            journal.journalSetupElems.Add(jSetup);
+                        journal?.journalSetupElems.Add(jSetup);
                     }
                 }
                 else
                 {
                     var journalSetup = GetFromDictOrLogWarning(dprJournalSetupDict, parent, "DPRJournalSetup", jSetup.uuid, "DPRJournalSetup");
-                    if (journalSetup  != null)
-                        journalSetup.childElems.Add(jSetup);
+                    journalSetup?.childElems.Add(jSetup);
                 }
             }
             
@@ -143,8 +123,7 @@ namespace LogfileMetaAnalyser.Detectors
 
 
                 var journal = GetFromDictOrLogWarning(dprJournalDict, uidJournal, "DPRJournalMessage", kp.Value.uuid);
-                if (journal != null)
-                    journal.journalMessages.Add(kp.Value);
+                journal?.journalMessages.Add(kp.Value);
             }
 
 
@@ -159,8 +138,7 @@ namespace LogfileMetaAnalyser.Detectors
                 string uidJournal = kp.Value.Get("UID_DPRJournal");
 
                 var journal = GetFromDictOrLogWarning(dprJournalDict, uidJournal, "DPRJournalFailure", kp.Value.uuid);
-                if (journal != null)
-                    journal.journalFailures.Add(kp.Value);
+                journal?.journalFailures.Add(kp.Value);
             }
 
             //===========================================
@@ -184,14 +162,12 @@ namespace LogfileMetaAnalyser.Detectors
                     if (uidJournalFailure != "")
                     {
                         var journalFailure = GetFromDictOrLogWarning(dprJournalFailureDict, uidJournalFailure, "DPRJournalObject", dprJObj.uuid, "DPRJournalFailure");
-                        if (journalFailure != null)
-                            journalFailure.dprJournalObjects.Add(dprJObj);
+                        journalFailure?.dprJournalObjects.Add(dprJObj);
                     }
                     else  //if the parent is a DPRJournal record:
                     {
                         var journal = GetFromDictOrLogWarning(dprJournalDict, uidJournal, "DPRJournalObject", kp.Value.uuid);
-                        if (journal != null)
-                            journal.journalObjects.Add(dprJObj);
+                        journal?.journalObjects.Add(dprJObj);
                     }
                 }
             }
@@ -207,8 +183,7 @@ namespace LogfileMetaAnalyser.Detectors
                 string uidJournalObject = kp.Value.Get("UID_DPRJournalObject");
 
                 var journalObject = GetFromDictOrLogWarning(dprJournalObjectDict, uidJournalObject, "DPRJournalProperty", kp.Value.uuid, "DPRJournalObject");
-                if (journalObject != null)
-                    journalObject.dprJournalProperties.Add(kp.Value);
+                journalObject?.dprJournalProperties.Add(kp.Value);
             }
 
 
@@ -262,45 +237,59 @@ namespace LogfileMetaAnalyser.Detectors
                 DprJournal journal = kp.Value;
 
                 logger.Debug($"TryToAssignDprJournalToAProjection: run for DPRJournal '{journal.uuid}'");
-                
+
 
                 if (projections.Count == 1)
                 {
-                    logger.Trace("if we only found one projection, all journal entries must belong to it");                
+                    logger.Trace("if we only found one projection, all journal entries must belong to it");
                     journal.belongsToProjectionUuid = projections.First().uuid;
                     continue;
                 }
-                                                   
+
 
                 var projectionsInTimeRange = projections.Where(p => journal.dtTimestampStart.InRange(p.dtTimestampStart, p.dtTimestampEnd, 2000) &&
-                                                                    journal.dtTimestampEnd.InRange(p.dtTimestampStart, p.dtTimestampEnd, 10 * 1000));
+                                                                    journal.dtTimestampEnd.InRange(p.dtTimestampStart, p.dtTimestampEnd, 10 * 1000))
+                    .ToArray();
 
-                if (projectionsInTimeRange.Any())
+                switch (projectionsInTimeRange.Length)
                 {
-                    if (projectionsInTimeRange.Count() == 1)
+                    case 0:
+                        logger.Warning($"for DPRJournal '{journal.uuid}' no logged projection was found inside journal lifetime (from {journal.dtTimestampStart} to {journal.dtTimestampEnd}). This DPRJournal cannot be used!");
+                        continue;
+                    case 1:
                         journal.belongsToProjectionUuid = projectionsInTimeRange.First().uuid;
-                    else
+                        break;
+                    default:
                     {
                         //more than one projection spans over this DPRJournal object
                         //first, take all projections away that already have an journal assigned
-                        var projectionsInTimeRangeEx = projectionsInTimeRange.Where(p => !dprJournalDict.Any(x => x.Value.belongsToProjectionUuid == p.uuid));
+                        var projectionsInTimeRangeEx = projectionsInTimeRange.Where(p => dprJournalDict.All(x => x.Value.belongsToProjectionUuid != p.uuid)).ToArray();
 
-                        if (projectionsInTimeRangeEx.Any())
+                        switch (projectionsInTimeRangeEx.Length)
                         {
-                            if (projectionsInTimeRangeEx.Count() == 1)
-                                journal.belongsToProjectionUuid = projectionsInTimeRangeEx.First().uuid;
-                            else
+                            case 0:
+                                logger.Warning($"for DPRJournal '{journal.uuid}' no logged projection was found inside journal lifetime (from {journal.dtTimestampStart} to {journal.dtTimestampEnd}). This DPRJournal cannot be used!");
+                                continue;
+                            case 1:
+                                journal.belongsToProjectionUuid = projectionsInTimeRangeEx[0].uuid;
+                                break;
+                            default:
                             {
                                 //more than one unassigned projection spans over this DPRJournal object
                                 var projectionsInTimeRangeSameType = projectionsInTimeRangeEx.Where(p => p.projectionType == ProjectionType.Unknown ||
                                                                                                          p.projectionType == ProjectionType.AdHocProvision && journal.isAdHocProjection ||
-                                                                                                         p.projectionType != ProjectionType.AdHocProvision && !journal.isAdHocProjection);
+                                                                                                         p.projectionType != ProjectionType.AdHocProvision && !journal.isAdHocProjection)
+                                    .ToArray();
 
-                                if (projectionsInTimeRangeSameType.Any())
+                                switch (projectionsInTimeRangeSameType.Length)
                                 {
-                                    if (projectionsInTimeRangeSameType.Count() == 1)
-                                        journal.belongsToProjectionUuid = projectionsInTimeRangeSameType.First().uuid;
-                                    else
+                                    case 0:
+                                        logger.Warning($"for DPRJournal '{journal.uuid}' no logged projection of same projection type ({(journal.isAdHocProjection ? "AdHoc" : "Full")}) was found inside journal lifetime (from {journal.dtTimestampStart} to {journal.dtTimestampEnd}). This DPRJournal cannot be used!");
+                                        continue;
+                                    case 1:
+                                        journal.belongsToProjectionUuid = projectionsInTimeRangeSameType[0].uuid;
+                                        break;
+                                    default:
                                     {
                                         //well, we still have more than 1 projection where the time range and the type matches
 
@@ -313,46 +302,46 @@ namespace LogfileMetaAnalyser.Detectors
                                             string conDisp1 = journal.journalSetupElems[0].Get("OptionContextDisplay").Trim();
                                             string conDisp2 = journal.journalSetupElems[1].Get("OptionContextDisplay").Trim();
 
-                                            var projectionsInTimeRangeSameTypeSameConns = projectionsInTimeRangeSameType.Where(p =>
-                                                            (p.conn_IdentityManager == conDisp1 && p.conn_TargetSystem == conDisp2) ||
-                                                            (p.conn_IdentityManager == conDisp2 && p.conn_TargetSystem == conDisp1));
+                                            var projectionsInTimeRangeSameTypeSameConns = projectionsInTimeRangeSameType
+                                                .Where(p => (p.conn_IdentityManager == conDisp1 && p.conn_TargetSystem == conDisp2) 
+                                                            || (p.conn_IdentityManager == conDisp2 && p.conn_TargetSystem == conDisp1))
+                                                .ToArray();
 
-                                            if (projectionsInTimeRangeSameTypeSameConns.Any())
+                                            if (projectionsInTimeRangeSameTypeSameConns.Length > 0)
                                             {
-                                                if (projectionsInTimeRangeSameTypeSameConns.Count() == 1)
+                                                if (projectionsInTimeRangeSameTypeSameConns.Length == 1)
                                                 {
-                                                    journal.belongsToProjectionUuid = projectionsInTimeRangeSameTypeSameConns.First().uuid;
+                                                    journal.belongsToProjectionUuid = projectionsInTimeRangeSameTypeSameConns[0].uuid;
                                                     continue;
                                                 }
+
                                                 //else try again below
                                             }
                                             else
                                             {
                                                 logger.Warning($"for DPRJournal '{journal.uuid}' no logged projection of same projection type ({(journal.isAdHocProjection ? "AdHoc" : "Full")}) and equal connection displays was found inside journal lifetime (from {journal.dtTimestampStart} to {journal.dtTimestampEnd}). This DPRJournal cannot be used!");
-                                                continue;  //no, do not try again below
+                                                continue; //no, do not try again below
                                             }
                                         }
 
                                         //well, lets assign the closest start 
                                         var closestProjectionStart = projectionsInTimeRangeSameType
-                                                                                        .OrderBy(p => (p.dtTimestampStart - journal.dtTimestampStart).EnsurePositive())
-                                                                                        .First();
+                                            .OrderBy(p => (p.dtTimestampStart - journal.dtTimestampStart).EnsurePositive())
+                                            .First();
 
                                         journal.belongsToProjectionUuid = closestProjectionStart.uuid;
                                         logger.Warning($"for DPRJournal '{journal.uuid}' only a vague connection to a projection was found due to the closest difference between DPRJournal log entry and projection start log entry");
+                                        break;
                                     }
                                 }
-                                else
-                                    logger.Warning($"for DPRJournal '{journal.uuid}' no logged projection of same projection type ({(journal.isAdHocProjection ? "AdHoc" : "Full")}) was found inside journal lifetime (from {journal.dtTimestampStart} to {journal.dtTimestampEnd}). This DPRJournal cannot be used!");
+
+                                break;
                             }
                         }
-                        else
-                            logger.Warning($"for DPRJournal '{journal.uuid}' no logged projection was found inside journal lifetime (from {journal.dtTimestampStart} to {journal.dtTimestampEnd}). This DPRJournal cannot be used!");
+
+                        break;
                     }
                 }
-                else
-                    logger.Warning($"for DPRJournal '{journal.uuid}' no logged projection was found inside journal lifetime (from {journal.dtTimestampStart} to {journal.dtTimestampEnd}). This DPRJournal cannot be used!");
-                        
             } //foreach DPRJournal object
         }
 
@@ -450,23 +439,22 @@ namespace LogfileMetaAnalyser.Detectors
                 string updatedColumns = rm_ObjUpdate.Groups["columns"].Value;
                 string pkuid = rm_ObjUpdate.Groups["uid"].Value;
 
-                if (lstDprObject.ContainsKey(pkuid))
+
+                if (lstDprObject.TryGetValue(pkuid, out var dprObj))
                 {
                     logger.Debug($"found an update of object (type={objectType}; pk={pkuid}");
-                    lstDprObject[pkuid].PutDataFromUpdate(updatedColumns);
+                    dprObj.PutDataFromUpdate(updatedColumns);
 
                     //special handling for DprJournal
                     if (objectType == "dprjournal")
                     {
-                        lstDprObject[pkuid].dtTimestampEnd = msg.messageTimestamp;  //for the journal, we need this to have a time span for it
+                        dprObj.dtTimestampEnd = msg.messageTimestamp;  //for the journal, we need this to have a time span for it
 
                         var updatedColumnLst = SqlHelper.GetValuePairsFromUpdateCmd(updatedColumns);
-                        if (updatedColumnLst.ContainsKey("ProjectionState"))
+                        if (updatedColumnLst.TryGetValue("ProjectionState", out var newProjectionState))
                         {
-                            string newProjectionState = updatedColumnLst["ProjectionState"];
-
-                            if (string.Compare(newProjectionState, "Running", true) == 0)
-                                lstDprObject[pkuid].dtTimestampStart = msg.messageTimestamp;
+                            if (string.Compare(newProjectionState, "Running", StringComparison.OrdinalIgnoreCase) == 0)
+                                dprObj.dtTimestampStart = msg.messageTimestamp;
                         }
                     }
                 }                

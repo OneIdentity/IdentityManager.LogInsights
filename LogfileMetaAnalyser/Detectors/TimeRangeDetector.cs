@@ -23,20 +23,11 @@ namespace LogfileMetaAnalyser.Detectors
         private Dictionary<string, bool> startDateSet = new Dictionary<string, bool>();
                 
 
-        public override string caption
-        {
-            get {return "Log file time ranges and log level information"; }
-        }
+        public override string caption =>"Log file time ranges and log level information"; 
 
-        public override string category
-        {
-            get {return "General Log Data";}
-        }
+        public override string category => "General Log Data";
 
-        public override string identifier
-        {
-            get { return "#TimeRangeDetector"; }
-        }
+        public override string identifier => "#TimeRangeDetector"; 
 
 
         

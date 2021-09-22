@@ -212,7 +212,7 @@ namespace LogfileMetaAnalyser.Detectors
             if (!messageProcessed)
             {
                 //we have a life sign of this projection id
-                var unfinishedProjections = projections.Where(kp => kp.Key == msg.spid).SelectMany(x => x.Value).Where(p => !p.isDataComplete);
+                var unfinishedProjections = projections.Where(kp => kp.Key == msg.spid).SelectMany(x => x.Value).Where(p => !p.isDataComplete).ToArray();
                 foreach (var p in unfinishedProjections)
                     p.dtTimestampEnd = msg.messageTimestamp;
 
@@ -245,13 +245,13 @@ namespace LogfileMetaAnalyser.Detectors
                         logger.Trace($"regex match for rx regex_SyncStep: {regex_SyncStep.ToString()}");
 
                         //try to find the last unfinished projection of the same logger id
-                        var projection = projections.ContainsKey(msg.spid) ? projections[msg.spid].Where(p => !p.isDataComplete).LastOrDefault() : null;
+                        var projection = projections.ContainsKey(msg.spid) ? projections[msg.spid].LastOrDefault(p => !p.isDataComplete) : null;
 
                         //oh no, we got information about a projection which never started in the log file(s)
                         if (projection == null)
                         {
                             CreateNewProjection(null, msg);
-                            projection = projections[msg.spid].Where(p => !p.isDataComplete).LastOrDefault();
+                            projection = projections[msg.spid].LastOrDefault(p => !p.isDataComplete);
                         }
 
                         //create current step info, take the data from the group msg

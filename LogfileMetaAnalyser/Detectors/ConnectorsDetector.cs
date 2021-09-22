@@ -43,29 +43,11 @@ namespace LogfileMetaAnalyser.Detectors
         public ConnectorsDetector() : base(TextReadMode.SingleMessage)
         { }
 
-        public override string caption
-        {
-            get
-            {
-                return "Found OneIM connector communication";
-            }
-        }
+        public override string caption => "Found OneIM connector communication";
             
-        public override string identifier
-        {
-            get
-            {
-                return "#ConnectorsDetector";
-            }
-        }
-        
-        public override string[] requiredParentDetectors
-        {
-            get
-            {
-                return new string[] { "#SyncStructureDetector" };
-            }
-        }
+        public override string identifier =>"#ConnectorsDetector";
+
+        public override string[] requiredParentDetectors => new string[] {"#SyncStructureDetector"};
                   
 
        
@@ -80,9 +62,9 @@ namespace LogfileMetaAnalyser.Detectors
             foreach (var c in systemConnectorsAndConnections)
             {
                 c.Value.isDataComplete = true;
-                if (!c.Value.connectTimestamp.Any())
+                if (c.Value.connectTimestamp.Count == 0)
                     c.Value.connectTimestamp.Add(c.Value.dtTimestampStart);
-                if (!c.Value.disconnectTimestamp.Any())
+                if (c.Value.disconnectTimestamp.Count == 0)
                     c.Value.disconnectTimestamp.Add(c.Value.dtTimestampEnd);
             }
 
@@ -254,19 +236,19 @@ namespace LogfileMetaAnalyser.Detectors
                                                                                             t.connectTimestamp.Any() && 
                                                                                             t.disconnectTimestamp.Any()))
             {
-                var systemConnectorCanditates = systemConnectorsAndConnections.Values
+                var systemConnectorCandidates = systemConnectorsAndConnections.Values
                                                     .Where(t =>
                                                         t.systemConnType == SystemConnType.SystemConnector &&
                                                         t.belongsToSide == systemConnection.belongsToSide &&
                                                         t.systemConnectionSpid == "" &&
                                                         t.connectTimestamp.Any() &&
                                                         t.disconnectTimestamp.Any()
-                                                    );
+                                                    ).ToArray();
 
                 //match, when systemConnection has at least one connect/disconnect pair with a Connector
                 for (int connectNum = 0; connectNum < systemConnection.connectTimestamp.Count; connectNum++)
                 {
-                    foreach (var candi in systemConnectorCanditates)
+                    foreach (var candi in systemConnectorCandidates)
                         for (int candiConnectNum = 0; candiConnectNum < candi.connectTimestamp.Count; candiConnectNum++)
                             if (systemConnection.connectTimestamp[connectNum].AlmostEqual(candi.connectTimestamp[candiConnectNum], 1500) &&
                                 systemConnection.disconnectTimestamp[connectNum].AlmostEqual(candi.disconnectTimestamp[candiConnectNum], 1500)

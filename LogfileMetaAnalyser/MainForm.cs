@@ -63,7 +63,7 @@ namespace LogfileMetaAnalyser
             _datastoreViewer = new DataStoreViewer(_analyzerCore.datastore, _logfileFilterExporter, this, splitContainerRightIn.Panel1.Controls, splitContainerRightIn.Panel2.Controls);
 
 
-            _analyzerCore.OnReadProgressChanged += new EventHandler<double>((object o, double d) =>
+            _analyzerCore.ReadProgressChanged += new EventHandler<double>((object o, double d) =>
             {
                 GuiHelper.SetGuiSave(statusStrip1, () =>
                 {
