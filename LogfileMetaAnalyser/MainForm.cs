@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using LogfileMetaAnalyser.Controls;
 using LogfileMetaAnalyser.Helpers;
 using LogfileMetaAnalyser.Datastore;
+using LogfileMetaAnalyser.ExceptionHandling;
 using LogfileMetaAnalyser.LogReader;
 
 namespace LogfileMetaAnalyser
@@ -65,28 +66,49 @@ namespace LogfileMetaAnalyser
 
             _analyzerCore.ReadProgressChanged += new EventHandler<double>((object o, double d) =>
             {
-                GuiHelper.SetGuiSave(statusStrip1, () =>
+                try
                 {
-                    toolStripProgressBar1.Visible = d < 1D;
-               //     toolStripProgressBar1.Value = d.Int();
-                });
+                    GuiHelper.SetGuiSave(statusStrip1, () =>
+                    {
+                        toolStripProgressBar1.Visible = d < 1D;
+                    });
+                }
+                catch (Exception e)
+                {
+                    ExceptionHandler.Instance.HandleException(e); 
+
+                }
             });
 
             _logfileFilterExporter.OnExportProgressChanged += new EventHandler<double>((object o, double d) =>
             {
-                GuiHelper.SetGuiSave(statusStrip1, () =>
+                try
                 {
-                    toolStripProgressBar1.Visible = d < 1D;
-                    //toolStripProgressBar1.Value = d.Int();
-                });
+                    GuiHelper.SetGuiSave(statusStrip1, () =>
+                    {
+                        toolStripProgressBar1.Visible = d < 1D;
+                        //toolStripProgressBar1.Value = d.Int();
+                    });
+                }
+                catch (Exception e)
+                {
+                    ExceptionHandler.Instance.HandleException(e);
+                }
             });
 
             treeViewLeft.AfterSelect += new TreeViewEventHandler((object o, TreeViewEventArgs args) => {
-                GuiHelper.SetGuiSave(treeViewLeft, async () =>
+                try
                 {
-                    string key = args.Node.Name;
-                    await _datastoreViewer.ExportAsViewContent(key).ConfigureAwait(false);
-                });
+                    GuiHelper.SetGuiSave(treeViewLeft, async () =>
+                    {
+                        string key = args.Node.Name;
+                        await _datastoreViewer.ExportAsViewContent(key).ConfigureAwait(false);
+                    });
+                }
+                catch (Exception e)
+                {
+                    ExceptionHandler.Instance.HandleException(e);
+                }
             });
 
             HandleCmdLineParams();
@@ -365,25 +387,39 @@ namespace LogfileMetaAnalyser
 
         private void DragEnterMethod(object sender, DragEventArgs e)
         {
-            e.Effect = DragDropEffects.None;
-            if (!e.Data.GetDataPresent(DataFormats.FileDrop))
-                return;
+            try
+            {
+                e.Effect = DragDropEffects.None;
+                if (!e.Data.GetDataPresent(DataFormats.FileDrop))
+                    return;
 
-            var files = e.Data.GetData(DataFormats.FileDrop) as string[];
-            if (files == null || files.Length < 1)
-                return;
+                var files = e.Data.GetData(DataFormats.FileDrop) as string[];
+                if (files == null || files.Length < 1)
+                    return;
 
-            e.Effect = DragDropEffects.Copy;             
+                e.Effect = DragDropEffects.Copy;
+            }
+            catch (Exception exception)
+            {
+                ExceptionHandler.Instance.HandleException(exception);
+            }
         }
 
         private void DragDropMethod(object sender, DragEventArgs e)
         {
-            var files = e.Data.GetData(DataFormats.FileDrop) as string[];
-            if (files == null || files.Length < 1)
-                return;
+            try
+            {
+                var files = e.Data.GetData(DataFormats.FileDrop) as string[];
+                if (files == null || files.Length < 1)
+                    return;
 
-            if (_CheckForClose())
-                _Load(new NLogReader(files));
+                if (_CheckForClose())
+                    _Load(new NLogReader(files));
+            }
+            catch (Exception exception)
+            {
+                ExceptionHandler.Instance.HandleException(exception);
+            }
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -424,34 +460,55 @@ namespace LogfileMetaAnalyser
 
         private void debugDatastoreToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Controls.TextBoxFrm fm = new Controls.TextBoxFrm();
-            fm.SetupLabel($"Data Store JSON export");
-            fm.SetupData(_datastoreViewer.ExportAsJson());            
+            try
+            {
+                TextBoxFrm fm = new TextBoxFrm();
+                fm.SetupLabel($"Data Store JSON export");
+                fm.SetupData(_datastoreViewer.ExportAsJson());            
 
-            fm.ShowDialog();
+                fm.ShowDialog();
+            }
+            catch (Exception exception)
+            {
+                ExceptionHandler.Instance.HandleException(exception);
+            }
         }
 
         private async void filterLogfilesToScopeTheImportantStuffToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            await _logfileFilterExporter.FilterAndExport().ConfigureAwait(true);
-            RefreshStatusLabel(3);
+            try
+            {
+                await _logfileFilterExporter.FilterAndExport().ConfigureAwait(true);
+                RefreshStatusLabel(3);
+            }
+            catch (Exception exception)
+            {
+                ExceptionHandler.Instance.HandleException(exception);
+            }
         }
 
         private void loadLogsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (!_CheckForClose())
-                return;
-
-            using (var dlgProvider = new LogReaderForm())
+            try
             {
-                DialogResult dr = dlgProvider.ShowDialog(this);
+                if (!_CheckForClose())
+                    return;
 
-                if (dr == DialogResult.OK)
+                using (var dlgProvider = new LogReaderForm())
                 {
-                    dlgProvider.StoreCredentials();
-                    // start Load
-                    _Load(dlgProvider.ConnectToReader());
+                    DialogResult dr = dlgProvider.ShowDialog(this);
+
+                    if (dr == DialogResult.OK)
+                    {
+                        dlgProvider.StoreCredentials();
+                        // start Load
+                        _Load(dlgProvider.ConnectToReader());
+                    }
                 }
+            }
+            catch (Exception exception)
+            {
+                ExceptionHandler.Instance.HandleException(exception);
             }
         }
     }

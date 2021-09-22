@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LogfileMetaAnalyser.ExceptionHandling;
+using System;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -35,10 +36,17 @@ namespace LogfileMetaAnalyser.Controls
 
             listView1.ItemSelectionChanged += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
                {
-                   if (((ListView)o).SelectedIndices.Count == 0)
-                       return;
+                   try
+                   {
+                       if (((ListView)o).SelectedIndices.Count == 0)
+                           return;
 
-                    ItemClicked?.Invoke(o, args);
+                       ItemClicked?.Invoke(o, args);
+                   }
+                   catch (Exception e)
+                   {
+                       ExceptionHandler.Instance.HandleException(e);
+                   }
                }
             );
         }

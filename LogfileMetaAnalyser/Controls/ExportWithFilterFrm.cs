@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using LogfileMetaAnalyser.Datastore;
+using LogfileMetaAnalyser.ExceptionHandling;
 using LogfileMetaAnalyser.Helpers;
 
 namespace LogfileMetaAnalyser.Controls
@@ -31,7 +32,14 @@ namespace LogfileMetaAnalyser.Controls
 
             comboBox_Profiles.SelectedIndexChanged += (_, _) =>
             {
-                LoadSettingsByProfilename();
+                try
+                {
+                    LoadSettingsByProfilename();
+                }
+                catch (Exception e)
+                {
+                    ExceptionHandler.Instance.HandleException(e);
+                }
             };
 
 
@@ -48,8 +56,15 @@ namespace LogfileMetaAnalyser.Controls
 
         private void TreeActivities_AfterCheck(object sender, TreeViewEventArgs e)
         {
-            if (e.Action != TreeViewAction.Unknown)
-                SwitchNodeState(e.Node, e.Node.Checked ? 1 : 0);
+            try
+            {
+                if (e.Action != TreeViewAction.Unknown)
+                    SwitchNodeState(e.Node, e.Node.Checked ? 1 : 0);
+            }
+            catch (Exception exception)
+            {
+                ExceptionHandler.Instance.HandleException(exception);
+            }
         }
 
         private void LoadSettingsByProfilename()
@@ -399,8 +414,15 @@ namespace LogfileMetaAnalyser.Controls
 
                 bl3.Click += (_, _) =>
                 {
-                    foreach (var ckb in cbLst_LogLevelBoxes)
-                        ckb.Checked = !ckb.Checked;
+                    try
+                    {
+                        foreach (var ckb in cbLst_LogLevelBoxes)
+                            ckb.Checked = !ckb.Checked;
+                    }
+                    catch (Exception e)
+                    {
+                        ExceptionHandler.Instance.HandleException(e);
+                    }
                 };
 
 
@@ -451,8 +473,15 @@ namespace LogfileMetaAnalyser.Controls
 
                 bl4.Click += (_, _) =>
                 {
-                    foreach (var ckb in cbLst_LogSourceBoxes)
-                        ckb.Checked = !ckb.Checked;
+                    try
+                    {
+                        foreach (var ckb in cbLst_LogSourceBoxes)
+                            ckb.Checked = !ckb.Checked;
+                    }
+                    catch (Exception e)
+                    {
+                        ExceptionHandler.Instance.HandleException(e);
+                    }
                 };
             }
             finally
@@ -583,80 +612,101 @@ namespace LogfileMetaAnalyser.Controls
 
         private void button_Export_Click(object sender, EventArgs e)
         {
-            GetExportSettingFromGui();
+            try
+            {
+                GetExportSettingFromGui();
 
-            DialogResult = DialogResult.OK;
-            Close();
+                DialogResult = DialogResult.OK;
+                Close();
+            }
+            catch (Exception exception)
+            {
+                ExceptionHandler.Instance.HandleException(exception);
+            }
         }
 
         private void button_Newprofile_Click(object sender, EventArgs e)
         {
-            string profilename = comboBox_Profiles.SelectedItem as string;
-            string newprofilename = profilename;
+            try
+            {
+                string profilename = comboBox_Profiles.SelectedItem as string;
+                string newprofilename = profilename;
 
-            bool keepAsking = true;
+                bool keepAsking = true;
 
-            GetExportSettingFromGui();
+                GetExportSettingFromGui();
 
-            using (QuestionFrm frm = new QuestionFrm())
-                while (keepAsking)
-                {   
-                    frm.SetupLabel("Please name your new profile:");
-                    frm.SetupData(profilename);
-                    var result = frm.ShowDialog();
+                using (QuestionFrm frm = new QuestionFrm())
+                    while (keepAsking)
+                    {   
+                        frm.SetupLabel("Please name your new profile:");
+                        frm.SetupData(profilename);
+                        var result = frm.ShowDialog();
 
-                    if (result == DialogResult.Cancel)
-                        break;
-                    else
-                    {
-                        newprofilename = frm.QuestionDataText;
-
-                        if (exportProfiles.profiles_predef.ContainsKey(newprofilename))
+                        if (result == DialogResult.Cancel)
+                            break;
+                        else
                         {
-                            MessageBox.Show("This profile name is already taken by a predefined profile which cannot be overwritten. Choose another profile name!", "predefined profile", MessageBoxButtons.OK);
-                        }
-                        else if (exportProfiles.profiles_custom.ContainsKey(newprofilename))
-                        {
-                            var qRes = MessageBox.Show("Profile already exists with this name. Overwrite it?", "Overwrite profile?", MessageBoxButtons.YesNoCancel);
+                            newprofilename = frm.QuestionDataText;
 
-                            if (qRes == DialogResult.Cancel)
+                            if (exportProfiles.profiles_predef.ContainsKey(newprofilename))
                             {
-                                keepAsking = false;
-                                newprofilename = "";
+                                MessageBox.Show("This profile name is already taken by a predefined profile which cannot be overwritten. Choose another profile name!", "predefined profile", MessageBoxButtons.OK);
+                            }
+                            else if (exportProfiles.profiles_custom.ContainsKey(newprofilename))
+                            {
+                                var qRes = MessageBox.Show("Profile already exists with this name. Overwrite it?", "Overwrite profile?", MessageBoxButtons.YesNoCancel);
+
+                                if (qRes == DialogResult.Cancel)
+                                {
+                                    keepAsking = false;
+                                    newprofilename = "";
+                                }
+                                else
+                                    keepAsking = qRes == DialogResult.No; //keep asking for profile name if profile name is NOt to overwrite
                             }
                             else
-                                keepAsking = qRes == DialogResult.No; //keep asking for profile name if profile name is NOt to overwrite
+                                keepAsking = false;
                         }
-                        else
-                            keepAsking = false;
                     }
+
+                if (!string.IsNullOrEmpty(newprofilename))
+                {
+                    exportProfiles.AddOrUpdateProfile(newprofilename, exportSettings);
+
+                    FillProfileDropdown();
+                    comboBox_Profiles.SelectedItem = newprofilename;
                 }
-
-            if (!string.IsNullOrEmpty(newprofilename))
+            }
+            catch (Exception exception)
             {
-                exportProfiles.AddOrUpdateProfile(newprofilename, exportSettings);
-
-                FillProfileDropdown();
-                comboBox_Profiles.SelectedItem = newprofilename;
+                ExceptionHandler.Instance.HandleException(exception);
             }
         }
 
         private void button_delprofile_Click(object sender, EventArgs e)
         {
-            string profilename = comboBox_Profiles.SelectedItem as string;
-            if (string.IsNullOrEmpty(profilename))
-                MessageBox.Show("No profile selected!");
-            else
+            try
             {
-                string msg = exportProfiles.DeleteProfile(profilename);
-
-                if (msg == "")
-                {
-                    comboBox_Profiles.Items.Remove(profilename);
-                    comboBox_Profiles.SelectedIndex = 0;
-                }
+                string profilename = comboBox_Profiles.SelectedItem as string;
+                if (string.IsNullOrEmpty(profilename))
+                    MessageBox.Show("No profile selected!");
                 else
-                    MessageBox.Show(msg);
+                {
+                    string msg = exportProfiles.DeleteProfile(profilename);
+
+                    if (msg == "")
+                    {
+                        comboBox_Profiles.Items.Remove(profilename);
+                        comboBox_Profiles.SelectedIndex = 0;
+                    }
+                    else
+                        MessageBox.Show(msg);
+                }
+            }
+            catch (Exception exception)
+            {
+                ExceptionHandler.Instance.HandleException(exception);
             }
                 
         }

@@ -6,6 +6,7 @@ using System.Drawing;
 
 using LogfileMetaAnalyser.Helpers;
 using LogfileMetaAnalyser.Controls;
+using LogfileMetaAnalyser.ExceptionHandling;
 
 
 namespace LogfileMetaAnalyser.Datastore
@@ -246,13 +247,20 @@ namespace LogfileMetaAnalyser.Datastore
             //we do not want the TimeTrace UC to popup its own message box, we'd like to use the lower panel context line UC
             uc.showPopupOnTrackClick = false;
             uc.TrackClicked += new EventHandler<TimelineTrackEventClickArgs>((object o, TimelineTrackEventClickArgs args) =>
-               {                   
-                   if (args.timelineTrackTextMessage != null)
-                       contextLinesUc.SetData(args.timelineTrackTextMessage);
-                   else if (args.timelineTrackText != null)
+               {
+                   try
                    {
-                       TextMessage tm = new TextMessage(new TextLocator("info"), $"\n{args.timelineTrackText}");
-                       contextLinesUc.SetData(tm);
+                       if (args.timelineTrackTextMessage != null)
+                           contextLinesUc.SetData(args.timelineTrackTextMessage);
+                       else if (args.timelineTrackText != null)
+                       {
+                           TextMessage tm = new TextMessage(new TextLocator("info"), $"\n{args.timelineTrackText}");
+                           contextLinesUc.SetData(tm);
+                       }
+                   }
+                   catch (Exception e)
+                   {
+                       ExceptionHandler.Instance.HandleException(e);
                    }
                });
 

@@ -6,6 +6,7 @@ using System.Drawing;
 
 using LogfileMetaAnalyser.Helpers;
 using LogfileMetaAnalyser.Controls;
+using LogfileMetaAnalyser.ExceptionHandling;
 
 namespace LogfileMetaAnalyser.Datastore
 {
@@ -131,16 +132,23 @@ namespace LogfileMetaAnalyser.Datastore
             uc[FillListVcTypes.p1__PrjActGeneral].SetupHeaders(new string[] { "Start", "End", "Type", "connection target system", "connetion OneIM", "StartUp config", "# steps", "AdHoc obj", "# cycles", "Logger id", "Log file" });
             uc[FillListVcTypes.p1__PrjActGeneral].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
             {
-                string prUuid = args.Item.Name;
-                var proj = dsref.projections.FirstOrDefault(t => t.uuid == prUuid);
-                if (proj == null)
-                    return;
+                try
+                {
+                    string prUuid = args.Item.Name;
+                    var proj = dsref.projections.FirstOrDefault(t => t.uuid == prUuid);
+                    if (proj == null)
+                        return;
 
-                RefreshListviewControlRecursive(FillListVcTypes.p1__PrjActGeneral, true, projListScope, prUuid, "", uc, contextLinesUc);
+                    RefreshListviewControlRecursive(FillListVcTypes.p1__PrjActGeneral, true, projListScope, prUuid, "", uc, contextLinesUc);
 
 
-                if (proj?.message != null)
-                    contextLinesUc.SetData(proj.message);
+                    if (proj?.message != null)
+                        contextLinesUc.SetData(proj.message);
+                }
+                catch (Exception e)
+                {
+                    ExceptionHandler.Instance.HandleException(e);
+                }
             });
 
 
@@ -151,17 +159,24 @@ namespace LogfileMetaAnalyser.Datastore
             uc[FillListVcTypes.p1_1__PrCycles].SetupHeaders(new string[] { "Nr.", "Start" });
             uc[FillListVcTypes.p1_1__PrCycles].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
             {
-                string[] keydata = args.Item.Name.Split('@');  //{cy.uuid}@{prUuid}@{(++i)}                 
+                try
+                {
+                    string[] keydata = args.Item.Name.Split('@');  //{cy.uuid}@{prUuid}@{(++i)}                 
 
-                var cycle = dsref.projections.First(t => t.uuid == keydata[1]).projectionCycles.Where(c => c.uuid == keydata[0]);
+                    var cycle = dsref.projections.First(t => t.uuid == keydata[1]).projectionCycles.Where(c => c.uuid == keydata[0]);
 
-                if (cycle == null || cycle.FirstOrDefault() == null)
-                    return;
+                    if (cycle == null || cycle.FirstOrDefault() == null)
+                        return;
 
-                if (cycle.FirstOrDefault().message != null)
-                    contextLinesUc.SetData(cycle.FirstOrDefault().message);
+                    if (cycle.FirstOrDefault().message != null)
+                        contextLinesUc.SetData(cycle.FirstOrDefault().message);
 
-                RefreshListviewControlRecursive(FillListVcTypes.p1_1__PrCycles, true, projListScope, keydata[1], "", uc, contextLinesUc);
+                    RefreshListviewControlRecursive(FillListVcTypes.p1_1__PrCycles, true, projListScope, keydata[1], "", uc, contextLinesUc);
+                }
+                catch (Exception e)
+                {
+                    ExceptionHandler.Instance.HandleException(e);
+                }
             });
 
 
@@ -174,16 +189,23 @@ namespace LogfileMetaAnalyser.Datastore
 
             uc[FillListVcTypes.p1_2__PrSteps].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
             {
-                string[] keydata = args.Item.Name.Split('@');  //step@projection
+                try
+                {
+                    string[] keydata = args.Item.Name.Split('@');  //step@projection
 
-                var projStep = dsref.projections.FirstOrDefault(t => t.uuid == keydata[1]).projectionSteps.Where(t => t.uuid == keydata[0]).FirstOrDefault();
-                if (projStep == null)
-                    return;
+                    var projStep = dsref.projections.FirstOrDefault(t => t.uuid == keydata[1]).projectionSteps.Where(t => t.uuid == keydata[0]).FirstOrDefault();
+                    if (projStep == null)
+                        return;
 
-                RefreshListviewControlRecursive(FillListVcTypes.p1_2__PrSteps, true, projListScope, keydata[1], keydata[0], uc, contextLinesUc);
+                    RefreshListviewControlRecursive(FillListVcTypes.p1_2__PrSteps, true, projListScope, keydata[1], keydata[0], uc, contextLinesUc);
 
-                if (projStep?.message != null)
-                    contextLinesUc.SetData(projStep.message);
+                    if (projStep?.message != null)
+                        contextLinesUc.SetData(projStep.message);
+                }
+                catch (Exception e)
+                {
+                    ExceptionHandler.Instance.HandleException(e);
+                }
             });
 
 
@@ -194,17 +216,24 @@ namespace LogfileMetaAnalyser.Datastore
             uc[FillListVcTypes.p1_2_1__PrStepsDetails].SetupHeaders(new string[] { "Start", "End", "Duration", "State", "Type", "Load direction", "Schema class", "Query type", "Load information" });
             uc[FillListVcTypes.p1_2_1__PrStepsDetails].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
                 {
-                    string[] keydata = args.Item.Name.Split('@');  //detail@step@projection
+                    try
+                    {
+                        string[] keydata = args.Item.Name.Split('@');  //detail@step@projection
 
-                    var projStepDetail = dsref.projections.First(t => t.uuid == keydata[2])
-                                        .projectionSteps.First(t => t.uuid == keydata[1])
-                                        .syncStepDetail
-                                        .GetSyncStepDetailByUuid(keydata[0]);
+                        var projStepDetail = dsref.projections.First(t => t.uuid == keydata[2])
+                            .projectionSteps.First(t => t.uuid == keydata[1])
+                            .syncStepDetail
+                            .GetSyncStepDetailByUuid(keydata[0]);
 
-                    if (projStepDetail?.message != null)
-                        contextLinesUc.SetData(projStepDetail.message, projStepDetail.messageEnd);
+                        if (projStepDetail?.message != null)
+                            contextLinesUc.SetData(projStepDetail.message, projStepDetail.messageEnd);
 
-                    RefreshListviewControlRecursive(FillListVcTypes.p1_2_1__PrStepsDetails, true, projListScope, keydata[2], "", uc, contextLinesUc);
+                        RefreshListviewControlRecursive(FillListVcTypes.p1_2_1__PrStepsDetails, true, projListScope, keydata[2], "", uc, contextLinesUc);
+                    }
+                    catch (Exception e)
+                    {
+                        ExceptionHandler.Instance.HandleException(e);
+                    }
                 });
 
 
@@ -214,19 +243,26 @@ namespace LogfileMetaAnalyser.Datastore
             uc[FillListVcTypes.p2__SysConns].SetupHeaders(new string[] { "Projection logger id", "Type", "Logger id", "Start", "End", "Side", "Log file" });
             uc[FillListVcTypes.p2__SysConns].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
             {
-                string[] keydata = args.Item.Name.Split('@');  //{prSystemConn.uuid}@{pr.uuid}
+                try
+                {
+                    string[] keydata = args.Item.Name.Split('@');  //{prSystemConn.uuid}@{pr.uuid}
 
-                var systemConn = dsref.projections.First(t => t.uuid == keydata[1])
-                                 .systemConnectors.First(t => t.uuid == keydata[0]);
+                    var systemConn = dsref.projections.First(t => t.uuid == keydata[1])
+                        .systemConnectors.First(t => t.uuid == keydata[0]);
 
-                if (systemConn == null)
-                    return;
+                    if (systemConn == null)
+                        return;
 
-                RefreshListviewControlRecursive(FillListVcTypes.p2__SysConns, true, projListScope, keydata[1], "", uc, contextLinesUc);
+                    RefreshListviewControlRecursive(FillListVcTypes.p2__SysConns, true, projListScope, keydata[1], "", uc, contextLinesUc);
 
 
-                if (systemConn.message != null)
-                    contextLinesUc.SetData(systemConn.message);
+                    if (systemConn.message != null)
+                        contextLinesUc.SetData(systemConn.message);
+                }
+                catch (Exception e)
+                {
+                    ExceptionHandler.Instance.HandleException(e);
+                }
             });
 
 
@@ -236,19 +272,26 @@ namespace LogfileMetaAnalyser.Datastore
             uc[FillListVcTypes.p3__PrSql].SetupHeaders(new string[] { "SQL logger id", "Is suspicious", "Session start", "Session ends", "Session duration", "Transaction count", "Top duration transaction", "Long running statement count", "Top duration statement" });
             uc[FillListVcTypes.p3__PrSql].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
             {
-                string[] keydata = args.Item.Name.Split('@');  //{sql.loggerSourceId}@{pr.uuid}
+                try
+                {
+                    string[] keydata = args.Item.Name.Split('@');  //{sql.loggerSourceId}@{pr.uuid}
 
-                var sqlsession = dsref.projections.First(t => t.uuid == keydata[1])
-                                 .specificSqlInformation
-                                 .sqlSessions.FirstOrDefault(t => t.uuid == keydata[0]);
+                    var sqlsession = dsref.projections.First(t => t.uuid == keydata[1])
+                        .specificSqlInformation
+                        .sqlSessions.FirstOrDefault(t => t.uuid == keydata[0]);
 
-                if (sqlsession == null)
-                    return;
+                    if (sqlsession == null)
+                        return;
 
-                RefreshListviewControlRecursive(FillListVcTypes.p3__PrSql, true, projListScope, keydata[1], keydata[0], uc, contextLinesUc);
+                    RefreshListviewControlRecursive(FillListVcTypes.p3__PrSql, true, projListScope, keydata[1], keydata[0], uc, contextLinesUc);
 
-                if (sqlsession.message != null)
-                    contextLinesUc.SetData(sqlsession.message);
+                    if (sqlsession.message != null)
+                        contextLinesUc.SetData(sqlsession.message);
+                }
+                catch (Exception e)
+                {
+                    ExceptionHandler.Instance.HandleException(e);
+                }
             });
 
 
@@ -259,17 +302,24 @@ namespace LogfileMetaAnalyser.Datastore
             uc[FillListVcTypes.p3_1__PrSqlLongRunning].SetupHeaders(new string[] { "Timestamp", "Locator", "Duration [ms]", "Logger id", "Command", "Involved tables", "Statement text" });
             uc[FillListVcTypes.p3_1__PrSqlLongRunning].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
             {
-                string[] keydata = args.Item.Name.Split('@');  //{longsql.uuid}@{sql.loggerSourceId}@{pr.uuid}
+                try
+                {
+                    string[] keydata = args.Item.Name.Split('@');  //{longsql.uuid}@{sql.loggerSourceId}@{pr.uuid}
 
-                var longrunner = dsref.projections.First(t => t.uuid == keydata[2])
-                                 .specificSqlInformation
-                                 .sqlSessions.First(t => t.uuid == keydata[1])?
-                                 .longRunningStatements?.First(l => l.uuid == keydata[0]);
+                    var longrunner = dsref.projections.First(t => t.uuid == keydata[2])
+                        .specificSqlInformation
+                        .sqlSessions.First(t => t.uuid == keydata[1])?
+                        .longRunningStatements?.First(l => l.uuid == keydata[0]);
                                 
-                if (longrunner?.message != null)
-                    contextLinesUc.SetData(longrunner.message);
+                    if (longrunner?.message != null)
+                        contextLinesUc.SetData(longrunner.message);
 
-                RefreshListviewControlRecursive(FillListVcTypes.p3_1__PrSqlLongRunning, true, projListScope, keydata[2], "", uc, contextLinesUc);
+                    RefreshListviewControlRecursive(FillListVcTypes.p3_1__PrSqlLongRunning, true, projListScope, keydata[2], "", uc, contextLinesUc);
+                }
+                catch (Exception e)
+                {
+                    ExceptionHandler.Instance.HandleException(e);
+                }
             });
 
 
@@ -280,20 +330,27 @@ namespace LogfileMetaAnalyser.Datastore
             uc[FillListVcTypes.p3_2__PrSqlTransactions].SetupHeaders(new string[] { "Start", "End", "Duration", "Start locator", "End locator", "State", "Logger id" });
             uc[FillListVcTypes.p3_2__PrSqlTransactions].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
             {
-                string[] keydata = args.Item.Name.Split('@');  //{trans.uuid}@{sql.loggerSourceId}@{pr.uuid}
+                try
+                {
+                    string[] keydata = args.Item.Name.Split('@');  //{trans.uuid}@{sql.loggerSourceId}@{pr.uuid}
 
-                var transact = dsref.projections.First(t => t.uuid == keydata[2])
-                                 .specificSqlInformation
-                                 .sqlSessions.First(t => t.uuid == keydata[1])?
-                                 .transactions?.First(l => l.uuid == keydata[0]);
+                    var transact = dsref.projections.First(t => t.uuid == keydata[2])
+                        .specificSqlInformation
+                        .sqlSessions.First(t => t.uuid == keydata[1])?
+                        .transactions?.First(l => l.uuid == keydata[0]);
 
-                if (transact == null)
-                    return;
+                    if (transact == null)
+                        return;
 
-                if (transact.message != null)
-                    contextLinesUc.SetData(transact.message);
+                    if (transact.message != null)
+                        contextLinesUc.SetData(transact.message);
 
-                RefreshListviewControlRecursive(FillListVcTypes.p3_2__PrSqlTransactions, true, projListScope, keydata[2], "", uc, contextLinesUc);
+                    RefreshListviewControlRecursive(FillListVcTypes.p3_2__PrSqlTransactions, true, projListScope, keydata[2], "", uc, contextLinesUc);
+                }
+                catch (Exception e)
+                {
+                    ExceptionHandler.Instance.HandleException(e);
+                }
             });
 
 
@@ -303,18 +360,25 @@ namespace LogfileMetaAnalyser.Datastore
             uc[FillListVcTypes.p4__PrJournal].SetupHeaders(new string[] { "Projection", "Journal Start", "Journal End", "Projection Context", "Projection Start Info", "Projection Config", "Variable Set", "State", "Obj count", "Msg count", "Failure count" });
             uc[FillListVcTypes.p4__PrJournal].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
             {
-                string[] keydata = args.Item.Name.Split('@');  //{journalobj.uuid}@{proj.uuid}
+                try
+                {
+                    string[] keydata = args.Item.Name.Split('@');  //{journalobj.uuid}@{proj.uuid}
 
-                var journal = dsref.projections.First(t => t.uuid == keydata[1])
-                                 .projectionJournal;
+                    var journal = dsref.projections.First(t => t.uuid == keydata[1])
+                        .projectionJournal;
 
-                if (journal == null)
-                    return;
+                    if (journal == null)
+                        return;
 
-                if (journal.uuid == keydata[0] &&  journal.message != null)
-                    contextLinesUc.SetData(journal.message);
+                    if (journal.uuid == keydata[0] &&  journal.message != null)
+                        contextLinesUc.SetData(journal.message);
 
-                RefreshListviewControlRecursive(FillListVcTypes.p4__PrJournal, true, projListScope, keydata[1], "", uc, contextLinesUc);
+                    RefreshListviewControlRecursive(FillListVcTypes.p4__PrJournal, true, projListScope, keydata[1], "", uc, contextLinesUc);
+                }
+                catch (Exception e)
+                {
+                    ExceptionHandler.Instance.HandleException(e);
+                }
             });
 
             //4.1) Dpr Sync Journal Setup
@@ -337,19 +401,26 @@ namespace LogfileMetaAnalyser.Datastore
                 uc[FillListVcTypes.p4_2__PrJournalObj].SetupHeaders(new string[] { "Object", "Object Id", "Method", "Schema type", "Sequence number", "Is import" });
                 uc[FillListVcTypes.p4_2__PrJournalObj].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
                 {
-                    string[] keydata = args.Item.Name.Split('@');  //{journalObjects.uuid}@{proj.uuid}
+                    try
+                    {
+                        string[] keydata = args.Item.Name.Split('@');  //{journalObjects.uuid}@{proj.uuid}
 
-                    var journalObj = dsref.projections.First(t => t.uuid == keydata[1])
-                                     .projectionJournal
-                                     .journalObjects.Where(jo => jo.uuid == keydata[0]).FirstOrDefault();
+                        var journalObj = dsref.projections.First(t => t.uuid == keydata[1])
+                            .projectionJournal
+                            .journalObjects.Where(jo => jo.uuid == keydata[0]).FirstOrDefault();
 
-                    if (journalObj == null)
-                        return;
+                        if (journalObj == null)
+                            return;
 
-                    if (journalObj.uuid == keydata[0] && journalObj.message != null)
-                        contextLinesUc.SetData(journalObj.message);
+                        if (journalObj.uuid == keydata[0] && journalObj.message != null)
+                            contextLinesUc.SetData(journalObj.message);
 
-                    RefreshListviewControlRecursive(FillListVcTypes.p4_2__PrJournalObj, true, projListScope, keydata[1], journalObj.uuid, uc, contextLinesUc);
+                        RefreshListviewControlRecursive(FillListVcTypes.p4_2__PrJournalObj, true, projListScope, keydata[1], journalObj.uuid, uc, contextLinesUc);
+                    }
+                    catch (Exception e)
+                    {
+                        ExceptionHandler.Instance.HandleException(e);
+                    }
                 });
 
                 //4.2.1 props of objects
@@ -359,29 +430,36 @@ namespace LogfileMetaAnalyser.Datastore
                 uc[FillListVcTypes.p4_2_1__PrJournalObjProp].SetupHeaders(new string[] { "Property name", "Old value", "New value" });
                 uc[FillListVcTypes.p4_2_1__PrJournalObjProp].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
                 {
-                    string[] keydata = args.Item.Name.Split('@');  //JournaleProp.UUID @ Projection.UUID
+                    try
+                    {
+                        string[] keydata = args.Item.Name.Split('@');  //JournaleProp.UUID @ Projection.UUID
 
-                    var journal = dsref.projections.First(t => t.uuid == keydata[1])
-                                     .projectionJournal;
+                        var journal = dsref.projections.First(t => t.uuid == keydata[1])
+                            .projectionJournal;
 
-                    if (journal == null)
-                        return;
+                        if (journal == null)
+                            return;
 
-                    var journalPropAll = journal
-                                        .journalObjects.SelectMany(x => x.dprJournalProperties);
+                        var journalPropAll = journal
+                            .journalObjects.SelectMany(x => x.dprJournalProperties);
 
-                    if (journalPropAll == null)
-                        return;
+                        if (journalPropAll == null)
+                            return;
 
-                    var journalProp = journalPropAll.Where(jp => jp.uuid == keydata[0]).FirstOrDefault();
+                        var journalProp = journalPropAll.Where(jp => jp.uuid == keydata[0]).FirstOrDefault();
 
-                    if (journalProp == null)
-                        return;
+                        if (journalProp == null)
+                            return;
 
-                    if (journalProp.uuid == keydata[0] && journalProp.message != null)
-                        contextLinesUc.SetData(journalProp.message);
+                        if (journalProp.uuid == keydata[0] && journalProp.message != null)
+                            contextLinesUc.SetData(journalProp.message);
 
-                    RefreshListviewControlRecursive(FillListVcTypes.p4_2_1__PrJournalObjProp, true, projListScope, keydata[1], journalProp.uuid, uc, contextLinesUc);
+                        RefreshListviewControlRecursive(FillListVcTypes.p4_2_1__PrJournalObjProp, true, projListScope, keydata[1], journalProp.uuid, uc, contextLinesUc);
+                    }
+                    catch (Exception e)
+                    {
+                        ExceptionHandler.Instance.HandleException(e);
+                    }
                 });
 
             } //4.2.x JournalObjects and properties if any
@@ -397,19 +475,26 @@ namespace LogfileMetaAnalyser.Datastore
                 uc[FillListVcTypes.p4_3__PrJournalMessage].SetupHeaders(new string[] { "Time", "Context", "Type", "Messagetext", "Source" });
                 uc[FillListVcTypes.p4_3__PrJournalMessage].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
                 {
-                    string[] keydata = args.Item.Name.Split('@');  //JournaleMessage.UUID @ Projection.UUID
+                    try
+                    {
+                        string[] keydata = args.Item.Name.Split('@');  //JournaleMessage.UUID @ Projection.UUID
 
-                    var journal = dsref.projections.First(t => t.uuid == keydata[1]).projectionJournal;
+                        var journal = dsref.projections.First(t => t.uuid == keydata[1]).projectionJournal;
 
-                    if (journal == null)
-                        return;
+                        if (journal == null)
+                            return;
 
-                    var jmesg = journal.journalMessages.Where(m => m.uuid == keydata[0]).FirstOrDefault();
+                        var jmesg = journal.journalMessages.Where(m => m.uuid == keydata[0]).FirstOrDefault();
 
-                    if (jmesg?.message != null)
-                        contextLinesUc.SetData(jmesg.message);
+                        if (jmesg?.message != null)
+                            contextLinesUc.SetData(jmesg.message);
 
-                    RefreshListviewControlRecursive(FillListVcTypes.p4_3__PrJournalMessage, true, projListScope, keydata[1], "", uc, contextLinesUc);
+                        RefreshListviewControlRecursive(FillListVcTypes.p4_3__PrJournalMessage, true, projListScope, keydata[1], "", uc, contextLinesUc);
+                    }
+                    catch (Exception e)
+                    {
+                        ExceptionHandler.Instance.HandleException(e);
+                    }
                 });
             }  //4.3 journal messages, if any
 
@@ -422,19 +507,26 @@ namespace LogfileMetaAnalyser.Datastore
                 uc[FillListVcTypes.p4_4__PrJournalFailure].SetupHeaders(new string[] {"Time", "Projection step", "Schema type", "Object", "Reason", "Object state" });
                 uc[FillListVcTypes.p4_4__PrJournalFailure].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
                 {
-                    string[] keydata = args.Item.Name.Split('@');  //JournaleFailure.UUID @ Projection.UUID
+                    try
+                    {
+                        string[] keydata = args.Item.Name.Split('@');  //JournaleFailure.UUID @ Projection.UUID
 
-                    var journal = dsref.projections.First(t => t.uuid == keydata[1]).projectionJournal;
+                        var journal = dsref.projections.First(t => t.uuid == keydata[1]).projectionJournal;
 
-                    if (journal == null)
-                        return;
+                        if (journal == null)
+                            return;
 
-                    var failure = journal.journalFailures.Where(m => m.uuid == keydata[0]).FirstOrDefault();
+                        var failure = journal.journalFailures.Where(m => m.uuid == keydata[0]).FirstOrDefault();
 
-                    if (failure?.message != null)
-                        contextLinesUc.SetData(failure.message);
+                        if (failure?.message != null)
+                            contextLinesUc.SetData(failure.message);
 
-                    RefreshListviewControlRecursive(FillListVcTypes.p4_4__PrJournalFailure, true, projListScope, keydata[1], keydata[0], uc, contextLinesUc);
+                        RefreshListviewControlRecursive(FillListVcTypes.p4_4__PrJournalFailure, true, projListScope, keydata[1], keydata[0], uc, contextLinesUc);
+                    }
+                    catch (Exception e)
+                    {
+                        ExceptionHandler.Instance.HandleException(e);
+                    }
                 });
 
 
@@ -443,30 +535,37 @@ namespace LogfileMetaAnalyser.Datastore
                 uc[FillListVcTypes.p4_4_1__PrJournalFailureObjProp].SetupHeaders(new string[] { "Object", "Object Id", "Method", "Schema type", "Sequence number", "Is import", "Property name", "Old value", "New value" });
                 uc[FillListVcTypes.p4_4_1__PrJournalFailureObjProp].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
                 {
-                    string[] keydata = args.Item.Name.Split('@');  //DPRJournalProperty.uuid @ DPRJournalObject.uuid @ DPRJournalFailure.uuid @ Projection.UUID
+                    try
+                    {
+                        string[] keydata = args.Item.Name.Split('@');  //DPRJournalProperty.uuid @ DPRJournalObject.uuid @ DPRJournalFailure.uuid @ Projection.UUID
 
 
-                    var journal = dsref.projections.First(t => t.uuid == keydata[3]).projectionJournal;
+                        var journal = dsref.projections.First(t => t.uuid == keydata[3]).projectionJournal;
 
-                    if (journal == null)
-                        return;
+                        if (journal == null)
+                            return;
 
-                    var failure = journal.journalFailures.Where(m => m.uuid == keydata[2]).FirstOrDefault();
+                        var failure = journal.journalFailures.Where(m => m.uuid == keydata[2]).FirstOrDefault();
 
-                    if (failure == null)
-                        return;
+                        if (failure == null)
+                            return;
 
-                    var obj = failure.dprJournalObjects.Where(jo => jo.uuid == keydata[1]).FirstOrDefault();
+                        var obj = failure.dprJournalObjects.Where(jo => jo.uuid == keydata[1]).FirstOrDefault();
 
-                    if (obj == null)
-                        return;
+                        if (obj == null)
+                            return;
 
-                    var prop = obj.dprJournalProperties.Where(jp => jp.uuid == keydata[0]).FirstOrDefault();
+                        var prop = obj.dprJournalProperties.Where(jp => jp.uuid == keydata[0]).FirstOrDefault();
 
-                    if (prop?.message != null)
-                        contextLinesUc.SetData(prop.message);
+                        if (prop?.message != null)
+                            contextLinesUc.SetData(prop.message);
 
-                    RefreshListviewControlRecursive(FillListVcTypes.p4_4_1__PrJournalFailureObjProp, true, projListScope, keydata[1], prop.uuid, uc, contextLinesUc);
+                        RefreshListviewControlRecursive(FillListVcTypes.p4_4_1__PrJournalFailureObjProp, true, projListScope, keydata[1], prop.uuid, uc, contextLinesUc);
+                    }
+                    catch (Exception e)
+                    {
+                        ExceptionHandler.Instance.HandleException(e);
+                    }
                 });
             }//failures, if any
 

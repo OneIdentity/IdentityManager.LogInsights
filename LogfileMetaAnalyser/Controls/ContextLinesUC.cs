@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LogfileMetaAnalyser.ExceptionHandling;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Data;
@@ -38,31 +39,38 @@ namespace LogfileMetaAnalyser.Controls
             comboBox_OpenInEditor.BackColor = Constants.contextLinesUcHighlightColor;
             comboBox_OpenInEditor.SelectedIndexChanged += new EventHandler((object o, EventArgs args) => {
 
-                button_MessagesJumpForward.Visible = comboBox_OpenInEditor.Visible && comboBox_OpenInEditor.Items.Count > 1;
-                button_MessagesJumpBack.Visible = comboBox_OpenInEditor.Visible && comboBox_OpenInEditor.Items.Count > 1;
-                                
-                button_MessagesJumpForward.Enabled = comboBox_OpenInEditor.SelectedIndex < comboBox_OpenInEditor.Items.Count - 1;
-                button_MessagesJumpBack.Enabled = comboBox_OpenInEditor.SelectedIndex > 0;
-
-                if (comboBox_OpenInEditor.SelectedItem == null || comboBox_OpenInEditor.Items.Count == 0)
-                    return;
-
-                var SelectedItem = ((DropdownItem<FileInformationContext>)comboBox_OpenInEditor.SelectedItem);
-
-                if (SelectedItem == null || SelectedItem.data == null)
-                    return;
-
-                //jump to the end first 
-                if (rtbLog.Lines.Length > 5)
+                try
                 {
-                    rtbLog.SelectionStart = rtbLog.Text.Length;
-                    // scroll it automatically
-                    rtbLog.ScrollToCaret();
-                }
+                    button_MessagesJumpForward.Visible = comboBox_OpenInEditor.Visible && comboBox_OpenInEditor.Items.Count > 1;
+                    button_MessagesJumpBack.Visible = comboBox_OpenInEditor.Visible && comboBox_OpenInEditor.Items.Count > 1;
+                                
+                    button_MessagesJumpForward.Enabled = comboBox_OpenInEditor.SelectedIndex < comboBox_OpenInEditor.Items.Count - 1;
+                    button_MessagesJumpBack.Enabled = comboBox_OpenInEditor.SelectedIndex > 0;
 
-                //now jump to the correct pos
-                //int jumppos = Math.Max(1, SelectedItem.data.fileposRelativeInView - 3);
-                //rtbLog.SelectedView.GoToLine(jumppos);
+                    if (comboBox_OpenInEditor.SelectedItem == null || comboBox_OpenInEditor.Items.Count == 0)
+                        return;
+
+                    var SelectedItem = ((DropdownItem<FileInformationContext>)comboBox_OpenInEditor.SelectedItem);
+
+                    if (SelectedItem == null || SelectedItem.data == null)
+                        return;
+
+                    //jump to the end first 
+                    if (rtbLog.Lines.Length > 5)
+                    {
+                        rtbLog.SelectionStart = rtbLog.Text.Length;
+                        // scroll it automatically
+                        rtbLog.ScrollToCaret();
+                    }
+
+                    //now jump to the correct pos
+                    //int jumppos = Math.Max(1, SelectedItem.data.fileposRelativeInView - 3);
+                    //rtbLog.SelectedView.GoToLine(jumppos);
+                }
+                catch (Exception e)
+                {
+                    ExceptionHandler.Instance.HandleException(e);
+                }
             });
 
             SetupCaption("");
@@ -71,28 +79,42 @@ namespace LogfileMetaAnalyser.Controls
 
         private void buttonShowInEditor_Click(object sender, EventArgs e)
         {
-            string fn;
-            long fp;
-
-            if (comboBox_OpenInEditor.Items.Count == 0)
+            try
             {
-                fn = currentMsg.textLocator.fileName;
-                fp = currentMsg.textLocator.fileLinePosition;
-            }
-            else
-            {
-                fn = ((DropdownItem<FileInformationContext>)comboBox_OpenInEditor.SelectedItem).data.filename;
-                fp = ((DropdownItem<FileInformationContext>)comboBox_OpenInEditor.SelectedItem).data.filepos;
-            }
+                string fn;
+                long fp;
 
-            if (!string.IsNullOrEmpty(fn))
-                Helpers.ProcessExec.OpenFileInEditor(fn, fp);
+                if (comboBox_OpenInEditor.Items.Count == 0)
+                {
+                    fn = currentMsg.textLocator.fileName;
+                    fp = currentMsg.textLocator.fileLinePosition;
+                }
+                else
+                {
+                    fn = ((DropdownItem<FileInformationContext>)comboBox_OpenInEditor.SelectedItem).data.filename;
+                    fp = ((DropdownItem<FileInformationContext>)comboBox_OpenInEditor.SelectedItem).data.filepos;
+                }
+
+                if (!string.IsNullOrEmpty(fn))
+                    ProcessExec.OpenFileInEditor(fn, fp);
+            }
+            catch (Exception exception)
+            {
+                ExceptionHandler.Instance.HandleException(exception);
+            }
         }
 
 
         private async void buttonExport_Click(object sender, EventArgs e)
         {
-            await logfileFilterExporter.FilterAndExportFromMessage(currentMsg);
+            try
+            {
+                await logfileFilterExporter.FilterAndExportFromMessage(currentMsg);
+            }
+            catch (Exception exception)
+            {
+                ExceptionHandler.Instance.HandleException(exception);
+            }
         }
 
 
@@ -467,14 +489,28 @@ namespace LogfileMetaAnalyser.Controls
         
         private void button_MessagesUp_Click(object sender, EventArgs e)
         {
-            if (comboBox_OpenInEditor.CanSelect && comboBox_OpenInEditor.SelectedIndex > 0) 
-                comboBox_OpenInEditor.SelectedIndex--;
+            try
+            {
+                if (comboBox_OpenInEditor.CanSelect && comboBox_OpenInEditor.SelectedIndex > 0) 
+                    comboBox_OpenInEditor.SelectedIndex--;
+            }
+            catch (Exception exception)
+            {
+                ExceptionHandler.Instance.HandleException(exception);
+            }
         }
 
         private void button_MessagesDn_Click(object sender, EventArgs e)
         {
-            if (comboBox_OpenInEditor.CanSelect && comboBox_OpenInEditor.SelectedIndex+1 < comboBox_OpenInEditor.Items.Count)
-                comboBox_OpenInEditor.SelectedIndex++;
+            try
+            {
+                if (comboBox_OpenInEditor.CanSelect && comboBox_OpenInEditor.SelectedIndex+1 < comboBox_OpenInEditor.Items.Count)
+                    comboBox_OpenInEditor.SelectedIndex++;
+            }
+            catch (Exception exception)
+            {
+                ExceptionHandler.Instance.HandleException(exception);
+            }
         }
 
         public void SetLineColor(int iLine, Color c)
