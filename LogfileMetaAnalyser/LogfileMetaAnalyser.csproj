@@ -11,6 +11,7 @@
     <Copyright>© 2021 One Identity LLC.  All rights reserved.</Copyright>
     <PackageProjectUrl>https://github.com/OneIdentity/IdentityManager.LogInsights</PackageProjectUrl>
     <RepositoryUrl>https://github.com/OneIdentity/IdentityManager.LogInsights</RepositoryUrl>
+    <AssemblyName>LogInsights</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="TextReading\ReadLogByBlock.cs" />
