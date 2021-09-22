@@ -95,8 +95,10 @@ namespace LogfileMetaAnalyser
 
                 if (!string.IsNullOrEmpty(spid))
                     id = $"{id} {spid}";
-                                                             
-                return $"{messageTimestamp:yyyy-MM-dd HH:mm:ss.ffff} {loggerLevel} ({id}): {payloadMessage}";                
+
+                string idspace = (!string.IsNullOrEmpty(id)) ? " " : "";
+
+                return $"{messageTimestamp:yyyy-MM-dd HH:mm:ss.ffff} {loggerLevel} ({loggerSource ?? ""}{idspace}{id}): {payloadMessage ?? ""}";                
             }
         }
 
