@@ -111,5 +111,5 @@ Contributions are what make the open source community such an amazing place to b
 <!-- LICENSE -->
 ## License
 
-Distributed under the One Identity - Open Source License. See `LICENSE` for more information.
+Distributed under the One Identity - Open Source License. See [LICENSE](LICENSE) for more information.
 
