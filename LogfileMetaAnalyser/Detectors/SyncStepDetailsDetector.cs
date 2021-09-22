@@ -190,8 +190,9 @@ namespace LogfileMetaAnalyser.Detectors
                         logger.Trace($"{syncStepDetail}: find the step; conSide = {conSide.ToString()}");
 
                         var stepListWithoutClasscheck = projection.projectionSteps
-                                                                    .Where(s => s.dtTimestampStart.LessThan(syncStepDetail.firstOccurrence) &&
-                                                                                s.dtTimestampEnd.MoreThan(syncStepDetail.lastOccurrence));
+                            .Where(s => s.dtTimestampStart.LessThan(syncStepDetail.firstOccurrence) &&
+                                        s.dtTimestampEnd.MoreThan(syncStepDetail.lastOccurrence))
+                            .ToArray();
 
                         if (stepListWithoutClasscheck.HasNoData()) //we found object list load jobs outside a step; but we've filtered exactly this in the LINQ above :-o
                         {
@@ -199,48 +200,47 @@ namespace LogfileMetaAnalyser.Detectors
                             continue;
                         }
 
-                        IEnumerable<ProjectionStep> stepListWithClasscheck = new ProjectionStep[] { };
+                        ProjectionStep[] stepListWithClasscheck = new ProjectionStep[] { };
 
                         if (!string.IsNullOrWhiteSpace(syncStepDetail.queryObjectInformation.schemaClassName))
                             stepListWithClasscheck = stepListWithoutClasscheck.Where(s => syncStepDetail.queryObjectInformation.schemaClassName ==
                                                                                             (conSide == SystemConnBelongsTo.IdentityManagerSide ?
                                                                                                 s.leftSchemaClassName : s.rightSchemaClassName)
-                                                                                    );
+                                                                                    ).ToArray();
 
                         
                         //if we found a step where the object class name matches -> perfect
-                        if (stepListWithClasscheck.Count() == 1)
+                        if (stepListWithClasscheck.Length == 1)
                         {
                             logger.Trace($"PutSyncStepDetail stepListWithClasscheck");
 
-                            stepListWithClasscheck.First().syncStepDetail.PutSyncStepDetail(syncStepDetail.queryObjectInformation, conSide);
+                            stepListWithClasscheck[0].syncStepDetail.PutSyncStepDetail(syncStepDetail.queryObjectInformation, conSide);
                             detectorStats.numberOfDetections++;
                             continue;
                         }
 
                         //still searching but we found exactly one step that matches the timestamp but not the class name -> take it as additional object load job
-                        if (!stepListWithClasscheck.Any() && stepListWithoutClasscheck.Count() == 1)
+                        if (stepListWithClasscheck.Length == 0 && stepListWithoutClasscheck.Length == 1)
                         {
                             logger.Trace($"PutSyncStepDetail stepListWithoutClasscheck");
 
-                            stepListWithoutClasscheck.First().syncStepDetail.PutSyncStepDetail(syncStepDetail.queryObjectInformation, conSide);
+                            stepListWithoutClasscheck[0].syncStepDetail.PutSyncStepDetail(syncStepDetail.queryObjectInformation, conSide);
                             detectorStats.numberOfDetections++;
                             continue;
                         }
 
                         //still searching, no exact step match, seems to be a retry job or a "phase #2" job and the timestamp is not selective enough
-                        if (stepListWithClasscheck.Count() > 1 || stepListWithoutClasscheck.Count() > 1)
+                        if (stepListWithClasscheck.Length > 1 || stepListWithoutClasscheck.Length > 1)
                         {
                             ProjectionStep step = null;
 
                             //which list is to take
-                            if (stepListWithClasscheck.Count() > 1)
-                                step = stepListWithClasscheck.Where(s => syncStepDetail.queryObjectInformation.schemaClassName ==
-                                                                            (conSide == SystemConnBelongsTo.IdentityManagerSide ?
-                                                                               s.leftSchemaClassName :
-                                                                               s.rightSchemaClassName
-                                                                            ))
-                                                             .FirstOrDefault();
+                            if (stepListWithClasscheck.Length > 1)
+                                step = stepListWithClasscheck.FirstOrDefault(s => syncStepDetail.queryObjectInformation.schemaClassName ==
+                                                                                  (conSide == SystemConnBelongsTo.IdentityManagerSide ?
+                                                                                      s.leftSchemaClassName :
+                                                                                      s.rightSchemaClassName
+                                                                                  ));
 
                             if (step != null)
                             {
@@ -256,7 +256,7 @@ namespace LogfileMetaAnalyser.Detectors
             }
 
             //stats
-            detectorStats.detectorName = string.Format("{0} <{1}>", this.GetType().Name, this.identifier);
+            detectorStats.detectorName = $"{GetType().Name} <{identifier}>";
             detectorStats.finalizeDuration = sw.ElapsedMilliseconds;
             _datastore.statistics.detectorStatistics.Add(detectorStats);
             logger.Debug(detectorStats.ToString());

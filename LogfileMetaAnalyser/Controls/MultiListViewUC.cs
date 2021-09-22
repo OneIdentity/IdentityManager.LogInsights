@@ -194,10 +194,7 @@ namespace LogfileMetaAnalyser.Controls
 
         public bool HasData()
         {
-            if (!listOflistviewUC.Any())
-                return false;
-
-            return listOflistviewUC.Any(uc => uc.HasData());
+            return listOflistviewUC.Count != 0 && listOflistviewUC.Any(uc => uc.HasData());
         }
 
         public int Count()

@@ -92,13 +92,13 @@ namespace LogfileMetaAnalyser
                             .Select(f => f.Key)
                             .ToArray();
 
-            if (!files.Any())
+            if (files.Length == 0)
             {
                 MessageBox.Show("No file or file type to filter was selected!");
                 return;
             }
 
-            if (exportSettings.inputOutputOptions.mergeFiles && files.Count() > 1)
+            if (exportSettings.inputOutputOptions.mergeFiles && files.Length > 1)
                 throw new NotSupportedException("The option to merge the export rows into one single file is not yet supported. Sorry.");
 
 

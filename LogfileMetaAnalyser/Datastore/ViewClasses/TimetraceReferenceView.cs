@@ -36,7 +36,7 @@ namespace LogfileMetaAnalyser.Datastore
 
 
             //ad hoc jobs
-            cnt_real = datastore.projectionActivity.projections.Where(p => p.projectionType == ProjectionType.AdHocProvision).Count();
+            cnt_real = datastore.projectionActivity.projections.Count(p => p.projectionType == ProjectionType.AdHocProvision);
             if (showFull)
                 cnt += cnt_real;
             else
@@ -46,14 +46,11 @@ namespace LogfileMetaAnalyser.Datastore
             //other (Jobservice) jobs 
             if (showFull)
                 cnt += datastore.jobserviceActivities.jobserviceJobs
-                            .Where(js => js.jobserviceJobattempts.Any())
+                            .Where(js => js.jobserviceJobattempts.Count > 0)
                             .SelectMany(ja => ja.jobserviceJobattempts)
                             .Count();
             else
-                cnt += Math.Min(showLimitedViewElementCount, 
-                                datastore.jobserviceActivities.jobserviceJobs
-                                    .Where(js => js.jobserviceJobattempts.Any())
-                                    .Count());
+                cnt += Math.Min(showLimitedViewElementCount, datastore.jobserviceActivities.jobserviceJobs.Count(js => js.jobserviceJobattempts.Count > 0));
 
 
             //errors
@@ -127,9 +124,9 @@ namespace LogfileMetaAnalyser.Datastore
                 Color TCol2 = Color.DarkOrange;
                 Color ECol1 = Color.Orange;
                 Color ECol2 = Color.Wheat;
-                var proj = datastore.projectionActivity.projections.Where(p => p.projectionType == ProjectionType.AdHocProvision);
+                var proj = datastore.projectionActivity.projections.Where(p => p.projectionType == ProjectionType.AdHocProvision).ToArray();
 
-                if (proj.Any())
+                if (proj.Length > 0)
                 {
                     uc.AddBlockTrack("AdHoc", "Ad Hoc Projection jobs", Color.DarkBlue, TCol1, TCol2, ECol1, ECol2);
 
@@ -158,7 +155,7 @@ namespace LogfileMetaAnalyser.Datastore
 
                 if (!showFull)
                     jsJobs = datastore.jobserviceActivities.jobserviceJobs
-                                                       .Where(js => js.jobserviceJobattempts.Any())
+                                                       .Where(js => js.jobserviceJobattempts.Count>0)
                                                        .Select(j => new TimelineTrackEvent(
                                                                         j.GetLabel(),
                                                                         DateHelper.IfNull(j.jobserviceJobattempts.OrderBy(x => x.dtTimestampStart).First().dtTimestampStart, datastore.generalLogData.logDataOverallTimeRange_Start),
@@ -171,7 +168,7 @@ namespace LogfileMetaAnalyser.Datastore
                     jsJobs = new List<TimelineTrackEvent>();
 
                     foreach (var job in datastore.jobserviceActivities.jobserviceJobs
-                                                       .Where(js => js.jobserviceJobattempts.Any()))
+                                                       .Where(js => js.jobserviceJobattempts.Count > 0))
                         jsJobs.AddRange(job.jobserviceJobattempts.Select(a => new TimelineTrackEvent(
                                                                                 job.GetLabel(),
                                                                                 DateHelper.IfNull(a.dtTimestampStart, datastore.generalLogData.logDataOverallTimeRange_Start),
