@@ -74,7 +74,7 @@ namespace LogfileMetaAnalyser
 
 
             //Auslesen der Required Parent Detectors und zuweisen der resourcen
-            foreach (var childDetector in detectors.Where(d => d.requiredParentDetectors.Any()))
+            foreach (var childDetector in detectors.Where(d => d.requiredParentDetectors.Length > 0))
             {
                 List<Detectors.ILogDetector> listOfParentDetectors = new List<Detectors.ILogDetector>();
                 foreach (var parentId in childDetector.requiredParentDetectors)

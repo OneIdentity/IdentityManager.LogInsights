@@ -179,7 +179,7 @@ namespace LogfileMetaAnalyser.Helpers
                 //if we filter with .Where(c => c.Value < 0.75) then it can result in an empty list, which is impossible bcause at least one candidate MUST have caused the matrix data
                 var res_filtered = res.Where(c => c.Value < 0.75).Select(c => c.Key).ToArray();
 
-                if (res_filtered.Any())
+                if (res_filtered.Length > 0)
                     return res_filtered;
 
                 return res.OrderBy(c => c.Value).Take(1).Select(c => c.Key).ToArray();

@@ -143,14 +143,14 @@ namespace LogfileMetaAnalyser.Datastore
 
 
             //Branch: ErrorsAndWarnings
-            if (dsref.messageErrors.Any() || dsref.messageWarnings.Any())
+            if (dsref.messageErrors.Count > 0 || dsref.messageWarnings.Count > 0)
             {
                 key = $"{viewer.BaseKey}/ErrorsAndWarnings";
                 TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, $"message of type error and warning ({viewer.GetElementCount(key)})", "warning", Constants.treenodeBackColorSuspicious);
                 responsibleViewerClass.Add(key, viewer);
             }
 
-            if (dsref.messageErrors.Any())
+            if (dsref.messageErrors.Count > 0)
             {
                 key = $"{viewer.BaseKey}/ErrorsAndWarnings/Errors";
                 TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, $"message of type error ({viewer.GetElementCount(key)})", "error", Constants.treenodeBackColorSuspicious);
@@ -161,7 +161,7 @@ namespace LogfileMetaAnalyser.Datastore
                 responsibleViewerClass.Add(key, viewer);
             }
 
-            if (dsref.messageWarnings.Any())
+            if (dsref.messageWarnings.Count > 0)
             {
                 key = $"{viewer.BaseKey}/ErrorsAndWarnings/Warnings";
                 TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, $"message of type warning ({viewer.GetElementCount(key)})", "warning", Constants.treenodeBackColorSuspicious);
@@ -173,7 +173,7 @@ namespace LogfileMetaAnalyser.Datastore
             }
 
             //Branch: timestamp
-            if (dsref.timegaps.Any())
+            if (dsref.timegaps.Count > 0)
             {
                 key = $"{viewer.BaseKey}/timegaps";
                 TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, $"timestamp gaps ({viewer.GetElementCount(key)})", "warning", Constants.treenodeBackColorSuspicious);
@@ -190,7 +190,7 @@ namespace LogfileMetaAnalyser.Datastore
             TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, "General SQL session information", "information", Constants.treenodeBackColorNormal);
             responsibleViewerClass.Add(key, viewer);
 
-            if (dsref.sqlSessions.Any())
+            if (dsref.sqlSessions.Count > 0)
             {
                 key = $"{viewer.BaseKey}/sessions";
                 TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, $"General SQL session information ({viewer.GetElementCount(key)})", "information", Constants.treenodeBackColorNormal);
@@ -367,10 +367,10 @@ namespace LogfileMetaAnalyser.Datastore
                                 responsibleViewerClass[key].ExportView(key);
                             else
                             {
-                                var viewer = responsibleViewerClass.Where(v => key.StartsWith(v.Value.BaseKey));
+                                var viewer = responsibleViewerClass.Where(v => key.StartsWith(v.Value.BaseKey)).ToArray();
 
-                                if (viewer.Any())
-                                    viewer.First().Value.ExportView(key);
+                                if (viewer.Length>0)
+                                    viewer[0].Value.ExportView(key);
                                 else
                                 {
                                     //Fallback :(                                    

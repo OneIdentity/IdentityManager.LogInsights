@@ -151,7 +151,7 @@ namespace LogfileMetaAnalyser.Detectors
             logger.Debug($"pushing to ds: generalSqlInformation generally");
 
             //b) each projection
-            foreach (var sqlsession in sqlSessionInfo.Values.Where(x => x.belongsToProjectionId.Any()))
+            foreach (var sqlsession in sqlSessionInfo.Values.Where(x => x.belongsToProjectionId.Count > 0))
                 foreach (var projuuid in sqlsession.belongsToProjectionId.Distinct())
                 {
                     var proj = _datastore.projectionActivity.projections.FirstOrDefault(p => p.uuid == projuuid);
@@ -316,8 +316,8 @@ namespace LogfileMetaAnalyser.Detectors
                         sqlSessionInfo[msg.spid].touchesDprModuleTables = true;
 
                 //assign non system table to this sql session, so we can match it to the projection step schema class name
-                var payloadTables = sqlcmd.assignedTablenames.Where(t => regex_NonSystemTable.IsMatch(t));
-                sqlcmd.isPayloadTableInvolved = payloadTables.Any();
+                var payloadTables = sqlcmd.assignedTablenames.Where(t => regex_NonSystemTable.IsMatch(t)).ToArray();
+                sqlcmd.isPayloadTableInvolved = payloadTables.Length > 0;
 
                 foreach (string tabname in payloadTables)
                     if (!sqlSessionInfo[msg.spid].nonSystemTables.Any(t => string.Compare(t, tabname, true) == 0))

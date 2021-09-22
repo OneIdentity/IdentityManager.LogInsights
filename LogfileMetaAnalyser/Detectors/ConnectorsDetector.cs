@@ -233,16 +233,16 @@ namespace LogfileMetaAnalyser.Detectors
         {
             foreach (var systemConnection in systemConnectorsAndConnections.Values
                                                                                 .Where(t => t.systemConnType == SystemConnType.SystemConnection && 
-                                                                                            t.connectTimestamp.Any() && 
-                                                                                            t.disconnectTimestamp.Any()))
+                                                                                            t.connectTimestamp.Count > 0 && 
+                                                                                            t.disconnectTimestamp.Count > 0))
             {
                 var systemConnectorCandidates = systemConnectorsAndConnections.Values
                                                     .Where(t =>
                                                         t.systemConnType == SystemConnType.SystemConnector &&
                                                         t.belongsToSide == systemConnection.belongsToSide &&
                                                         t.systemConnectionSpid == "" &&
-                                                        t.connectTimestamp.Any() &&
-                                                        t.disconnectTimestamp.Any()
+                                                        t.connectTimestamp.Count > 0 &&
+                                                        t.disconnectTimestamp.Count > 0
                                                     ).ToArray();
 
                 //match, when systemConnection has at least one connect/disconnect pair with a Connector

@@ -65,11 +65,11 @@ namespace LogfileMetaAnalyser.Helpers
                 dictRoundHuman.Add(i, Math.Abs((firstDt - firstDt.RoundHuman(i)).TotalSeconds));
 
             double fivepercentLimit = (span.TotalSeconds * 0.05f);
-            var dictColRoundHuman = dictRoundHuman.Where(kp => kp.Value <= fivepercentLimit).OrderByDescending(kp => kp.Value);
-            if (!dictColRoundHuman.Any())
+            var dictColRoundHuman = dictRoundHuman.Where(kp => kp.Value <= fivepercentLimit).OrderByDescending(kp => kp.Value).ToArray();
+            if (dictColRoundHuman.Length == 0)
                 return res.ToArray(); //return no result
 
-            byte bestfit = dictColRoundHuman.First().Key;
+            byte bestfit = dictColRoundHuman[0].Key;
             //firstDt = firstDt.RoundHuman(bestfit);
             firstDt = minDate.RoundHuman(bestfit);
 

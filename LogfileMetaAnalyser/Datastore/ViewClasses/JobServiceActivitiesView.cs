@@ -51,10 +51,10 @@ namespace LogfileMetaAnalyser.Datastore
             }
 
             if (key == $"{BaseKey}/withRetries")
-                return dsref.jobserviceJobs.Where(t => !t.isSmoothExecuted).Count();
+                return dsref.jobserviceJobs.Count(t => !t.isSmoothExecuted);
 
             if (key == $"{BaseKey}/withMissingStartFinish")
-                return dsref.jobserviceJobs.Where(j => j.hasMissingStartOrFinishMessages).Count();
+                return dsref.jobserviceJobs.Count(j => j.hasMissingStartOrFinishMessages);
 
             return 0;
         }
@@ -147,7 +147,7 @@ namespace LogfileMetaAnalyser.Datastore
                                                                         filterByTask && j.taskfull.Replace("/", "") == tasknamefull ||
                                                                         filterByQueuename && j.queuename.Replace("/", "") == queuename
                                                                     ) &&
-                                                                    j.jobserviceJobattempts.Any())
+                                                                    j.jobserviceJobattempts.Count > 0)
                                                         .OrderBy(j => j.jobserviceJobattempts[0].dtTimestampStart)
                     )
             {
@@ -220,31 +220,31 @@ namespace LogfileMetaAnalyser.Datastore
                 foreach (string queuename in dsref.jobserviceJobs.Where(j => j.taskfull == taskname).Select(j => j.queuename).Distinct())
                 {
                     var jobs_all = dsref.jobserviceJobs.Where(j => j.taskfull == taskname && j.queuename == queuename).SelectMany(j => j.jobserviceJobattempts);
-                    var jobs_valid = jobs_all.Where(a => !a.hasMissingStartOrFinishMessage);
-                    var jobs_invalid = jobs_all.Where(a => a.hasMissingStartOrFinishMessage);
+                    var jobs_valid = jobs_all.Where(a => !a.hasMissingStartOrFinishMessage).ToArray();
+                    var jobs_invalid = jobs_all.Where(a => a.hasMissingStartOrFinishMessage).ToArray();
 
-                    if (jobs_valid.Any())
+                    if (jobs_valid.Length > 0)
                     {
                         uint maxDura = jobs_valid.Max(j => j.durationSec);
-                        string uuid_expensiveJob = jobs_valid.Where(j => j.durationSec == maxDura).First().uuid;
+                        string uuid_expensiveJob = jobs_valid.First(j => j.durationSec == maxDura).uuid;
 
                         uc[0].AddItemRow($"{taskname}{queuename}valid#{uuid_expensiveJob}", new string[] {
                             taskname,
                             queuename,
                             "finished jobs",
-                            jobs_valid.Count().ToString(),
+                            jobs_valid.Length.ToString(),
                             jobs_valid.Min(j => j.durationSec).ToString(),
                             maxDura.ToString(),
                             Math.Round(jobs_valid.Average(j => j.durationSec),1).ToString("F1")
                         });
                     }
 
-                    if (jobs_invalid.Any())
+                    if (jobs_invalid.Length > 0)
                         uc[0].AddItemRow($"{taskname}{queuename}invalid", new string[] {
                             taskname,
                             queuename,
                             "jobs start/finish missing",
-                            jobs_invalid.Count().ToString(),
+                            jobs_invalid.Length.ToString(),
                             "N/A","N/A","N/A"
                         });
                 }

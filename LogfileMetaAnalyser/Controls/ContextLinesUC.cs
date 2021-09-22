@@ -224,7 +224,7 @@ namespace LogfileMetaAnalyser.Controls
         {
             comboBox_OpenInEditor.Items.Clear();
 
-            if (filePos == null || filePos.Count() <= 1)
+            if (filePos == null || filePos.Count <= 1)
             {
                 tableLayoutPanel2.ColumnStyles[3].Width = 0;
                 comboBox_OpenInEditor.Visible = false;
@@ -268,7 +268,9 @@ namespace LogfileMetaAnalyser.Controls
                 int highlightEditorPositions_tmp_start;
                 if (highlightFilePositions == null)
                     highlightFilePositions = new long[] { };
-                
+                else
+                    highlightFilePositions = highlightFilePositions.ToArray();
+
                 rtbLog.Text = "";
 
                 if (rtbLog.ShowLineNumbers)

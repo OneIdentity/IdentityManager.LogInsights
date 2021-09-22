@@ -15,48 +15,48 @@ namespace LogfileMetaAnalyser.Datastore
 
         public long logfilePositionStart
         {
-            get { return subEventPoints.Any() ? subEventPoints[0].logfilePosition : -1 ; }
+            get { return subEventPoints.Count > 0 ? subEventPoints[0].logfilePosition : -1 ; }
         }
 
         public long logfilePositionEnd
         {
-            get { return subEventPoints.Any() ? subEventPoints.Last().logfilePosition : -1; }
+            get { return subEventPoints.Count > 0 ? subEventPoints[^1].logfilePosition : -1; }
         }
 
 
         public string logfileNameStart
         {
-            get { return subEventPoints.Any() ? subEventPoints[0].logfileName : ""; }
+            get { return subEventPoints.Count > 0 ? subEventPoints[0].logfileName : ""; }
         }
 
         public string logfileNameEnd
         {
-            get { return subEventPoints.Any() ? subEventPoints.Last().logfileName : ""; }
+            get { return subEventPoints.Count > 0 ? subEventPoints[^1].logfileName : ""; }
         }
 
         public DateTime dtTimestampSequenceStart
         {
-            get { return subEventPoints.Any() ? subEventPoints[0].dtTimestamp : DateTime.MinValue; }
+            get { return subEventPoints.Count > 0 ? subEventPoints[0].dtTimestamp : DateTime.MinValue; }
         }
 
         public DateTime dtTimestampSequenceEnd
         {
-            get { return subEventPoints.Any() ? subEventPoints.Last().dtTimestamp : DateTime.MinValue; }
+            get { return subEventPoints.Count > 0 ? subEventPoints[^1].dtTimestamp : DateTime.MinValue; }
         }
 
         public uint durationMin
         {
-            get { return subEventPoints.Any() ? Convert.ToUInt32(Math.Abs(Math.Ceiling((dtTimestampSequenceEnd - dtTimestampSequenceStart).TotalMinutes))) : 0; } 
+            get { return subEventPoints.Count > 0 ? Convert.ToUInt32(Math.Abs(Math.Ceiling((dtTimestampSequenceEnd - dtTimestampSequenceStart).TotalMinutes))) : 0; } 
         }
 
         public uint durationSec
         {
-            get { return subEventPoints.Any() ? Convert.ToUInt32(Math.Abs(Math.Ceiling((dtTimestampSequenceEnd - dtTimestampSequenceStart).TotalSeconds))) : 0; }
+            get { return subEventPoints.Count > 0 ? Convert.ToUInt32(Math.Abs(Math.Ceiling((dtTimestampSequenceEnd - dtTimestampSequenceStart).TotalSeconds))) : 0; }
         }
 
         public string DurationString()
         {
-            if (!subEventPoints.Any())
+            if (subEventPoints.Count == 0)
                 return ("N/A");
             else
                 return (dtTimestampSequenceEnd - dtTimestampSequenceStart).EnsurePositive().ToHumanString();
@@ -68,7 +68,7 @@ namespace LogfileMetaAnalyser.Datastore
 
         public override string ToString()
         {
-            if (!subEventPoints.Any())
+            if (subEventPoints.Count == 0)
                 return "event sequence with no data";
 
             int cnt = subEventPoints.Count;

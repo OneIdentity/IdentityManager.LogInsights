@@ -86,10 +86,10 @@ namespace LogfileMetaAnalyser.Datastore
 
             foreach (var proj in projections)
             {
-                var freeLaneLst = res.Where(p => !Helpers.DateHelper.DateRangeInterferesWithRange(p.Key.dtTimestampStart, p.Key.dtTimestampEnd, proj.dtTimestampStart, proj.dtTimestampEnd));
+                var freeLaneLst = res.Where(p => !Helpers.DateHelper.DateRangeInterferesWithRange(p.Key.dtTimestampStart, p.Key.dtTimestampEnd, proj.dtTimestampStart, proj.dtTimestampEnd)).ToArray();
 
                 //we got a free lane
-                if (freeLaneLst != null && freeLaneLst.Any())                
+                if (freeLaneLst.Length> 0)
                     laneId = freeLaneLst.Min(x => x.Value); //take the lane with the lowest laneId                 
                 else
                     laneId = res.Count;

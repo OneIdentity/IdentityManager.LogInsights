@@ -35,8 +35,8 @@ namespace LogfileMetaAnalyser.Datastore
         public override string ToString()
         {
             return string.Format("left objList: {0}\nadditional # of left objectList:{2}\nright objList: {1}\nadditional # of right objectList:{2}",
-                                    loadingObjectList_left.Any() ? loadingObjectList_left.First().Value.schemaClassName : " - ",
-                                    loadingObjectList_right.Any() ? loadingObjectList_right.First().Value.schemaClassName : " - ", 
+                                    loadingObjectList_left.Count > 0 ? loadingObjectList_left.First().Value.schemaClassName : " - ",
+                                    loadingObjectList_right.Count > 0 ? loadingObjectList_right.First().Value.schemaClassName : " - ", 
                                     loadingObjectList_left.Count,
                                     loadingObjectList_right.Count
                                     );
@@ -139,14 +139,12 @@ namespace LogfileMetaAnalyser.Datastore
                     //  => ALL stepDetails must belong to EITHER process1 (proj1, proj3) OR process2 (proj2)
 
                     var potListOfProjections = potentialProjections.Where(p => p.dtTimestampStart <= stepDetail.firstOccurrence &&
-                                                           p.dtTimestampEnd >= stepDetail.lastOccurrence &&
-                                                           p.projectionSteps.Count >= 0 &&
-                                                           p.projectionSteps.Min(step => step.dtTimestampStart).LessThan(stepDetail.firstOccurrence) &&
-                                                           p.projectionSteps.Max(step => step.dtTimestampEnd).MoreThan(stepDetail.lastOccurrence)
-                                                      );
+                                                                               p.dtTimestampEnd >= stepDetail.lastOccurrence &&
+                                                                               p.projectionSteps.Count >= 0 &&
+                                                                               p.projectionSteps.Min(step => step.dtTimestampStart).LessThan(stepDetail.firstOccurrence) &&
+                                                                               p.projectionSteps.Max(step => step.dtTimestampEnd).MoreThan(stepDetail.lastOccurrence)
+                    );
 
-                    if (!potListOfProjections.Any())
-                        continue; // :(
 
                     foreach (var p in potListOfProjections)
                         projectionsWithPotentialSteps.AddOrUpdate(p, stepDetail);
@@ -175,18 +173,18 @@ namespace LogfileMetaAnalyser.Datastore
 
             //now we need to assign each step detail to a projection
             foreach (var stepDetail in stepDetails)
-            {                
+            {
                 var potListOfProjections = potentialProjections.Where(p => p.dtTimestampStart <= stepDetail.firstOccurrence &&
-                                                        p.dtTimestampEnd >= stepDetail.lastOccurrence &&
-                                                        p.projectionSteps.Count >= 0 &&
-                                                        p.projectionSteps.Min(step => step.dtTimestampStart).LessThan(stepDetail.firstOccurrence) &&
-                                                        p.projectionSteps.Max(step => step.dtTimestampEnd).MoreThan(stepDetail.lastOccurrence)
-                                                    );
+                                                                           p.dtTimestampEnd >= stepDetail.lastOccurrence &&
+                                                                           p.projectionSteps.Count >= 0 &&
+                                                                           p.projectionSteps.Min(step => step.dtTimestampStart).LessThan(stepDetail.firstOccurrence) &&
+                                                                           p.projectionSteps.Max(step => step.dtTimestampEnd).MoreThan(stepDetail.lastOccurrence)
+                ).ToArray();
 
-                if (potListOfProjections.Count() != 1)
+                if (potListOfProjections.Length != 1)
                     continue; // :(
                 
-                res.AddOrUpdate(potListOfProjections.First(), stepDetail);
+                res.AddOrUpdate(potListOfProjections[0], stepDetail);
             }
 
 
