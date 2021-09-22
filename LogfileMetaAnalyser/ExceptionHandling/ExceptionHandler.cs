@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LogfileMetaAnalyser.Controls;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -22,19 +23,23 @@ namespace LogfileMetaAnalyser.ExceptionHandling
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             if (e.IsTerminating)
-                m_Logger.Info("Application is terminating unexpectedly.");
+                m_Logger.Fatal("Application is terminating unexpectedly.");
 
             if (e.ExceptionObject is Exception ex)
-                m_Logger.Fatal(ex, ex.Message);
+            {
+                MainForm?.Invoke(new ExceptionInvoker(ShowException), ex);
+
+                if (e.IsTerminating)                
+                    m_Logger.Fatal(ex, ex.Message);
+                else
+                    m_Logger.Error(ex, ex.Message);
+            }
         }
 
         private void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
         {
-            if (MainForm != null)
-            {
-                MainForm?.Invoke(new ExceptionInvoker(ShowException), e.Exception);
-            }            
-            
+            MainForm?.Invoke(new ExceptionInvoker(ShowException), e.Exception);
+
             m_Logger.Error(e.Exception, e.Exception.Message);
         }
 
@@ -65,7 +70,7 @@ namespace LogfileMetaAnalyser.ExceptionHandling
 
         private void ShowException(Exception exception)
         {
-            MessageBox.Show(exception.Message + "\r\n" + exception.StackTrace, "Error");
+            ExceptionForm.ShowDialog(exception, MainForm);
         }
 
         public void HandleException(Exception exception, bool isUserRelevant = true)
@@ -74,9 +79,7 @@ namespace LogfileMetaAnalyser.ExceptionHandling
                 return;
 
             if (isUserRelevant && MainForm != null)
-            {
                 MainForm?.Invoke(new ExceptionInvoker(ShowException), exception);
-            }
 
             m_Logger.Error(exception, exception.Message);
         }
@@ -87,9 +90,7 @@ namespace LogfileMetaAnalyser.ExceptionHandling
             {
                 if (_instance == null)
                     lock (_lockObj)
-                    {
                         _instance ??= new ExceptionHandler();
-                    }
 
                 return _instance;
             }
