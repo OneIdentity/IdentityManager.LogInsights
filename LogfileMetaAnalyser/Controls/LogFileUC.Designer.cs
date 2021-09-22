@@ -29,6 +29,7 @@ namespace LogfileMetaAnalyser.Controls
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LogFileUC));
             this.lvLogFiles = new System.Windows.Forms.ListView();
             this.colFileName = new System.Windows.Forms.ColumnHeader();
@@ -37,10 +38,13 @@ namespace LogfileMetaAnalyser.Controls
             this.colFileTo = new System.Windows.Forms.ColumnHeader();
             this.dlgOpen = new System.Windows.Forms.OpenFileDialog();
             this.toolStrip = new System.Windows.Forms.ToolStrip();
-            this.tsbAdd = new System.Windows.Forms.ToolStripButton();
+            this.tsbFiles = new System.Windows.Forms.ToolStripButton();
+            this.tsbFolder = new System.Windows.Forms.ToolStripButton();
             this.tsbDelete = new System.Windows.Forms.ToolStripButton();
             this.lblHeader = new System.Windows.Forms.Label();
             this.panelTop = new System.Windows.Forms.Panel();
+            this.dlgFolder = new System.Windows.Forms.FolderBrowserDialog();
+            this.imageList = new System.Windows.Forms.ImageList(this.components);
             this.toolStrip.SuspendLayout();
             this.panelTop.SuspendLayout();
             this.SuspendLayout();
@@ -60,8 +64,10 @@ namespace LogfileMetaAnalyser.Controls
             this.lvLogFiles.Margin = new System.Windows.Forms.Padding(1);
             this.lvLogFiles.Name = "lvLogFiles";
             this.lvLogFiles.Size = new System.Drawing.Size(622, 201);
+            this.lvLogFiles.SmallImageList = this.imageList;
             this.lvLogFiles.TabIndex = 0;
             this.lvLogFiles.UseCompatibleStateImageBehavior = false;
+            this.lvLogFiles.UseWaitCursor = true;
             this.lvLogFiles.View = System.Windows.Forms.View.Details;
             this.lvLogFiles.SelectedIndexChanged += new System.EventHandler(this.lvLogFiles_SelectedIndexChanged);
             // 
@@ -94,7 +100,8 @@ namespace LogfileMetaAnalyser.Controls
             // 
             this.toolStrip.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
             this.toolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsbAdd,
+            this.tsbFiles,
+            this.tsbFolder,
             this.tsbDelete});
             this.toolStrip.Location = new System.Drawing.Point(0, 44);
             this.toolStrip.Name = "toolStrip";
@@ -102,22 +109,28 @@ namespace LogfileMetaAnalyser.Controls
             this.toolStrip.Size = new System.Drawing.Size(622, 25);
             this.toolStrip.TabIndex = 1;
             // 
-            // tsbAdd
+            // tsbFiles
             // 
-            this.tsbAdd.Image = ((System.Drawing.Image)(resources.GetObject("tsbAdd.Image")));
-            this.tsbAdd.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbAdd.Name = "tsbAdd";
-            this.tsbAdd.Size = new System.Drawing.Size(49, 22);
-            this.tsbAdd.Text = "Add";
-            this.tsbAdd.Click += new System.EventHandler(this.tsbAdd_Click);
+            this.tsbFiles.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbFiles.Name = "tsbFiles";
+            this.tsbFiles.Size = new System.Drawing.Size(57, 22);
+            this.tsbFiles.Text = "Add files";
+            this.tsbFiles.Click += new System.EventHandler(this.tsbAdd_Click);
+            // 
+            // tsbFolder
+            // 
+            this.tsbFolder.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbFolder.Name = "tsbFolder";
+            this.tsbFolder.Size = new System.Drawing.Size(67, 22);
+            this.tsbFolder.Text = "Add folder";
+            this.tsbFolder.Click += new System.EventHandler(this.tsbFolder_Click);
             // 
             // tsbDelete
             // 
             this.tsbDelete.Enabled = false;
-            this.tsbDelete.Image = ((System.Drawing.Image)(resources.GetObject("tsbDelete.Image")));
             this.tsbDelete.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsbDelete.Name = "tsbDelete";
-            this.tsbDelete.Size = new System.Drawing.Size(70, 22);
+            this.tsbDelete.Size = new System.Drawing.Size(54, 22);
             this.tsbDelete.Text = "Remove";
             this.tsbDelete.Click += new System.EventHandler(this.tsbDelete_Click);
             // 
@@ -141,6 +154,19 @@ namespace LogfileMetaAnalyser.Controls
             this.panelTop.Name = "panelTop";
             this.panelTop.Size = new System.Drawing.Size(622, 44);
             this.panelTop.TabIndex = 2;
+            // 
+            // dlgFolder
+            // 
+            this.dlgFolder.ShowNewFolderButton = false;
+            // 
+            // imageList
+            // 
+            this.imageList.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
+            this.imageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList.ImageStream")));
+            this.imageList.TransparentColor = System.Drawing.Color.Transparent;
+            this.imageList.Images.SetKeyName(0, "NewDocument 16 n p.png");
+            this.imageList.Images.SetKeyName(1, "FolderOpen 16 n p.png");
+            this.imageList.Images.SetKeyName(2, "DeleteDocument 16 n p.png");
             // 
             // LogFileUC
             // 
@@ -168,11 +194,14 @@ namespace LogfileMetaAnalyser.Controls
         private System.Windows.Forms.ColumnHeader colFileSize;
         private System.Windows.Forms.OpenFileDialog dlgOpen;
         private System.Windows.Forms.ToolStrip toolStrip;
-        private System.Windows.Forms.ToolStripButton tsbAdd;
+        private System.Windows.Forms.ToolStripButton tsbFiles;
         private System.Windows.Forms.ToolStripButton tsbDelete;
         private System.Windows.Forms.Label lblHeader;
         private System.Windows.Forms.Panel panelTop;
         private System.Windows.Forms.ColumnHeader colFileFrom;
         private System.Windows.Forms.ColumnHeader colFileTo;
+        private System.Windows.Forms.ToolStripButton tsbFolder;
+        private System.Windows.Forms.FolderBrowserDialog dlgFolder;
+        private System.Windows.Forms.ImageList imageList;
     }
 }
