@@ -59,5 +59,10 @@ namespace LogfileMetaAnalyser.Controls
         {
            CheckValid();
         }
+
+        public void StoreCredentials()
+        {
+            SelectedProvider.StoreCredentials();
+        }
     }
 }

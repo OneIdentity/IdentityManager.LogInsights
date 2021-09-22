@@ -48,7 +48,7 @@ namespace LogfileMetaAnalyser.Controls
             }
         }
 
-        public virtual void CheckValid()
+        public void CheckValid()
         {
             IsValid = OnCheckValid();
         }
@@ -59,7 +59,7 @@ namespace LogfileMetaAnalyser.Controls
         }
 
 
-        protected virtual void OnValidChanged()
+        protected void OnValidChanged()
         {
             IsValidChanged?.Invoke(this, EventArgs.Empty);
         }
@@ -72,6 +72,10 @@ namespace LogfileMetaAnalyser.Controls
         public virtual ILogReader ConnectToReader()
         {
             throw new NotImplementedException();
+        }
+
+        public virtual void StoreCredentials()
+        {
         }
     }
 }
