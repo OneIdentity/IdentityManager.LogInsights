@@ -19,7 +19,7 @@ jobs:
     env:
       Solution_Name: LogfileMetaAnalyser.sln                      # Replace with your solution name, i.e. MyWpfApp.sln.
       Project_Dir: LogfileMetaAnalyser
-      Zip_Name: LogfileMetaAnalyser
+      Zip_Name: LogInsights
 
     steps:
     - name: Checkout
