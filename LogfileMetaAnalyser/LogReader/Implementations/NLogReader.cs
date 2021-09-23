@@ -132,16 +132,20 @@ namespace LogfileMetaAnalyser.LogReader
                     if (logFormat == LogFormat.JobService && string.IsNullOrEmpty(logger))
                         logger = "Jobservice";
 
-                    var logEntry = new LogEntry(new Locator(++entryNumber, lineNumber, file), 
-                        lineNumber.ToString(),
-                        DateTime.TryParse(match.Groups["Timestamp"].Value, out var timeStamp) ? timeStamp : DateTime.MinValue,
-                        logFormat == LogFormat.JobService ? _GetServiceLogLevel(match.Groups["tag"].Value) : _GetNLogLevel(match.Groups["NLevel"].Value),
-                        0,
-                        match.Groups["Payload"].Value,
-                        logger, 
-                        "",
-                        match.Groups["PID"].Value,
-                        spid);
+                    var logEntry = new LogEntry {
+                        Locator = new Locator(++entryNumber, lineNumber, file),
+                        Id = lineNumber.ToString(),
+                        TimeStamp = DateTime.TryParse(match.Groups["Timestamp"].Value, out var timeStamp)
+                            ? timeStamp
+                            : DateTime.MinValue,
+                        Level = logFormat == LogFormat.JobService
+                            ? _GetServiceLogLevel(match.Groups["tag"].Value)
+                            : _GetNLogLevel(match.Groups["NLevel"].Value),
+                        Message = match.Groups["Payload"].Value,
+                        Logger = logger,
+                        Pid = match.Groups["PID"].Value,
+                        Spid = spid
+                    };
 
                     lineNumber = lineNumberTotal;
 
