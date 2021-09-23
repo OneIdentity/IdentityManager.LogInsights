@@ -1,4 +1,6 @@
-﻿using System;
+﻿using LogfileMetaAnalyser.Datastore;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -75,7 +77,7 @@ namespace LogfileMetaAnalyser.Detectors
             detectorStats.detectorName = string.Format("{0} <{1}>", this.GetType().Name, this.identifier);
             detectorStats.finalizeDuration = (DateTime.Now - finStartpoint).TotalMilliseconds;
             detectorStats.numberOfDetections = 0;
-            _datastore.Statistics.DetectorStatistics.Add(detectorStats);
+            _datastore.GetOrAdd<StatisticsStore>().DetectorStatistics.Add(detectorStats);
 
             //dispose
             //idmatches = null;

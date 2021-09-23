@@ -73,9 +73,13 @@ namespace LogfileMetaAnalyser.Detectors
 
             DateTime finStartpoint = DateTime.Now;
 
+            var generalLogData = _datastore.GetOrAdd<GeneralLogData>();
+            var projectionActivity = _datastore.GetOrAdd<ProjectionActivity>();
+            var statisticsStore = _datastore.GetOrAdd<StatisticsStore>();
+
             //correct the projections start time
             foreach (Projection proj in projections.Values.SelectMany(p => p).Where(p => p.dtTimestampStart.IsNull()))
-                proj.dtTimestampStart = _datastore.GeneralLogData.LogDataOverallTimeRangeStart;
+                proj.dtTimestampStart = generalLogData.LogDataOverallTimeRangeStart;
 
             //finish the projections
             foreach (Projection proj in projections.Values.SelectMany(p => p).OrderBy(o => o.dtTimestampStart))
@@ -116,12 +120,12 @@ namespace LogfileMetaAnalyser.Detectors
                 }
 
                 //put in store if not already in it (can happen when a log file was analyed twice (a copy))
-                if (!_datastore.ProjectionActivity.Projections.Any(p => (p.dtTimestampStart.AlmostEqual(proj.dtTimestampStart) && p.logfileName != proj.logfileName) 
+                if (!projectionActivity.Projections.Any(p => (p.dtTimestampStart.AlmostEqual(proj.dtTimestampStart) && p.logfileName != proj.logfileName) 
                                                                         || 
                                                                         p.loggerSourceId == proj.loggerSourceId))
                 {
                     logger.Debug($"pushing to ds: projectionActivity.projections.Add: {proj.ToString()}");
-                    _datastore.ProjectionActivity.Projections.Add(proj);
+                    projectionActivity.Projections.Add(proj);
 
                     detectorStats.numberOfDetections++;
                     detectorStats.numberOfDetections += proj.projectionSteps.Count;
@@ -132,7 +136,7 @@ namespace LogfileMetaAnalyser.Detectors
             //stats
             detectorStats.detectorName = string.Format("{0} <{1}>", this.GetType().Name, this.identifier);
             detectorStats.finalizeDuration = (DateTime.Now - finStartpoint).TotalMilliseconds;
-            _datastore.Statistics.DetectorStatistics.Add(detectorStats);
+            statisticsStore.DetectorStatistics.Add(detectorStats);
             logger.Debug(detectorStats.ToString());
 
             //dispose

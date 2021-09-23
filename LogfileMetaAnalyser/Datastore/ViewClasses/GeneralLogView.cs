@@ -18,7 +18,7 @@ namespace LogfileMetaAnalyser.Datastore
 
         public int GetElementCount(string key)
         {
-            var dsref = datastore.GeneralLogData;
+            var dsref = datastore.GetOrAdd<GeneralLogData>();
 
             if (key == $"{BaseKey}/ErrorsAndWarnings")
                 return dsref.MessageErrors.Count + dsref.MessageWarnings.Count;
@@ -40,7 +40,7 @@ namespace LogfileMetaAnalyser.Datastore
             if (!key.StartsWith(BaseKey))
                 return;
 
-            var dsref = datastore.GeneralLogData;
+            var dsref = datastore.GetOrAdd<GeneralLogData>();
 
 
             if (key == BaseKey)  //information

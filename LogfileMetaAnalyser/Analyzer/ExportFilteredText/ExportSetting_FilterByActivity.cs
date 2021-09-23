@@ -105,26 +105,32 @@ namespace LogfileMetaAnalyser
 
             //b): filters are partially set
 
+            var generalLogData = dsref.GetOrAdd<GeneralLogData>();
+            var projectionActivity = dsref.GetOrAdd<ProjectionActivity>();
+            var statisticsStore = dsref.GetOrAdd<StatisticsStore>();
+            var jobServiceActivities = dsref.GetOrAdd<JobServiceActivity>();
+            var generalSqlInformation = dsref.GetOrAdd<SqlInformation>();
+
             bool takeAllAdHoc = isfilterEnabled_ProjectionActivity_Projections_AdHoc && (
                                     filterProjectionActivity_Projections_AdHocLst.Count == 0
                                      || 
-                                    filterProjectionActivity_Projections_AdHocLst.Count == dsref.ProjectionActivity.NumberOfAdHocProjections);
+                                    filterProjectionActivity_Projections_AdHocLst.Count == projectionActivity.NumberOfAdHocProjections);
 
             bool takeAllSync = isfilterEnabled_ProjectionActivity_Projections_Sync && (
                                     filterProjectionActivity_Projections_SyncLst.Count == 0
                                      ||
-                                    filterProjectionActivity_Projections_SyncLst.Count == dsref.ProjectionActivity.NumberOfSyncProjections);
+                                    filterProjectionActivity_Projections_SyncLst.Count == projectionActivity.NumberOfSyncProjections);
 
             //here the option isfilterEnabled_JobServiceActivity_ByX has another meaning: when enabled, respect the filterJobServiceActivity_ByXLst, otherwise take all
             bool takeAllJsJobByComponent = isfilterEnabled_JobServiceActivity_ByComponent && (
                                     filterJobServiceActivity_ByComponentLst.Count == 0
                                      ||
-                                    filterJobServiceActivity_ByComponentLst.Count == dsref.JobServiceActivities.DistinctTaskFull.Count);
+                                    filterJobServiceActivity_ByComponentLst.Count == jobServiceActivities.DistinctTaskFull.Count);
 
             bool takeAllJsJobByQueue = isfilterEnabled_JobServiceActivity_ByQueue && (
                                     filterJobServiceActivity_ByQueueLst.Count == 0
                                      ||
-                                    filterJobServiceActivity_ByQueueLst.Count == dsref.JobServiceActivities.DistinctQueueName.Count);
+                                    filterJobServiceActivity_ByQueueLst.Count == jobServiceActivities.DistinctQueueName.Count);
 
             bool takeAllJsJob = takeAllJsJobByComponent || takeAllJsJobByQueue;  //if one filter says TakeAllByX a filter ByY is meaningless
 
@@ -152,13 +158,13 @@ namespace LogfileMetaAnalyser
                 //we should filter by AdHoc jobs, but no single job was specified: include ALL
                 if (takeAllAdHoc)
                 {
-                    spids = dsref.ProjectionActivity.GetLoggerIdsByUuids(new string[] { "*" }, true, ProjectionType.AdHocProvision);
-                    spids.Union(dsref.GeneralSqlInformation.GetLoggerIdsByUuids(new string[] { "*" }));
+                    spids = projectionActivity.GetLoggerIdsByUuids(new string[] { "*" }, true, ProjectionType.AdHocProvision);
+                    spids.Union(generalSqlInformation.GetLoggerIdsByUuids(new string[] { "*" }));
                 }
                 else
                 {
-                    spids = dsref.ProjectionActivity.GetLoggerIdsByUuids(filterProjectionActivity_Projections_AdHocLst.ToArray(), true, ProjectionType.AdHocProvision);
-                    spids.Union(dsref.GeneralSqlInformation.GetLoggerIdsByUuids(filterProjectionActivity_Projections_AdHocLst.ToArray()));
+                    spids = projectionActivity.GetLoggerIdsByUuids(filterProjectionActivity_Projections_AdHocLst.ToArray(), true, ProjectionType.AdHocProvision);
+                    spids.Union(generalSqlInformation.GetLoggerIdsByUuids(filterProjectionActivity_Projections_AdHocLst.ToArray()));
                 }
 
                 foreach (string spid in spids)
@@ -170,13 +176,13 @@ namespace LogfileMetaAnalyser
                 //we should filter by Sync jobs, but no single job was specified: include ALL
                 if (takeAllSync)
                 {
-                    spids = dsref.ProjectionActivity.GetLoggerIdsByUuids(new string[] { "*" }, true, ProjectionType.SyncGeneral);
-                    spids.Union(dsref.GeneralSqlInformation.GetLoggerIdsByUuids(new string[] { "*" }));
+                    spids = projectionActivity.GetLoggerIdsByUuids(new string[] { "*" }, true, ProjectionType.SyncGeneral);
+                    spids.Union(generalSqlInformation.GetLoggerIdsByUuids(new string[] { "*" }));
                 }
                 else
                 {
-                    spids = dsref.ProjectionActivity.GetLoggerIdsByUuids(filterProjectionActivity_Projections_SyncLst.ToArray(), true, ProjectionType.SyncGeneral);
-                    spids.Union(dsref.GeneralSqlInformation.GetLoggerIdsByUuids(filterProjectionActivity_Projections_SyncLst.ToArray()));
+                    spids = projectionActivity.GetLoggerIdsByUuids(filterProjectionActivity_Projections_SyncLst.ToArray(), true, ProjectionType.SyncGeneral);
+                    spids.Union(generalSqlInformation.GetLoggerIdsByUuids(filterProjectionActivity_Projections_SyncLst.ToArray()));
                 }
 
                 foreach (string spid in spids)
@@ -190,20 +196,20 @@ namespace LogfileMetaAnalyser
                 spids = new string[] { };
 
                 if (takeAllJsJob)
-                    spids = dsref.JobServiceActivities
+                    spids = jobServiceActivities
                                     .JobServiceJobs
                                     .Select(j => j.uidJob);
 
                 else if (isfilterEnabled_JobServiceActivity_ByComponent)   //filter by component but do not simply take all                        
                                                                            //pick those which are selected
-                    spids = dsref.JobServiceActivities
+                    spids = jobServiceActivities
                                     .JobServiceJobs
                                     .Where(j => filterJobServiceActivity_ByComponentLst.Contains(j.taskfull))
                                     .Select(j => j.uidJob);
 
                 else if (isfilterEnabled_JobServiceActivity_ByQueue)       //filter by queue but do not simply take all    
                                                                            //pick those which are selected
-                    spids = dsref.JobServiceActivities
+                    spids = jobServiceActivities
                                     .JobServiceJobs
                                     .Where(j => filterJobServiceActivity_ByQueueLst.Contains(j.queuename))
                                     .Select(j => j.uidJob);

@@ -20,7 +20,7 @@ namespace LogfileMetaAnalyser.Datastore
 
         public int GetElementCount(string key)
         {
-            var dsref = datastore.JobServiceActivities;
+            var dsref = datastore.GetOrAdd<JobServiceActivity>();
 
             if (key == BaseKey)
                 return dsref.JobServiceJobs.Count;
@@ -91,7 +91,7 @@ namespace LogfileMetaAnalyser.Datastore
         {
             MultiListViewUC uc = new MultiListViewUC();
             ContextLinesUC contextLinesUc = new ContextLinesUC(logfileFilterExporter);
-            var dsref = datastore.JobServiceActivities;
+            var dsref = datastore.GetOrAdd<JobServiceActivity>();
 
 
             string caption = "Job service jobs";
@@ -207,7 +207,7 @@ namespace LogfileMetaAnalyser.Datastore
         {
             MultiListViewUC uc = new MultiListViewUC();
             ContextLinesUC contextLinesUc = new ContextLinesUC(logfileFilterExporter);
-            var dsref = datastore.JobServiceActivities;
+            var dsref = datastore.GetOrAdd<JobServiceActivity>();
 
             uc.SetupLayout(1);
             uc[0].SetupCaption("Job Service job run time performance");
