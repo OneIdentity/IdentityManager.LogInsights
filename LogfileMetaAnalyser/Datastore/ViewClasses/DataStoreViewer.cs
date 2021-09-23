@@ -148,7 +148,7 @@ namespace LogfileMetaAnalyser.Datastore
                                     }
 
                                     if (upperPanelControl.Count > 0)
-                                        MessageBox.Show($"no viewer class found to handle key '{key}'");
+                                        MessageBox.Show($"no viewer class found to handle key '{key}'", Constants.AppDisplay);
                                 }
                             }
 
