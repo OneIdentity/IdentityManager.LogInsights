@@ -70,7 +70,6 @@ namespace LogfileMetaAnalyser.LogReader
         {
             StringBuilder sb = new StringBuilder(1024);
 
-            // todo read order of files?
             foreach (var file in m_FileNames)
             {
                 var data = await _TryDetectFileFormatAsync(file).ConfigureAwait(false);

@@ -177,7 +177,6 @@ namespace LogfileMetaAnalyser
 
             logger.Info($"Starting reading {logReader.GetType().Name}");
 
-            // TODO respect Constants.NumberOfContextMessages
             var reader = await LogContextReader.CreateAsync(logReader, Constants.NumberOfContextMessages, Constants.NumberOfContextMessages).ConfigureAwait(false);
             var enumerator = reader.ReadAsync()
                 .Partition(1024)

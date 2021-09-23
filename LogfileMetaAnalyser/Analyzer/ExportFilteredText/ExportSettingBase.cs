@@ -17,7 +17,7 @@ namespace LogfileMetaAnalyser
             set { dsref = value; }
         }
 
-        public ExportSettingBase(DataStore datastore)
+        protected ExportSettingBase(DataStore datastore)
         {
             dsref = datastore;
         }
