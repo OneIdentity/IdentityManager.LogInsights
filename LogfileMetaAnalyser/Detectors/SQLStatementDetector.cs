@@ -223,7 +223,7 @@ namespace LogfileMetaAnalyser.Detectors
             
                         
             //transaction start
-            if (regex_TransactionBegin.IsMatch(msg.messageText))
+            if (regex_TransactionBegin.IsMatch(msg.payloadMessage))
             {
                 logger.Trace($"regex match for rx regex_TransactionBegin: {regex_TransactionBegin.ToString()}");
                 
@@ -241,7 +241,7 @@ namespace LogfileMetaAnalyser.Detectors
             }
                 
             //transaction end
-            var rm = regex_TransactionEnd.Match(msg.messageText);
+            var rm = regex_TransactionEnd.Match(msg.payloadMessage);
             if (rm.Success)
             {
                 logger.Trace($"regex match for rx regex_TransactionEnd: {regex_TransactionEnd.ToString()}");
@@ -266,7 +266,7 @@ namespace LogfileMetaAnalyser.Detectors
             }
 
             //basic statement
-            rm = regex_BasicStatement.Match(msg.messageText);
+            rm = regex_BasicStatement.Match(msg.payloadMessage);
             if (rm.Success)
             {
                 logger.Trace($"regex match for rx regex_BasicStatement: {regex_BasicStatement.ToString()}");
@@ -299,7 +299,7 @@ namespace LogfileMetaAnalyser.Detectors
                 }
                 else if (!string.IsNullOrEmpty(rm.Groups["cmdSelect"].Value))
                 {
-                    var rms = regex_SelectTableStatement.Matches(msg.messageText);
+                    var rms = regex_SelectTableStatement.Matches(msg.payloadMessage);
 
                     foreach (Match m in rms)
                         if (sqlcmd.assignedTablenames.All(c => c != m.Groups["cmdSelectTable"].Value))
@@ -311,7 +311,7 @@ namespace LogfileMetaAnalyser.Detectors
                 else
                 {
                     sqlcmd.sqlCmdType = SQLCmdType.Other;
-                    sqlcmd.statementText = msg.messageText;
+                    sqlcmd.statementText = msg.payloadMessage;
                 }
 
                 //can we assign this sql session to a projection anyway?
@@ -327,9 +327,10 @@ namespace LogfileMetaAnalyser.Detectors
                     if (!sqlSessionInfo[msg.spid].nonSystemTables.Any(t => string.Compare(t, tabname, true) == 0))
                         sqlSessionInfo[msg.spid].nonSystemTables.Add(tabname);
 
-                //store a sql command
-                //if (dura >= threshold_suspicious_duration_SqlCommand_msec)
-                sqlSessionInfo[msg.spid].longRunningStatements.Add(sqlcmd); 
+                //store a sql command 
+                // when long running or 
+                if (sqlcmd.durationMsec >= threshold_suspicious_duration_SqlCommand_msec || sqlcmd.isPayloadTableInvolved)
+                    sqlSessionInfo[msg.spid].longRunningStatements.Add(sqlcmd); 
             }
 			
 			detectorStats.parseDuration += (DateTime.Now - procMsgStartpoint).TotalMilliseconds;			
