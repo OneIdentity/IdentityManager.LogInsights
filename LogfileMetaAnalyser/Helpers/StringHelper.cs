@@ -65,7 +65,15 @@ namespace LogfileMetaAnalyser.Helpers
                             sb.AppendLine(s.Substring(0, Math.Min(s.Length, maxCol)));
                             s = s.Remove(0, Math.Min(s.Length, maxCol));
                             if (s.Length > 0)
+                            {
                                 lno++;
+
+                                if (lno > maxLines)
+                                {
+                                    sb.AppendLine("...");
+                                    break;
+                                }
+                            }
                         }
                     }
                     else
