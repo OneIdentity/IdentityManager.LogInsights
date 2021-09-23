@@ -441,9 +441,7 @@ namespace LogfileMetaAnalyser.Controls
             int firstRowPos = rtbLog.GetFirstCharIndexFromLine(rLines.Start.Value);
             int lastRowPos = rtbLog.GetFirstCharIndexFromLine(rLines.End.Value);
 
-            string lastRow = rtbLog.Lines[rLines.End.Value];
-
-            rtbLog.Select(firstRowPos, lastRowPos + lastRow.Length);
+            rtbLog.Select(firstRowPos, lastRowPos -firstRowPos);
             rtbLog.SelectionBackColor = c;
         }
     }
