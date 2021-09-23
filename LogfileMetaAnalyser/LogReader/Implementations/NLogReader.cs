@@ -254,7 +254,7 @@ namespace LogfileMetaAnalyser.LogReader
         {
             string line;
 
-            while ((line = await reader.ReadLineAsync()) != null)
+            while ((line = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
                 yield return line;
 
             // we have to add null in order to handle the last entry correctly
