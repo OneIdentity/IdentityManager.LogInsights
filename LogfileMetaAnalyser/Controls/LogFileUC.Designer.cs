@@ -36,6 +36,7 @@ namespace LogfileMetaAnalyser.Controls
             this.colFileSize = new System.Windows.Forms.ColumnHeader();
             this.colFileFrom = new System.Windows.Forms.ColumnHeader();
             this.colFileTo = new System.Windows.Forms.ColumnHeader();
+            this.imageList = new System.Windows.Forms.ImageList(this.components);
             this.dlgOpen = new System.Windows.Forms.OpenFileDialog();
             this.toolStrip = new System.Windows.Forms.ToolStrip();
             this.tsbFiles = new System.Windows.Forms.ToolStripButton();
@@ -44,7 +45,6 @@ namespace LogfileMetaAnalyser.Controls
             this.lblHeader = new System.Windows.Forms.Label();
             this.panelTop = new System.Windows.Forms.Panel();
             this.dlgFolder = new System.Windows.Forms.FolderBrowserDialog();
-            this.imageList = new System.Windows.Forms.ImageList(this.components);
             this.toolStrip.SuspendLayout();
             this.panelTop.SuspendLayout();
             this.SuspendLayout();
@@ -83,13 +83,22 @@ namespace LogfileMetaAnalyser.Controls
             // 
             // colFileFrom
             // 
-            this.colFileFrom.Text = "From";
+            this.colFileFrom.Text = "Created";
             this.colFileFrom.Width = 120;
             // 
             // colFileTo
             // 
-            this.colFileTo.Text = "To";
+            this.colFileTo.Text = "Last write";
             this.colFileTo.Width = 120;
+            // 
+            // imageList
+            // 
+            this.imageList.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
+            this.imageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList.ImageStream")));
+            this.imageList.TransparentColor = System.Drawing.Color.Transparent;
+            this.imageList.Images.SetKeyName(0, "NewDocument 16 n p.png");
+            this.imageList.Images.SetKeyName(1, "FolderOpen 16 n p.png");
+            this.imageList.Images.SetKeyName(2, "DeleteDocument 16 n p.png");
             // 
             // dlgOpen
             // 
@@ -158,15 +167,6 @@ namespace LogfileMetaAnalyser.Controls
             // dlgFolder
             // 
             this.dlgFolder.ShowNewFolderButton = false;
-            // 
-            // imageList
-            // 
-            this.imageList.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
-            this.imageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList.ImageStream")));
-            this.imageList.TransparentColor = System.Drawing.Color.Transparent;
-            this.imageList.Images.SetKeyName(0, "NewDocument 16 n p.png");
-            this.imageList.Images.SetKeyName(1, "FolderOpen 16 n p.png");
-            this.imageList.Images.SetKeyName(2, "DeleteDocument 16 n p.png");
             // 
             // LogFileUC
             // 
