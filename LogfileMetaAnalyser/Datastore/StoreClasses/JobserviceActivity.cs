@@ -1,43 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-
-using LogfileMetaAnalyser.Helpers;
 
 
 namespace LogfileMetaAnalyser.Datastore
 {
-    public class JobserviceActivity 
+    public class JobServiceActivity : IDataStoreContent
     {
-        public List<JobserviceJob> jobserviceJobs = new List<JobserviceJob>();
+        public List<JobserviceJob> JobServiceJobs { get; } = new();
 
-        public JobserviceActivity()
-        { }
+        private List<string> _distinctTaskFull;
+        public List<string> DistinctTaskFull => _distinctTaskFull ??= JobServiceJobs.Select(j => j.taskfull).Distinct().ToList();
 
-        private List<string> _distinctTaskfull = null;
-        public List<string> distinctTaskfull
-        {
-            get
-            {
-                if (_distinctTaskfull == null)
-                    _distinctTaskfull = jobserviceJobs.Select(j => j.taskfull).Distinct().ToList();
+        private List<string> _distinctQueueName;
+        public List<string> DistinctQueueName => _distinctQueueName ??= JobServiceJobs.Select(j => j.queuename).Distinct().ToList();
 
-                return _distinctTaskfull;
-            }
-        }
-
-        private List<string> _distinctQueuename = null;
-        public List<string> distinctQueuename
-        {
-            get
-            {
-                if (_distinctQueuename == null)
-                    _distinctQueuename = jobserviceJobs.Select(j => j.queuename).Distinct().ToList();
-
-                return _distinctQueuename;
-            }
-        }
-
+        public bool HasData => JobServiceJobs?.Count > 0;
     }
-    
 }

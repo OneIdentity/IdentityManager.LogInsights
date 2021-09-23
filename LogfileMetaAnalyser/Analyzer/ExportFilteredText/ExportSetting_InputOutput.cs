@@ -26,7 +26,7 @@ namespace LogfileMetaAnalyser
 
 
         //constructor
-        public ExportSetting_InputOutput(DatastoreStructure datastore) : base(datastore)
+        public ExportSetting_InputOutput(DataStore datastore) : base(datastore)
         {}
         
      

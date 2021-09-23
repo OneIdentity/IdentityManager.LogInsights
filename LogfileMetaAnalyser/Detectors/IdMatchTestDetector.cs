@@ -75,7 +75,7 @@ namespace LogfileMetaAnalyser.Detectors
             detectorStats.detectorName = string.Format("{0} <{1}>", this.GetType().Name, this.identifier);
             detectorStats.finalizeDuration = (DateTime.Now - finStartpoint).TotalMilliseconds;
             detectorStats.numberOfDetections = 0;
-            _datastore.statistics.detectorStatistics.Add(detectorStats);
+            _datastore.Statistics.DetectorStatistics.Add(detectorStats);
 
             //dispose
             //idmatches = null;

@@ -80,7 +80,7 @@ namespace LogfileMetaAnalyser.Detectors
 
 
             //for each projection we need to put the system connector information in
-            var projections = _datastore.projectionActivity.projections;
+            var projections = _datastore.ProjectionActivity.Projections;
             var projectionsToGetConnData = projections.Where(p => systemConnectorsAndConnections.Any(con => con.Value.belongsToProjectorId.Contains(p.loggerSourceId)));
 
             foreach (var proj in projectionsToGetConnData)
@@ -121,7 +121,7 @@ namespace LogfileMetaAnalyser.Detectors
             //stats
             detectorStats.detectorName = string.Format("{0} <{1}>", this.GetType().Name, this.identifier);
             detectorStats.finalizeDuration = (DateTime.Now - finStartpoint).TotalMilliseconds;
-            _datastore.statistics.detectorStatistics.Add(detectorStats);
+            _datastore.Statistics.DetectorStatistics.Add(detectorStats);
             logger.Debug(detectorStats.ToString());
 
             //dispose
@@ -267,7 +267,7 @@ namespace LogfileMetaAnalyser.Detectors
 
         private void TryMatchConnectorIDToProjectorID()   
         {
-            var projections = _datastore.projectionActivity.projections;
+            var projections = _datastore.ProjectionActivity.Projections;
 
             //good luck case: if we only found one projection, all log entries must belong to it            
             if (projections.Count == 1)
@@ -360,7 +360,7 @@ namespace LogfileMetaAnalyser.Detectors
             Dictionary<string, string> matchMatrix_Left = new Dictionary<string, string>();
             Dictionary<string, string> matchMatrix_Right = new Dictionary<string, string>();
 
-            foreach (var proj in _datastore.projectionActivity.projections)
+            foreach (var proj in _datastore.ProjectionActivity.Projections)
                 foreach (var projstep in proj.projectionSteps)
                 {
                     matchMatrix_Left.AddOrUpdate(proj.loggerSourceId, projstep.leftConnection);

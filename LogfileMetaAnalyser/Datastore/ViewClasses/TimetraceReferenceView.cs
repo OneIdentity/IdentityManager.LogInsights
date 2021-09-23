@@ -29,14 +29,14 @@ namespace LogfileMetaAnalyser.Datastore
 
             
             //syncs
-            foreach (var ps in datastore.projectionActivity.projections.Where(p =>
+            foreach (var ps in datastore.ProjectionActivity.Projections.Where(p =>
                                                                                 (p.projectionType != ProjectionType.AdHocProvision && p.projectionType != ProjectionType.Unknown)
                                                                                 || (p.projectionType == ProjectionType.Unknown)))
                 cnt += ps.projectionSteps.Count;
 
 
             //ad hoc jobs
-            cnt_real = datastore.projectionActivity.projections.Count(p => p.projectionType == ProjectionType.AdHocProvision);
+            cnt_real = datastore.ProjectionActivity.Projections.Count(p => p.projectionType == ProjectionType.AdHocProvision);
             if (showFull)
                 cnt += cnt_real;
             else
@@ -45,16 +45,16 @@ namespace LogfileMetaAnalyser.Datastore
 
             //other (Jobservice) jobs 
             if (showFull)
-                cnt += datastore.jobserviceActivities.jobserviceJobs
+                cnt += datastore.JobServiceActivities.JobServiceJobs
                             .Where(js => js.jobserviceJobattempts.Count > 0)
                             .SelectMany(ja => ja.jobserviceJobattempts)
                             .Count();
             else
-                cnt += Math.Min(showLimitedViewElementCount, datastore.jobserviceActivities.jobserviceJobs.Count(js => js.jobserviceJobattempts.Count > 0));
+                cnt += Math.Min(showLimitedViewElementCount, datastore.JobServiceActivities.JobServiceJobs.Count(js => js.jobserviceJobattempts.Count > 0));
 
 
             //errors
-            cnt_real = datastore.generalLogData.messageErrors.Count;
+            cnt_real = datastore.GeneralLogData.MessageErrors.Count;
             if (showFull)
                 cnt += cnt_real;
             else
@@ -62,7 +62,7 @@ namespace LogfileMetaAnalyser.Datastore
 
 
             //warnings
-            cnt_real = datastore.generalLogData.messageWarnings.Count;
+            cnt_real = datastore.GeneralLogData.MessageWarnings.Count;
             if (showFull)
                 cnt += cnt_real;
             else
@@ -74,7 +74,7 @@ namespace LogfileMetaAnalyser.Datastore
 
         public void ExportView(string key)
         {
-            if (!key.StartsWith(BaseKey) || (datastore.generalLogData.logfileInformation.Count == 0))
+            if (!key.StartsWith(BaseKey) || (datastore.GeneralLogData.LogfileInformation.Count == 0))
                 return;
 
             bool showFull = (key == $"{BaseKey}/Full");
@@ -97,7 +97,7 @@ namespace LogfileMetaAnalyser.Datastore
                 uc.AddBlockTrack("allfiles", "log file coverage", Color.DarkBlue, c1, c2, c1, c3);
 
                 //print for each file a block into time trace
-                var fileinfoEvs = datastore.generalLogData.logfileInformation.Select(f => new TimelineTrackEvent(
+                var fileinfoEvs = datastore.GeneralLogData.LogfileInformation.Select(f => new TimelineTrackEvent(
                                                                                                             f.Value.GetLabel(),
                                                                                                             f.Value.logfileTimerange_Start,
                                                                                                             f.Value.logfileTimerange_Finish)
@@ -124,7 +124,7 @@ namespace LogfileMetaAnalyser.Datastore
                 Color TCol2 = Color.DarkOrange;
                 Color ECol1 = Color.Orange;
                 Color ECol2 = Color.Wheat;
-                var proj = datastore.projectionActivity.projections.Where(p => p.projectionType == ProjectionType.AdHocProvision).ToArray();
+                var proj = datastore.ProjectionActivity.Projections.Where(p => p.projectionType == ProjectionType.AdHocProvision).ToArray();
 
                 if (proj.Length > 0)
                 {
@@ -132,8 +132,8 @@ namespace LogfileMetaAnalyser.Datastore
 
                     var adHocJobs = proj.Select(p => new TimelineTrackEvent(
                                                             p.GetLabel(true),
-                                                            DateHelper.IfNull(p.dtTimestampStart, datastore.generalLogData.logDataOverallTimeRange_Start),
-                                                            DateHelper.IfNull(p.dtTimestampEnd, datastore.generalLogData.logDataOverallTimeRange_Finish),
+                                                            DateHelper.IfNull(p.dtTimestampStart, datastore.GeneralLogData.LogDataOverallTimeRangeStart),
+                                                            DateHelper.IfNull(p.dtTimestampEnd, datastore.GeneralLogData.LogDataOverallTimeRangeFinish),
                                                             p.message,
                                                             p.ToString())
                                                );
@@ -154,12 +154,12 @@ namespace LogfileMetaAnalyser.Datastore
                 List<TimelineTrackEvent> jsJobs;
 
                 if (!showFull)
-                    jsJobs = datastore.jobserviceActivities.jobserviceJobs
+                    jsJobs = datastore.JobServiceActivities.JobServiceJobs
                                                        .Where(js => js.jobserviceJobattempts.Count>0)
                                                        .Select(j => new TimelineTrackEvent(
                                                                         j.GetLabel(),
-                                                                        DateHelper.IfNull(j.jobserviceJobattempts.OrderBy(x => x.dtTimestampStart).First().dtTimestampStart, datastore.generalLogData.logDataOverallTimeRange_Start),
-                                                                        DateHelper.IfNull(j.jobserviceJobattempts.OrderBy(x => x.dtTimestampStart).Last().dtTimestampEnd, datastore.generalLogData.logDataOverallTimeRange_Finish),
+                                                                        DateHelper.IfNull(j.jobserviceJobattempts.OrderBy(x => x.dtTimestampStart).First().dtTimestampStart, datastore.GeneralLogData.LogDataOverallTimeRangeStart),
+                                                                        DateHelper.IfNull(j.jobserviceJobattempts.OrderBy(x => x.dtTimestampStart).Last().dtTimestampEnd, datastore.GeneralLogData.LogDataOverallTimeRangeFinish),
                                                                         j.jobserviceJobattempts[0].message,
                                                                         j.ToString()))
                                                        .ToList();
@@ -167,12 +167,12 @@ namespace LogfileMetaAnalyser.Datastore
                 {
                     jsJobs = new List<TimelineTrackEvent>();
 
-                    foreach (var job in datastore.jobserviceActivities.jobserviceJobs
+                    foreach (var job in datastore.JobServiceActivities.JobServiceJobs
                                                        .Where(js => js.jobserviceJobattempts.Count > 0))
                         jsJobs.AddRange(job.jobserviceJobattempts.Select(a => new TimelineTrackEvent(
                                                                                 job.GetLabel(),
-                                                                                DateHelper.IfNull(a.dtTimestampStart, datastore.generalLogData.logDataOverallTimeRange_Start),
-                                                                                DateHelper.IfNull(a.dtTimestampEnd, datastore.generalLogData.logDataOverallTimeRange_Finish),
+                                                                                DateHelper.IfNull(a.dtTimestampStart, datastore.GeneralLogData.LogDataOverallTimeRangeStart),
+                                                                                DateHelper.IfNull(a.dtTimestampEnd, datastore.GeneralLogData.LogDataOverallTimeRangeFinish),
                                                                                 a.message,
                                                                                 job.ToString()))
 
@@ -199,7 +199,7 @@ namespace LogfileMetaAnalyser.Datastore
             //============================
             try
             {
-                var errorEvents = datastore.generalLogData.messageErrors
+                var errorEvents = datastore.GeneralLogData.MessageErrors
                         .Select(t => 
                             new TimelineTrackEvent(
                                     StringHelper.ShortenText(t.message.messageText), 
@@ -222,7 +222,7 @@ namespace LogfileMetaAnalyser.Datastore
             //============================
             try
             {
-                var warningEvents = datastore.generalLogData.messageWarnings
+                var warningEvents = datastore.GeneralLogData.MessageWarnings
                                         .Select(t =>
                                             new TimelineTrackEvent(
                                                     StringHelper.ShortenText(t.message.messageText),
@@ -293,7 +293,7 @@ namespace LogfileMetaAnalyser.Datastore
                     break;
             }
 
-            var proj = datastore.projectionActivity.projections.Where(filter);
+            var proj = datastore.ProjectionActivity.Projections.Where(filter);
             foreach (var pr in proj)
             {
                 uc.AddBlockTrack(prefix + pr.uuid, pr.GetLabel(true), LCol, TCol1, TCol2, ECol1, ECol2);

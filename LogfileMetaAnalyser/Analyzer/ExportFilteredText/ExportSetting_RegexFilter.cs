@@ -24,7 +24,7 @@ namespace LogfileMetaAnalyser
 
 
         //constructor
-        public ExportSetting_RegexFilter(DatastoreStructure datastore) : base(datastore)
+        public ExportSetting_RegexFilter(DataStore datastore) : base(datastore)
         {
             rxFilters = new List<ExportRegex>();
             for (int i = 1; i <= 10; i++)

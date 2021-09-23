@@ -12,7 +12,7 @@ namespace LogfileMetaAnalyser
 
         MessageMatchResult IsMessageMatch(TextMessage msg, object additionalData);
 
-        Datastore.DatastoreStructure datastore { set; }
+        Datastore.DataStore datastore { set; }
     }
 
     public enum MessageMatchResult

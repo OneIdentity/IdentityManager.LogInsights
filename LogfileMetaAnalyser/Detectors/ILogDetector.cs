@@ -16,7 +16,7 @@ namespace LogfileMetaAnalyser.Detectors
 
         string caption { get; }
 
-        Datastore.DatastoreStructure datastore { set; }
+        Datastore.DataStore datastore { set; }
 
         ILogDetector[] parentDetectors { set; }
 

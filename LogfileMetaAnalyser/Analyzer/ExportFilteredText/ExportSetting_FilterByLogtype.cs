@@ -32,7 +32,7 @@ namespace LogfileMetaAnalyser
                     return _startDate;
 
                 if (_startDate.IsNull())
-                    _startDate = dsref.generalLogData.logDataOverallTimeRange_Start;
+                    _startDate = dsref.GeneralLogData.LogDataOverallTimeRangeStart;
 
                 _startDate_valid = true;
 
@@ -53,7 +53,7 @@ namespace LogfileMetaAnalyser
                     return _endDate;
 
                 if (_endDate.IsNull())
-                    _endDate = dsref.generalLogData.logDataOverallTimeRange_Finish;
+                    _endDate = dsref.GeneralLogData.LogDataOverallTimeRangeFinish;
 
                 _endDate_valid = true;
                 return _endDate;
@@ -65,7 +65,7 @@ namespace LogfileMetaAnalyser
 
 
         //constructor
-        public ExportSetting_FilterByLogtype(DatastoreStructure datastore): base(datastore)
+        public ExportSetting_FilterByLogtype(DataStore datastore): base(datastore)
         {}
 
 

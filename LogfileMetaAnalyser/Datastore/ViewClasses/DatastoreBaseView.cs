@@ -6,7 +6,7 @@ namespace LogfileMetaAnalyser.Datastore
 {
     public class DatastoreBaseView
     {
-        public DatastoreStructure datastore { set; protected get; }
+        public DataStore datastore { set; protected get; }
 
         public Exporter logfileFilterExporter { set; protected get; }
 

@@ -1,18 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-
-
-namespace LogfileMetaAnalyser.Datastore
+﻿namespace LogfileMetaAnalyser.Datastore
 {
-    public class TimetraceReferenceStore
+    public class TimetraceReferenceStore : IDataStoreContent
     {
-        public TimetraceReferenceStore()
-        {
-        }
-
         //nothing here ;D
 
+        public bool HasData => false;
     }
 }

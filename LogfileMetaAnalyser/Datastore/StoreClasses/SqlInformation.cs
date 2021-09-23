@@ -1,22 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-
-using LogfileMetaAnalyser.Helpers;
 
 
 namespace LogfileMetaAnalyser.Datastore
 {
-    public class SqlInformation
+    public class SqlInformation : IDataStoreContent
     {
         public int numberOfSqlSessions = 0;
         public bool isSuspicious = false;
-        public int threshold_suspicious_duration_SqlCommand_msec = -1;
-        public int threshold_suspicious_duration_SqlTransaction_sec = -1;
-        public List<SqlSession> sqlSessions = new List<SqlSession>();
-
-        public SqlInformation()
-        { }
+        public int ThresholdSuspiciousDurationSqlCommandMsec = -1;
+        public int ThresholdSuspiciousDurationSqlTransactionSec = -1;
+        public List<SqlSession> SqlSessions { get; } = new();
 
         public override string ToString()
         {
@@ -29,13 +23,17 @@ namespace LogfileMetaAnalyser.Datastore
                 return new string[] { };
 
             if (uuidList[0] == "*")
-                return sqlSessions.Select(ss => ss.loggerSourceId);
+                return SqlSessions.Select(ss => ss.loggerSourceId);
             else
-                return sqlSessions
+                return SqlSessions
                             .Where(ss => uuidList.Contains(ss.uuid))
                             .Select(ss => ss.loggerSourceId);                    
         }
- 
+
+        public bool HasData => numberOfSqlSessions > 0 || 
+                               ThresholdSuspiciousDurationSqlCommandMsec > -1 ||
+                               ThresholdSuspiciousDurationSqlTransactionSec > -1 ||
+                               SqlSessions.Count > 0;
     }
 
 

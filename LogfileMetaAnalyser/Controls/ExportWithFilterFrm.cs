@@ -14,12 +14,12 @@ namespace LogfileMetaAnalyser.Controls
     {
         public ExportSettings exportSettings;
 
-        private readonly DatastoreStructure myDataStore;
+        private readonly DataStore myDataStore;
         private readonly ExportProfiles exportProfiles;
         private const string BeforeOtherFilters = "before other filters";
         private const string AfterOtherFilters = "after other filters";
 
-        public ExportWithFilterFrm(DatastoreStructure datastore, ExportSettings exportSettings)
+        public ExportWithFilterFrm(DataStore datastore, ExportSettings exportSettings)
         {
             myDataStore = datastore;
             this.exportSettings = exportSettings;
@@ -155,7 +155,7 @@ namespace LogfileMetaAnalyser.Controls
         {
             //input file name list
             gridInputfiles.Rows.Clear();
-            foreach (var (_, value) in myDataStore.generalLogData.logfileInformation)
+            foreach (var (_, value) in myDataStore.GeneralLogData.LogfileInformation)
             {
                 var rowIdx = gridInputfiles.Rows.Add();
                 
@@ -198,28 +198,28 @@ namespace LogfileMetaAnalyser.Controls
                 category = "Projections";
                 on = exportSettings.filterByActivity.isfilterEnabled_ProjectionActivity_Projections;
                 node = treeActivities.Nodes[0].Nodes
-                    .Add($"{category} ({myDataStore.projectionActivity.projections.Count})");
+                    .Add($"{category} ({myDataStore.ProjectionActivity.Projections.Count})");
                 node.Checked = on;
                 joblst.Push(new Tuple<TreeNode, bool>(node, on));
 
                 category = "AdHoc jobs";
                 on = exportSettings.filterByActivity.isfilterEnabled_ProjectionActivity_Projections_AdHoc;
                 var aNode = treeActivities.Nodes[0].Nodes[0].Nodes.Add(
-                    $"{category} ({myDataStore.projectionActivity.NumberOfAdHocProjections})");
+                    $"{category} ({myDataStore.ProjectionActivity.NumberOfAdHocProjections})");
                 aNode.Checked = on;
                 joblst.Push(new Tuple<TreeNode, bool>(aNode, on));
 
                 category = "Jobservice jobs";
                 on = exportSettings.filterByActivity.isfilterEnabled_ProjectionActivity_Projections_Sync;
                 var bNode = treeActivities.Nodes[0].Nodes[0].Nodes.Add(
-                    $"{category} ({myDataStore.projectionActivity.NumberOfSyncProjections})");
+                    $"{category} ({myDataStore.ProjectionActivity.NumberOfSyncProjections})");
                 bNode.Checked = on;
                 joblst.Push(new Tuple<TreeNode, bool>(bNode, on));
 
-                if (myDataStore.projectionActivity.projections.Count > 0)
+                if (myDataStore.ProjectionActivity.Projections.Count > 0)
                 {
                     int i = 0;
-                    foreach (var proj in myDataStore.projectionActivity.projections.Where(t =>
+                    foreach (var proj in myDataStore.ProjectionActivity.Projections.Where(t =>
                         t.projectionType == ProjectionType.AdHocProvision))
                     {
                         var xNode = aNode.Nodes.Add($"#{++i} {proj.GetLabel()}");
@@ -230,7 +230,7 @@ namespace LogfileMetaAnalyser.Controls
                     }
 
                     i = 0;
-                    foreach (var proj in myDataStore.projectionActivity.projections.Where(t =>
+                    foreach (var proj in myDataStore.ProjectionActivity.Projections.Where(t =>
                         t.projectionType != ProjectionType.AdHocProvision))
                     {
                         var xNode = bNode.Nodes.Add($"#{++i} {proj.GetLabel()}");
@@ -258,11 +258,11 @@ namespace LogfileMetaAnalyser.Controls
                 category = "by Component";
                 on = exportSettings.filterByActivity.isfilterEnabled_JobServiceActivity_ByComponent;
                 var treeNodeByComponent = treeActivities.Nodes[1].Nodes
-                    .Add($"{category} ({myDataStore.jobserviceActivities.distinctTaskfull.Count})");
+                    .Add($"{category} ({myDataStore.JobServiceActivities.DistinctTaskFull.Count})");
                 treeNodeByComponent.Checked = on;
                 joblst.Push(new Tuple<TreeNode, bool>(treeNodeByComponent, on));
 
-                foreach (var taskname in myDataStore.jobserviceActivities.jobserviceJobs.Select(job => job.taskfull).OrderBy(x => x).Distinct())
+                foreach (var taskname in myDataStore.JobServiceActivities.JobServiceJobs.Select(job => job.taskfull).OrderBy(x => x).Distinct())
                 {
                     on = exportSettings.filterByActivity.filterJobServiceActivity_ByComponentLst.Contains(taskname);
                     var xNode = treeNodeByComponent.Nodes.Add(taskname);
@@ -272,11 +272,11 @@ namespace LogfileMetaAnalyser.Controls
                 category = "by Queue";
                 on = exportSettings.filterByActivity.isfilterEnabled_JobServiceActivity_ByQueue;
                 var treeNodeByQueuename = treeActivities.Nodes[1].Nodes
-                    .Add($"{category} ({myDataStore.jobserviceActivities.distinctQueuename.Count})");
+                    .Add($"{category} ({myDataStore.JobServiceActivities.DistinctQueueName.Count})");
                 treeNodeByQueuename.Checked = on;
                 joblst.Push(new Tuple<TreeNode, bool>(treeNodeByQueuename, on));
                  
-                foreach (var queuename in myDataStore.jobserviceActivities.jobserviceJobs.Select(job => job.queuename).OrderBy(x => x).Distinct())
+                foreach (var queuename in myDataStore.JobServiceActivities.JobServiceJobs.Select(job => job.queuename).OrderBy(x => x).Distinct())
                 {
                     on = exportSettings.filterByActivity.filterJobServiceActivity_ByQueueLst.Contains(queuename);
                     var xNode = treeNodeByQueuename.Nodes.Add(queuename);
@@ -325,8 +325,8 @@ namespace LogfileMetaAnalyser.Controls
                 {
                     Name = "DateTimePicker_startDate",
                     Value = exportSettings.filterByLogtype.startDate,
-                    MinDate = myDataStore.generalLogData.logDataOverallTimeRange_Start,
-                    MaxDate = myDataStore.generalLogData.logDataOverallTimeRange_Finish,
+                    MinDate = myDataStore.GeneralLogData.LogDataOverallTimeRangeStart,
+                    MaxDate = myDataStore.GeneralLogData.LogDataOverallTimeRangeFinish,
                     //Format = DateTimePickerFormat.Long,
                     Format = DateTimePickerFormat.Custom,
                     CustomFormat = "yyy-MM-dd HH:mm:ss",
@@ -351,8 +351,8 @@ namespace LogfileMetaAnalyser.Controls
                 {
                     Name = "DateTimePicker_endDate",
                     Value = exportSettings.filterByLogtype.endDate,
-                    MinDate = myDataStore.generalLogData.logDataOverallTimeRange_Start,
-                    MaxDate = myDataStore.generalLogData.logDataOverallTimeRange_Finish,
+                    MinDate = myDataStore.GeneralLogData.LogDataOverallTimeRangeStart,
+                    MaxDate = myDataStore.GeneralLogData.LogDataOverallTimeRangeFinish,
                     //Format = DateTimePickerFormat.Long,
                     Format = DateTimePickerFormat.Custom,
                     CustomFormat = "yyy-MM-dd HH:mm:ss",
@@ -400,7 +400,7 @@ namespace LogfileMetaAnalyser.Controls
                         AutoSize = true,
                         TextAlign = ContentAlignment.MiddleLeft,
                         Name = $"cb_LogLevel {sLevel}",
-                        Text = $"Log level: {sLevel} ({myDataStore.generalLogData.numberOfEntriesPerLoglevel.GetOrReturnDefault(Llevel)})",
+                        Text = $"Log level: {sLevel} ({myDataStore.GeneralLogData.NumberOfEntriesPerLoglevel.GetOrReturnDefault(Llevel)})",
                         Checked = exportSettings.filterByLogtype.logLevelFilters.GetBoolOrAdd(Llevel, true)
                     };
 
@@ -449,7 +449,7 @@ namespace LogfileMetaAnalyser.Controls
                 List<CheckBox> cbLst_LogSourceBoxes = new List<CheckBox>();
 
                 Dictionary<string, long> data = Constants.logSourcesOfInterest.Select(t => new KeyValuePair<string, long>(t, 0)).ToDictionary(t => t.Key, v => v.Value, StringComparer.InvariantCultureIgnoreCase);
-                foreach (var elem in myDataStore.generalLogData.numberOflogSources)
+                foreach (var elem in myDataStore.GeneralLogData.NumberOflogSources)
                     data.AddOrUpdate(elem.Key, elem.Value);
 
                 foreach (var kp in data.OrderBy(t => t.Key))
