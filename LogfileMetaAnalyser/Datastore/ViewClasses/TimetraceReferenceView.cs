@@ -11,26 +11,53 @@ using LogfileMetaAnalyser.ExceptionHandling;
 
 namespace LogfileMetaAnalyser.Datastore
 {
-    class TimetraceReferenceView: DatastoreBaseView, IDatastoreView
+    internal class TimetraceReferenceView: DatastoreBaseView
     {
         private static int showLimitedViewElementCount = 100; //each max cnt for ad hoc jobs; Jobservice jobs; warnings; errors
 
-        public TimetraceReferenceView()
-        { }
+        public TimetraceReferenceView(TreeView navigationTree, 
+            Control.ControlCollection upperPanelControl,
+            Control.ControlCollection lowerPanelControl, 
+            DataStore datastore, 
+            Exporter logfileFilterExporter) :
+            base(navigationTree, upperPanelControl, lowerPanelControl, datastore, logfileFilterExporter)
+        {
+        }
+
+        public override int SortOrder => 100;
+
+        public override IEnumerable<string> Build()
+        {
+            var result = new List<string>();
+            
+            int cnt = GetElementCount(BaseKey);
+            TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, BaseKey, $"Graphical time line ({cnt})", "timetrace", Constants.treenodeBackColorNormal);
+            result.Add(BaseKey);
+
+            var key = $"{BaseKey}/Full";
+            cnt = GetElementCount(key);
+            if (cnt > 300)
+            {                
+                TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, $"show all  ({cnt})", "timetrace", Constants.treenodeBackColorNormal);
+                result.Add(key);
+            }
+
+            return result;
+        }
 
         public override string BaseKey => $"{base.BaseKey}/Timetrace"; 
 
-        public int GetElementCount(string key)
+        public override int GetElementCount(string key)
         {
             bool showFull = (key == $"{BaseKey}/Full");
 
             int cnt = 0;
             int cnt_real;
 
-            var generalLogData = datastore.GetOrAdd<GeneralLogData>();
-            var projectionActivity = datastore.GetOrAdd<ProjectionActivity>();
-            var jobServiceActivities = datastore.GetOrAdd<JobServiceActivity>();
-
+            var generalLogData = Datastore.GetOrAdd<GeneralLogData>();
+            var projectionActivity = Datastore.GetOrAdd<ProjectionActivity>();
+            var jobserviceActivities = Datastore.GetOrAdd<JobServiceActivity>();
+            
 
             //syncs
             foreach (var ps in projectionActivity.Projections.Where(p =>
@@ -49,12 +76,12 @@ namespace LogfileMetaAnalyser.Datastore
 
             //other (Jobservice) jobs 
             if (showFull)
-                cnt += jobServiceActivities.JobServiceJobs
+                cnt += jobserviceActivities.JobServiceJobs
                             .Where(js => js.jobserviceJobattempts.Count > 0)
                             .SelectMany(ja => ja.jobserviceJobattempts)
                             .Count();
             else
-                cnt += Math.Min(showLimitedViewElementCount, jobServiceActivities.JobServiceJobs.Count(js => js.jobserviceJobattempts.Count > 0));
+                cnt += Math.Min(showLimitedViewElementCount, jobserviceActivities.JobServiceJobs.Count(js => js.jobserviceJobattempts.Count > 0));
 
 
             //errors
@@ -76,12 +103,13 @@ namespace LogfileMetaAnalyser.Datastore
             return cnt;
         }
 
-        public void ExportView(string key)
+        public override void ExportView(string key)
         {
-            var generalLogData = datastore.GetOrAdd<GeneralLogData>();
-            var projectionActivity = datastore.GetOrAdd<ProjectionActivity>();
-            var jobServiceActivities = datastore.GetOrAdd<JobServiceActivity>();
-
+            var generalLogData = Datastore.GetOrAdd<GeneralLogData>();
+            var projectionActivity = Datastore.GetOrAdd<ProjectionActivity>();
+            var jobServiceActivities = Datastore.GetOrAdd<JobServiceActivity>();
+            
+            
             if (!key.StartsWith(BaseKey) || (generalLogData.LogfileInformation.Count == 0))
                 return;
 
@@ -89,7 +117,7 @@ namespace LogfileMetaAnalyser.Datastore
 
             //display most important time events
 
-            ContextLinesUC contextLinesUc = new ContextLinesUC(logfileFilterExporter);
+            ContextLinesUC contextLinesUc = new ContextLinesUC(LogfileFilterExporter);
             TimeTraceUC uc = new TimeTraceUC();
             uc.Dock = DockStyle.Fill;
 
@@ -271,13 +299,13 @@ namespace LogfileMetaAnalyser.Datastore
 
 
             //finally put the timetrace control into the panel
-            upperPanelControl.Add(uc);
-            lowerPanelControl.Add(contextLinesUc);
+            UpperPanelControl.Add(uc);
+            LowerPanelControl.Add(contextLinesUc);
         }
 
         private void ExportProjectionJobs(string prefix, Func<Projection, bool> filter, TimeTraceUC uc)
         {
-            var projectionActivity = datastore.GetOrAdd<ProjectionActivity>();
+            var projectionActivity = Datastore.GetOrAdd<ProjectionActivity>();
 
             Color LCol = Color.DarkBlue; //line
             Color TCol1 = Color.Green; //track 
@@ -316,5 +344,6 @@ namespace LogfileMetaAnalyser.Datastore
                     .AddTrackEvents(stepList);
             }
         }
+
     }
 }

@@ -10,30 +10,60 @@ using LogfileMetaAnalyser.Controls;
 
 namespace LogfileMetaAnalyser.Datastore
 {
-    class StatisticsStoreView : DatastoreBaseView, IDatastoreView
+    //prevent loading.. uncomment if needed
+    /*
+    internal class StatisticsStoreView : DatastoreBaseView
     {
-        public StatisticsStoreView() { }
+        public StatisticsStoreView(TreeView navigationTree, 
+            Control.ControlCollection upperPanelControl,
+            Control.ControlCollection lowerPanelControl, 
+            DataStore datastore,
+            Exporter logfileFilterExporter) :
+            base(navigationTree, upperPanelControl, lowerPanelControl, datastore, logfileFilterExporter)
+        {
+        }
+
+        public override int SortOrder => 600;
+
+        public override IEnumerable<string> Build()
+        {
+            var result = new List<string>();
+
+            string key = BaseKey;
+            TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, "Analyze statistics", "stats", Constants.treenodeBackColorNormal);
+            result.Add(key);
+
+            key = $"{BaseKey}/1";
+            TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, "Parsing statistics", "stats", Constants.treenodeBackColorNormal);
+            result.Add(key);
+
+            key = $"{BaseKey}/2";
+            TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, "Detectors statistics", "stats", Constants.treenodeBackColorNormal);
+            result.Add(key);
+
+            return result;
+        }
 
         public override string BaseKey => $"{base.BaseKey}/Statistics";
 
-        public int GetElementCount(string key)
+        public override int GetElementCount(string key)
         {
             return -1;
         }
 
-        public void ExportView(string key)
+        public override void ExportView(string key)
         {
             if (!key.StartsWith(BaseKey))
                 return;
 
-            var statisticsStore = datastore.GetOrAdd<StatisticsStore>();
+            var statisticsStore = Datastore.GetOrAdd<StatisticsStore>();
 
             int posY = 1;
 
             if (key == BaseKey || key == BaseKey + "/1")
             {
                 ListViewUC uc = new ListViewUC();
-                uc.Size = new Size(upperPanelControl.Owner.Width, 200);
+                uc.Size = new Size(UpperPanelControl.Owner.Width, 200);
                 uc.Location = new Point(1, 1);
                 uc.SetupCaption("Parsing statistics for " + statisticsStore.FilesParsed + " file(s)");
                 uc.SetupHeaders(new string[] { "Filename", "Filesize (KB)", "read/parse duration", "duration in sum" });
@@ -47,14 +77,14 @@ namespace LogfileMetaAnalyser.Datastore
                     });
 
                 uc.Resume();
-                upperPanelControl.Add(uc);
+                UpperPanelControl.Add(uc);
                 posY = 201; ;
             }
 
             if (key == BaseKey || key == BaseKey + "/2")
             {
                 ListViewUC uc = new ListViewUC();
-                uc.Size = new Size(upperPanelControl.Owner.Width, 200);
+                uc.Size = new Size(UpperPanelControl.Owner.Width, 200);
                 uc.Location = new Point(1, posY + 40);
                 uc.SetupCaption("Statistics for all participated detectors");
                 uc.SetupHeaders(new string[] { "Detector name", "# lines parsed", "# detections", "parse duration", "finalize duration" });
@@ -69,13 +99,14 @@ namespace LogfileMetaAnalyser.Datastore
                     });
 
                 uc.Resume();
-                upperPanelControl.Add(uc);
+                UpperPanelControl.Add(uc);
             }
 
-            if (upperPanelControl.Count > 1)
-                foreach (Control uc in upperPanelControl)
+            if (UpperPanelControl.Count > 1)
+                foreach (Control uc in UpperPanelControl)
                     uc.Dock = DockStyle.None;
         }
 
     }
+    */
 }
