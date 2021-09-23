@@ -20,24 +20,24 @@ namespace LogfileMetaAnalyser.Datastore
 
         public int GetElementCount(string key)
         {
-            var dsref = datastore.jobserviceActivities;
+            var dsref = datastore.JobServiceActivities;
 
             if (key == BaseKey)
-                return dsref.jobserviceJobs.Count;
+                return dsref.JobServiceJobs.Count;
 
 
             if (key == $"{BaseKey}/byCompTask")
-                return dsref.distinctTaskfull.Count;
+                return dsref.DistinctTaskFull.Count;
 
 
             if (key == $"{BaseKey}/byQueue")
-                return dsref.distinctQueuename.Count;
+                return dsref.DistinctQueueName.Count;
 
 
             if (key.StartsWith($"{BaseKey}/byCompTask/"))
             {
                 var task = key.Substring((BaseKey + "/byCompTask/").Length);
-                return dsref.jobserviceJobs.Count(t => t.taskfull.Replace("/", "") == task);
+                return dsref.JobServiceJobs.Count(t => t.taskfull.Replace("/", "") == task);
             }
 
             if (key.StartsWith($"{BaseKey}/byQueue/"))
@@ -47,14 +47,14 @@ namespace LogfileMetaAnalyser.Datastore
                 if (queuename == "<empty>")
                     queuename = "";
 
-                return dsref.jobserviceJobs.Count(t => t.queuename.Replace("/", "") == queuename);
+                return dsref.JobServiceJobs.Count(t => t.queuename.Replace("/", "") == queuename);
             }
 
             if (key == $"{BaseKey}/withRetries")
-                return dsref.jobserviceJobs.Count(t => !t.isSmoothExecuted);
+                return dsref.JobServiceJobs.Count(t => !t.isSmoothExecuted);
 
             if (key == $"{BaseKey}/withMissingStartFinish")
-                return dsref.jobserviceJobs.Count(j => j.hasMissingStartOrFinishMessages);
+                return dsref.JobServiceJobs.Count(j => j.hasMissingStartOrFinishMessages);
 
             return 0;
         }
@@ -91,7 +91,7 @@ namespace LogfileMetaAnalyser.Datastore
         {
             MultiListViewUC uc = new MultiListViewUC();
             ContextLinesUC contextLinesUc = new ContextLinesUC(logfileFilterExporter);
-            var dsref = datastore.jobserviceActivities;
+            var dsref = datastore.JobServiceActivities;
 
 
             string caption = "Job service jobs";
@@ -141,7 +141,7 @@ namespace LogfileMetaAnalyser.Datastore
             uc[0].SetupHeaders(new string[] { "Start time", "Finish time", "Duration", "Exec Attemp", "State", "Queue name", "Component", "Task", "Params", "Job id", "Result text" });
 
             int attemptNr;
-            foreach (var jsAct in dsref.jobserviceJobs.Where(j => (key == BaseKey ||
+            foreach (var jsAct in dsref.JobServiceJobs.Where(j => (key == BaseKey ||
                                                                         filterByErrorJobs && !j.isSmoothExecuted ||
                                                                         filterByMissingStartFinishJobs && j.hasMissingStartOrFinishMessages ||
                                                                         filterByTask && j.taskfull.Replace("/", "") == tasknamefull ||
@@ -172,13 +172,13 @@ namespace LogfileMetaAnalyser.Datastore
                 }
             }
 
-            if (dsref.jobserviceJobs.Count > 0)
+            if (dsref.JobServiceJobs.Count > 0)
                 uc[0].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
                 {
                     try
                     {
                         string uuidAttemp = args.Item.Name;
-                        var jsAttempSelect = dsref.jobserviceJobs.SelectMany(t => t.jobserviceJobattempts).Where(a => a.uuid == uuidAttemp).FirstOrDefault();
+                        var jsAttempSelect = dsref.JobServiceJobs.SelectMany(t => t.jobserviceJobattempts).Where(a => a.uuid == uuidAttemp).FirstOrDefault();
 
                         if (jsAttempSelect == null)
                             return;
@@ -207,7 +207,7 @@ namespace LogfileMetaAnalyser.Datastore
         {
             MultiListViewUC uc = new MultiListViewUC();
             ContextLinesUC contextLinesUc = new ContextLinesUC(logfileFilterExporter);
-            var dsref = datastore.jobserviceActivities;
+            var dsref = datastore.JobServiceActivities;
 
             uc.SetupLayout(1);
             uc[0].SetupCaption("Job Service job run time performance");
@@ -215,11 +215,11 @@ namespace LogfileMetaAnalyser.Datastore
             uc[0].SetupHeaders(new string[] { "Task", "Queue name", "State", "Count", "Minimum duration [sec]", "Maximum duration [sec]", "Average duration [sec]" });
 
 
-            foreach (string taskname in dsref.distinctTaskfull.OrderBy(n => n))
+            foreach (string taskname in dsref.DistinctTaskFull.OrderBy(n => n))
             {
-                foreach (string queuename in dsref.jobserviceJobs.Where(j => j.taskfull == taskname).Select(j => j.queuename).Distinct())
+                foreach (string queuename in dsref.JobServiceJobs.Where(j => j.taskfull == taskname).Select(j => j.queuename).Distinct())
                 {
-                    var jobs_all = dsref.jobserviceJobs.Where(j => j.taskfull == taskname && j.queuename == queuename).SelectMany(j => j.jobserviceJobattempts);
+                    var jobs_all = dsref.JobServiceJobs.Where(j => j.taskfull == taskname && j.queuename == queuename).SelectMany(j => j.jobserviceJobattempts);
                     var jobs_valid = jobs_all.Where(a => !a.hasMissingStartOrFinishMessage).ToArray();
                     var jobs_invalid = jobs_all.Where(a => a.hasMissingStartOrFinishMessage).ToArray();
 
@@ -250,7 +250,7 @@ namespace LogfileMetaAnalyser.Datastore
                 }
             }
 
-            if (dsref.jobserviceJobs.Count > 0)
+            if (dsref.JobServiceJobs.Count > 0)
                 uc[0].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
                 {
                     try
@@ -261,7 +261,7 @@ namespace LogfileMetaAnalyser.Datastore
                             return;
 
                         string uuidAttemp = args.Item.Name.Substring(pos+1);
-                        var jsAttempSelect = dsref.jobserviceJobs.SelectMany(t => t.jobserviceJobattempts).Where(a => a.uuid == uuidAttemp).FirstOrDefault();
+                        var jsAttempSelect = dsref.JobServiceJobs.SelectMany(t => t.jobserviceJobattempts).Where(a => a.uuid == uuidAttemp).FirstOrDefault();
 
                         if (jsAttempSelect == null)
                             return;

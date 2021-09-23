@@ -9,15 +9,15 @@ namespace LogfileMetaAnalyser
 {
     public abstract class ExportSettingBase
     {
-        protected DatastoreStructure dsref;
+        protected DataStore dsref;
         [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
 
-        public DatastoreStructure datastore
+        public DataStore datastore
         {
             set { dsref = value; }
         }
 
-        public ExportSettingBase(DatastoreStructure datastore)
+        public ExportSettingBase(DataStore datastore)
         {
             dsref = datastore;
         }

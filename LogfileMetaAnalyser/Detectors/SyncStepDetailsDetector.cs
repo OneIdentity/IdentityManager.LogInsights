@@ -162,7 +162,7 @@ namespace LogfileMetaAnalyser.Detectors
 
                 logger.Debug($"handling sync step detail for SystemConnID {systemConnectionId}");
 
-                var potListOfProjections = _datastore.projectionActivity.projections
+                var potListOfProjections = _datastore.ProjectionActivity.Projections
                                                 .Where(p => p.systemConnectors.Any(sc => sc.loggerSourceId == systemConnectionId));
 
                 if (potListOfProjections.HasNoData())
@@ -258,7 +258,7 @@ namespace LogfileMetaAnalyser.Detectors
             //stats
             detectorStats.detectorName = $"{GetType().Name} <{identifier}>";
             detectorStats.finalizeDuration = sw.ElapsedMilliseconds;
-            _datastore.statistics.detectorStatistics.Add(detectorStats);
+            _datastore.Statistics.DetectorStatistics.Add(detectorStats);
             logger.Debug(detectorStats.ToString());
 
             //dispose

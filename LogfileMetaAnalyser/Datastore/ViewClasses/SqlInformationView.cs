@@ -20,7 +20,7 @@ namespace LogfileMetaAnalyser.Datastore
         public int GetElementCount(string key)
         {
             if (key == $"{BaseKey}/sessions")
-                return datastore.generalSqlInformation.numberOfSqlSessions;
+                return datastore.GeneralSqlInformation.numberOfSqlSessions;
 
             return 0;
         }
@@ -32,7 +32,7 @@ namespace LogfileMetaAnalyser.Datastore
 
             MultiListViewUC uc = new MultiListViewUC();
             ContextLinesUC contextLinesUc = new ContextLinesUC(logfileFilterExporter);
-            var dsref = datastore.generalSqlInformation;
+            var dsref = datastore.GeneralSqlInformation;
 
             if (key == BaseKey)
             {
@@ -42,8 +42,8 @@ namespace LogfileMetaAnalyser.Datastore
 
                 uc[0].AddItemRow("number", new string[] { "number of sql session found", dsref.numberOfSqlSessions.ToString() });
                 uc[0].AddItemRow("isSuspicious", new string[] { "is suspicious", dsref.isSuspicious ? "yes; please check some of the sql session marked" : "seems to be all fine" });
-                uc[0].AddItemRow("threshold_suspicious_duration_SqlCommand_msec", new string[] { "defined config value: threshold_suspicious_duration_SqlCommand_msec", dsref.threshold_suspicious_duration_SqlCommand_msec.ToString() });
-                uc[0].AddItemRow("threshold_suspicious_duration_SqlTransaction_min", new string[] { "defined config value: threshold_suspicious_duration_SqlTransaction_sec", dsref.threshold_suspicious_duration_SqlTransaction_sec.ToString() });
+                uc[0].AddItemRow("threshold_suspicious_duration_SqlCommand_msec", new string[] { "defined config value: threshold_suspicious_duration_SqlCommand_msec", dsref.ThresholdSuspiciousDurationSqlCommandMsec.ToString() });
+                uc[0].AddItemRow("threshold_suspicious_duration_SqlTransaction_min", new string[] { "defined config value: threshold_suspicious_duration_SqlTransaction_sec", dsref.ThresholdSuspiciousDurationSqlTransactionSec.ToString() });
 
                 contextLinesUc = null;
             }
@@ -55,7 +55,7 @@ namespace LogfileMetaAnalyser.Datastore
                 uc[0].SetupCaption("general sql session information - session list");
                 uc[0].SetupHeaders(new string[] { "Session id", "Is suspicious", "Session start", "Session ends", "Session duration", "Transaction count", "Top duration transaction", "Long running statement count", "Top duration statement" });
 
-                foreach (var s in dsref.sqlSessions)
+                foreach (var s in dsref.SqlSessions)
                     uc[0].AddItemRow(s.uuid, new string[] {
                         s.loggerSourceId,
                         s.isSuspicious ? "yes, pls check" : "all fine",
@@ -73,7 +73,7 @@ namespace LogfileMetaAnalyser.Datastore
                     try
                     {
                         string uuid = args.Item.Name;
-                        var tra = dsref.sqlSessions.FirstOrDefault(t => t.uuid == uuid);
+                        var tra = dsref.SqlSessions.FirstOrDefault(t => t.uuid == uuid);
 
                         if (tra != null && tra.message != null)
                             contextLinesUc.SetData(tra.message);
@@ -88,7 +88,7 @@ namespace LogfileMetaAnalyser.Datastore
             if (key.StartsWith(BaseKey + "/sessions/"))
             {
                 string uuid = key.Substring((BaseKey + "/sessions/").Length);
-                var sess = dsref.sqlSessions.FirstOrDefault(t => t.uuid == uuid);
+                var sess = dsref.SqlSessions.FirstOrDefault(t => t.uuid == uuid);
                 if (sess != null)
                 {
                     uc.SetupLayout(3);
@@ -140,7 +140,7 @@ namespace LogfileMetaAnalyser.Datastore
                         try
                         {
                             //string k = args.Item.Name;
-                            var sqlsess = dsref.sqlSessions.FirstOrDefault(t => t.uuid == uuid);
+                            var sqlsess = dsref.SqlSessions.FirstOrDefault(t => t.uuid == uuid);
 
                             var msg = sqlsess.message;
                             if (msg != null)
@@ -158,7 +158,7 @@ namespace LogfileMetaAnalyser.Datastore
                         try
                         {
                             string k = args.Item.Name;
-                            var statement = dsref.sqlSessions.FirstOrDefault(t => t.uuid == uuid).longRunningStatements.FirstOrDefault(st => st.uuid == k);
+                            var statement = dsref.SqlSessions.FirstOrDefault(t => t.uuid == uuid).longRunningStatements.FirstOrDefault(st => st.uuid == k);
 
                             if (statement != null && statement.message != null)
                                 contextLinesUc.SetData(statement.message);
@@ -175,7 +175,7 @@ namespace LogfileMetaAnalyser.Datastore
                         try
                         {
                             string k = args.Item.Name;
-                            var tra = dsref.sqlSessions.FirstOrDefault(t => t.uuid == uuid).transactions.FirstOrDefault(st => st.uuid == k);
+                            var tra = dsref.SqlSessions.FirstOrDefault(t => t.uuid == uuid).transactions.FirstOrDefault(st => st.uuid == k);
 
                             if (tra != null && tra.message != null)
                                 contextLinesUc.SetData(tra.message, tra.messageEnd);

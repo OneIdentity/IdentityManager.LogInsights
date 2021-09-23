@@ -34,10 +34,10 @@ namespace LogfileMetaAnalyser
                 };
             }
         }
-        private Datastore.DatastoreStructure ds;
+        private Datastore.DataStore ds;
 
 
-        public ExportSettings(Datastore.DatastoreStructure datastore)
+        public ExportSettings(Datastore.DataStore datastore)
         {
             ds = datastore;
 
@@ -47,7 +47,7 @@ namespace LogfileMetaAnalyser
             filterByRegex = new ExportSetting_RegexFilter(ds);            
         }
 
-        public void PutDatastoreRef(Datastore.DatastoreStructure datastore)
+        public void PutDatastoreRef(Datastore.DataStore datastore)
         {
             ds = datastore;
 

@@ -14,7 +14,7 @@ namespace LogfileMetaAnalyser.Datastore
 {
     public class DataStoreViewer
     {      
-        private DatastoreStructure datastore;
+        private DataStore datastore;
         private Exporter logfileFilterExporter;
 
         private ResultUcCache ucCache = new ResultUcCache();
@@ -25,7 +25,7 @@ namespace LogfileMetaAnalyser.Datastore
         private Dictionary<string, IDatastoreView> responsibleViewerClass = new Dictionary<string, IDatastoreView>();
 
 
-        public DataStoreViewer(DatastoreStructure datastore, Exporter logfileFilterExporter, Form ownerForm, Control.ControlCollection upperPanelControl, Control.ControlCollection lowerPanelControl)
+        public DataStoreViewer(DataStore datastore, Exporter logfileFilterExporter, Form ownerForm, Control.ControlCollection upperPanelControl, Control.ControlCollection lowerPanelControl)
         {
             this.datastore = datastore;
             this.logfileFilterExporter = logfileFilterExporter;
@@ -33,7 +33,7 @@ namespace LogfileMetaAnalyser.Datastore
             this.upperPanelControl = upperPanelControl;
             this.lowerPanelControl = lowerPanelControl;
 
-            datastore.storeInvalidation += new EventHandler((object s, EventArgs args) => 
+            datastore.StoreInvalidation += new EventHandler((object s, EventArgs args) => 
             {
                 try
                 {
@@ -134,7 +134,7 @@ namespace LogfileMetaAnalyser.Datastore
         {
             IDatastoreView viewer = new GeneralLogView() { upperPanelControl = upperPanelControl, lowerPanelControl = lowerPanelControl, datastore = datastore, logfileFilterExporter = this.logfileFilterExporter };
             string key = viewer.BaseKey;
-            var dsref = datastore.generalLogData;
+            var dsref = datastore.GeneralLogData;
 
 
             //Branch: General information
@@ -143,14 +143,14 @@ namespace LogfileMetaAnalyser.Datastore
 
 
             //Branch: ErrorsAndWarnings
-            if (dsref.messageErrors.Count > 0 || dsref.messageWarnings.Count > 0)
+            if (dsref.MessageErrors.Count > 0 || dsref.MessageWarnings.Count > 0)
             {
                 key = $"{viewer.BaseKey}/ErrorsAndWarnings";
                 TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, $"message of type error and warning ({viewer.GetElementCount(key)})", "warning", Constants.treenodeBackColorSuspicious);
                 responsibleViewerClass.Add(key, viewer);
             }
 
-            if (dsref.messageErrors.Count > 0)
+            if (dsref.MessageErrors.Count > 0)
             {
                 key = $"{viewer.BaseKey}/ErrorsAndWarnings/Errors";
                 TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, $"message of type error ({viewer.GetElementCount(key)})", "error", Constants.treenodeBackColorSuspicious);
@@ -161,7 +161,7 @@ namespace LogfileMetaAnalyser.Datastore
                 responsibleViewerClass.Add(key, viewer);
             }
 
-            if (dsref.messageWarnings.Count > 0)
+            if (dsref.MessageWarnings.Count > 0)
             {
                 key = $"{viewer.BaseKey}/ErrorsAndWarnings/Warnings";
                 TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, $"message of type warning ({viewer.GetElementCount(key)})", "warning", Constants.treenodeBackColorSuspicious);
@@ -173,7 +173,7 @@ namespace LogfileMetaAnalyser.Datastore
             }
 
             //Branch: timestamp
-            if (dsref.timegaps.Count > 0)
+            if (dsref.TimeGaps.Count > 0)
             {
                 key = $"{viewer.BaseKey}/timegaps";
                 TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, $"timestamp gaps ({viewer.GetElementCount(key)})", "warning", Constants.treenodeBackColorSuspicious);
@@ -185,18 +185,18 @@ namespace LogfileMetaAnalyser.Datastore
         {
             IDatastoreView viewer = new SqlInformationView() { upperPanelControl = upperPanelControl, lowerPanelControl = lowerPanelControl, datastore = datastore, logfileFilterExporter = this.logfileFilterExporter };
             string key = viewer.BaseKey;
-            var dsref = datastore.generalSqlInformation;
+            var dsref = datastore.GeneralSqlInformation;
 
             TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, "General SQL session information", "information", Constants.treenodeBackColorNormal);
             responsibleViewerClass.Add(key, viewer);
 
-            if (dsref.sqlSessions.Count > 0)
+            if (dsref.SqlSessions.Count > 0)
             {
                 key = $"{viewer.BaseKey}/sessions";
                 TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, $"General SQL session information ({viewer.GetElementCount(key)})", "information", Constants.treenodeBackColorNormal);
                 responsibleViewerClass.Add(key, viewer);
 
-                foreach (var session in dsref.sqlSessions.OrderBy(t => t.loggerSourceId))
+                foreach (var session in dsref.SqlSessions.OrderBy(t => t.loggerSourceId))
                 {
                     key = $"{viewer.BaseKey}/sessions/{session.uuid}";
                     TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, $"Sql session {session.ToString()}", (session.isSuspicious ? "warning" : "information"), GetBgColor(!session.isSuspicious));
@@ -209,7 +209,7 @@ namespace LogfileMetaAnalyser.Datastore
         {
             IDatastoreView viewer = new JobServiceActivitiesView() { upperPanelControl = upperPanelControl, lowerPanelControl = lowerPanelControl, datastore = datastore, logfileFilterExporter = this.logfileFilterExporter };
             string key = viewer.BaseKey;
-            var dsref = datastore.jobserviceActivities;
+            var dsref = datastore.JobServiceActivities;
             int cnt;
             int cntJsJobs = viewer.GetElementCount(key); 
 
@@ -222,10 +222,10 @@ namespace LogfileMetaAnalyser.Datastore
             TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, $"by component and task ({cnt})", "component", Constants.treenodeBackColorNormal);
             responsibleViewerClass.Add(key, viewer);
 
-            foreach (var task in dsref.distinctTaskfull.OrderBy(t => t))
+            foreach (var task in dsref.DistinctTaskFull.OrderBy(t => t))
             {
                 key = $"{viewer.BaseKey}/byCompTask/{task.Replace("/", "")}";
-                TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, $"{task} ({viewer.GetElementCount(key)})", "component", GetBgColor(!dsref.jobserviceJobs.Any(t => t.taskfull == task && !t.isSmoothExecuted)));
+                TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, $"{task} ({viewer.GetElementCount(key)})", "component", GetBgColor(!dsref.JobServiceJobs.Any(t => t.taskfull == task && !t.isSmoothExecuted)));
                 responsibleViewerClass.Add(key, viewer);
             }
 
@@ -234,11 +234,11 @@ namespace LogfileMetaAnalyser.Datastore
             TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, $"by queue name ({viewer.GetElementCount(key)})", "component", Constants.treenodeBackColorNormal);
             responsibleViewerClass.Add(key, viewer);
 
-            foreach (var queuename in dsref.distinctQueuename.OrderBy(t => t))
+            foreach (var queuename in dsref.DistinctQueueName.OrderBy(t => t))
             {
                 string qn = (string.IsNullOrEmpty(queuename) ? "<empty>" : queuename);
                 key = $"{viewer.BaseKey}/byQueue/{qn.Replace("/", "")}";
-                TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, $"{qn} ({viewer.GetElementCount(key)})", "component", GetBgColor(!dsref.jobserviceJobs.Any(t => t.queuename == queuename && !t.isSmoothExecuted)));
+                TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, $"{qn} ({viewer.GetElementCount(key)})", "component", GetBgColor(!dsref.JobServiceJobs.Any(t => t.queuename == queuename && !t.isSmoothExecuted)));
                 responsibleViewerClass.Add(key, viewer);
             }
 
@@ -273,7 +273,7 @@ namespace LogfileMetaAnalyser.Datastore
         {
             IDatastoreView viewer = new ProjectionActivitiesView() { upperPanelControl = upperPanelControl, lowerPanelControl = lowerPanelControl, datastore = datastore, logfileFilterExporter = this.logfileFilterExporter };
             string key = viewer.BaseKey;
-            var dsref = datastore.projectionActivity;
+            var dsref = datastore.ProjectionActivity;
 
             TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, $"Projection activities ({viewer.GetElementCount(key)})", "sync", Constants.treenodeBackColorNormal);
             responsibleViewerClass.Add(key, viewer);
@@ -284,13 +284,13 @@ namespace LogfileMetaAnalyser.Datastore
             TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, $"by projection activity type ({viewer.GetElementCount(key)})", "sync", Constants.treenodeBackColorNormal);
             responsibleViewerClass.Add(key, viewer);
 
-            foreach (var ptype in dsref.projections.Select(t => t.projectionType).Distinct().OrderBy(t => t))
+            foreach (var ptype in dsref.Projections.Select(t => t.projectionType).Distinct().OrderBy(t => t))
             {
                 key = $"{viewer.BaseKey}/byPType/{ptype.ToString()}";
                 TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, $"{ptype.ToString()} ({viewer.GetElementCount(key)})", "sync", Constants.treenodeBackColorNormal);
                 responsibleViewerClass.Add(key, viewer);
 
-                foreach (var proj in dsref.projections.Where(t => t.projectionType == ptype).OrderBy(t => t.dtTimestampStart))
+                foreach (var proj in dsref.Projections.Where(t => t.projectionType == ptype).OrderBy(t => t.dtTimestampStart))
                 {
                     key = $"{viewer.BaseKey}/byPType/{ptype.ToString()}/#{proj.uuid}";
                     TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, proj.GetLabel(), "job", Constants.treenodeBackColorNormal);
@@ -305,13 +305,13 @@ namespace LogfileMetaAnalyser.Datastore
             responsibleViewerClass.Add(key, viewer);
 
 
-            foreach (var tstype in dsref.projections.Select(t => t.conn_TargetSystem).Distinct().OrderBy(t => t))
+            foreach (var tstype in dsref.Projections.Select(t => t.conn_TargetSystem).Distinct().OrderBy(t => t))
             {
                 key = $"{viewer.BaseKey}/byTsType/{tstype.Replace("/","")}";
                 TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, $"{tstype} ({viewer.GetElementCount(key)})", "sync", Constants.treenodeBackColorNormal);
                 responsibleViewerClass.Add(key, viewer);
 
-                foreach (var proj in dsref.projections.Where(t => t.conn_TargetSystem == tstype).OrderBy(t => t.dtTimestampStart))
+                foreach (var proj in dsref.Projections.Where(t => t.conn_TargetSystem == tstype).OrderBy(t => t.dtTimestampStart))
                 {
                     key = $"{viewer.BaseKey}/byTsType/{tstype.Replace("/", "")}/#{proj.uuid}";
                     TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, proj.GetLabel(), "job", Constants.treenodeBackColorNormal);

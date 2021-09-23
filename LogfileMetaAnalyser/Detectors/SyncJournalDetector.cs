@@ -189,7 +189,7 @@ namespace LogfileMetaAnalyser.Detectors
 
             //===========================================
             //Finally
-            logger.Info($"found {dprJournalDict.Count} DPRJournal objects and {_datastore.projectionActivity.projections.Count} projections.");
+            logger.Info($"found {dprJournalDict.Count} DPRJournal objects and {_datastore.ProjectionActivity.Projections.Count} projections.");
             TryToAssignDprJournalToAProjection(dprJournalDict);
 
             
@@ -197,7 +197,7 @@ namespace LogfileMetaAnalyser.Detectors
             foreach (var kp in dprJournalDict.Where(kp => kp.Value.belongsToProjectionUuid != ""))
             {
                 DprJournal j = kp.Value;
-                var projection = _datastore.projectionActivity.projections.Where(p => p.uuid == j.belongsToProjectionUuid).FirstOrDefault();
+                var projection = _datastore.ProjectionActivity.Projections.Where(p => p.uuid == j.belongsToProjectionUuid).FirstOrDefault();
 
                 if (projection != null)
                     projection.projectionJournal = j;
@@ -208,7 +208,7 @@ namespace LogfileMetaAnalyser.Detectors
             //stats
             detectorStats.detectorName = string.Format("{0} <{1}>", this.GetType().Name, this.identifier);
             detectorStats.finalizeDuration = sw.ElapsedMilliseconds;
-            _datastore.statistics.detectorStatistics.Add(detectorStats);
+            _datastore.Statistics.DetectorStatistics.Add(detectorStats);
             logger.Debug(detectorStats.ToString());
 
             //dispose
@@ -230,7 +230,7 @@ namespace LogfileMetaAnalyser.Detectors
         private void TryToAssignDprJournalToAProjection(Dictionary<string, DprJournal> dprJournalDict)
         {
             //assignment to a sync activity....  -> belongsToProjectionUuid
-            var projections = _datastore.projectionActivity.projections;
+            var projections = _datastore.ProjectionActivity.Projections;
 
             foreach (var kp in dprJournalDict)
             {

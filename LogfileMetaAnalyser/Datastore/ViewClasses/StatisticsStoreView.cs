@@ -33,10 +33,10 @@ namespace LogfileMetaAnalyser.Datastore
                 ListViewUC uc = new ListViewUC();
                 uc.Size = new Size(upperPanelControl.Owner.Width, 200);
                 uc.Location = new Point(1, 1);
-                uc.SetupCaption("Parsing statistics for " + datastore.statistics.filesParsed + " file(s)");
+                uc.SetupCaption("Parsing statistics for " + datastore.Statistics.FilesParsed + " file(s)");
                 uc.SetupHeaders(new string[] { "Filename", "Filesize (KB)", "read/parse duration", "duration in sum" });
 
-                foreach (var item in datastore.statistics.parseStatistic)
+                foreach (var item in datastore.Statistics.ParseStatistic)
                     uc.AddItemRow(item.filename, new string[] {
                             item.filename,
                             item.filesizeKb.ToString("N"),
@@ -57,7 +57,7 @@ namespace LogfileMetaAnalyser.Datastore
                 uc.SetupCaption("Statistics for all participated detectors");
                 uc.SetupHeaders(new string[] { "Detector name", "# lines parsed", "# detections", "parse duration", "finalize duration" });
 
-                foreach (var item in datastore.statistics.detectorStatistics)
+                foreach (var item in datastore.Statistics.DetectorStatistics)
                     uc.AddItemRow(item.detectorName, new string[] {
                             item.detectorName,
                             item.numberOfLinesParsed.ToString(),

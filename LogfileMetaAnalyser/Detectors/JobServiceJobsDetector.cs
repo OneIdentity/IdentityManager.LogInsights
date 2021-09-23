@@ -47,7 +47,7 @@ namespace LogfileMetaAnalyser.Detectors
         public void InitializeDetector()
         {
             jobs = new Dictionary<string, JobserviceJob>();
-            jobs = _datastore.jobserviceActivities?.jobserviceJobs?.ToDictionary(j => j.uidJob);
+            jobs = _datastore.JobServiceActivities?.JobServiceJobs?.ToDictionary(j => j.uidJob);
                         
             detectorStats.Clear();
         }
@@ -63,14 +63,14 @@ namespace LogfileMetaAnalyser.Detectors
             {
                 if (cnt < 100)
                     logger.Debug($"pushing to ds: jobserviceActivities: {job.ToString()}");
-                _datastore.jobserviceActivities.jobserviceJobs.Add(job);
+                _datastore.JobServiceActivities.JobServiceJobs.Add(job);
             }
 
             //stats
             detectorStats.detectorName = string.Format("{0} <{1}>", this.GetType().Name, this.identifier);
-            detectorStats.numberOfDetections = _datastore.jobserviceActivities.jobserviceJobs.Count;
+            detectorStats.numberOfDetections = _datastore.JobServiceActivities.JobServiceJobs.Count;
             detectorStats.finalizeDuration = (DateTime.Now - finStartpoint).TotalMilliseconds;
-            _datastore.statistics.detectorStatistics.Add(detectorStats);
+            _datastore.Statistics.DetectorStatistics.Add(detectorStats);
             logger.Debug(detectorStats.ToString());
 
             //dispose

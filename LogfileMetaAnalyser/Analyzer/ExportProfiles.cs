@@ -17,7 +17,7 @@ namespace LogfileMetaAnalyser
         private static string jsonFilename_predef = "exportprofiles_pre.json";
         private static string jsonFilename_custom = "exportprofiles_user.json";
 
-        private Datastore.DatastoreStructure ds;
+        private Datastore.DataStore ds;
 
         private static readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.General)
         {
@@ -29,7 +29,7 @@ namespace LogfileMetaAnalyser
 
 
         //constructor
-        public ExportProfiles(Datastore.DatastoreStructure datastore)
+        public ExportProfiles(Datastore.DataStore datastore)
         {
             ds = datastore;
 

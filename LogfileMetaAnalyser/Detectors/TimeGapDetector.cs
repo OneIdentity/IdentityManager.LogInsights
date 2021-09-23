@@ -53,18 +53,18 @@ namespace LogfileMetaAnalyser.Detectors
             DateTime finStartpoint = DateTime.Now;
 
             foreach (var gap in timegaps.Where(g => isRelevantGap(g.logfileNameStart, g.GetGapInSecods())))
-                if (!_datastore.generalLogData.timegaps.Any(t => t.dtTimestampStart.AlmostEqual(gap.dtTimestampStart)))
+                if (!_datastore.GeneralLogData.TimeGaps.Any(t => t.dtTimestampStart.AlmostEqual(gap.dtTimestampStart)))
                 {
-                    _datastore.generalLogData.timegaps.Add(gap);
+                    _datastore.GeneralLogData.TimeGaps.Add(gap);
                     logger.Debug($"pushing to ds: generalLogData timegap {gap}");
                 }
 
 
             //stats
             detectorStats.detectorName = string.Format("{0} <{1}>", this.GetType().Name, this.identifier);
-            detectorStats.numberOfDetections = _datastore.generalLogData.timegaps.Count;
+            detectorStats.numberOfDetections = _datastore.GeneralLogData.TimeGaps.Count;
             detectorStats.finalizeDuration = (DateTime.Now - finStartpoint).TotalMilliseconds;
-            _datastore.statistics.detectorStatistics.Add(detectorStats);
+            _datastore.Statistics.DetectorStatistics.Add(detectorStats);
             logger.Debug(detectorStats.ToString());
 
 
@@ -76,7 +76,7 @@ namespace LogfileMetaAnalyser.Detectors
         {
             int gap_threshold = gap_threshold_WhenLogIsOnLevel_Min;
 
-            switch (_datastore.generalLogData.logfileInformation[filename].mostDetailedLogLevel)
+            switch (_datastore.GeneralLogData.LogfileInformation[filename].mostDetailedLogLevel)
             {
                 case Helpers.LogLevel.Undef: return false;
                 case Helpers.LogLevel.Info:

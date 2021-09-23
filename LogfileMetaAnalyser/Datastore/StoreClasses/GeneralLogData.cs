@@ -1,30 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using LogfileMetaAnalyser.Controls;
 using LogfileMetaAnalyser.Helpers;
 
 
 namespace LogfileMetaAnalyser.Datastore
 {
-    public class GeneralLogData
+    public class GeneralLogData : IDataStoreContent
     {
-        public DateTime logDataOverallTimeRange_Start = DateTime.MinValue;
-        public DateTime logDataOverallTimeRange_Finish;
-        public Helpers.LogLevel mostDetailedLogLevel = Helpers.LogLevel.Undef;
-        public Dictionary<Helpers.LogLevel, long> numberOfEntriesPerLoglevel = new Dictionary<Helpers.LogLevel, long>();
+        public DateTime LogDataOverallTimeRangeStart { get; set; } = DateTime.MinValue;
+        public DateTime LogDataOverallTimeRangeFinish { get; set; }
 
-        public Dictionary<string, LogfileInformation> logfileInformation = new Dictionary<string, LogfileInformation>();  //key == file name
-        public List<TimeGap> timegaps = new List<TimeGap>();
+        public LogLevel mostDetailedLogLevel = LogLevel.Undef;
+        public Dictionary<LogLevel, long> NumberOfEntriesPerLoglevel { get; } = new();
 
-        public List<DatastoreBaseDataPoint> messageErrors = new List<DatastoreBaseDataPoint>();
-        public List<DatastoreBaseDataPoint> messageWarnings = new List<DatastoreBaseDataPoint>();
+        public Dictionary<string, LogfileInformation> LogfileInformation { get; } = new();  //key == file name
+        public List<TimeGap> TimeGaps { get; } = new();
 
-        public Dictionary<string, long> numberOflogSources = new Dictionary<string, long>(); //key == Log Source
+        public List<DatastoreBaseDataPoint> MessageErrors { get; } = new();
+        public List<DatastoreBaseDataPoint> MessageWarnings { get; } = new();
 
-        public GeneralLogData()
-        { }
- 
+        public Dictionary<string, long> NumberOflogSources { get; } = new(); //key == Log Source
+
+        public bool HasData => !LogDataOverallTimeRangeStart.IsNull() &&
+                               !LogDataOverallTimeRangeFinish.IsNull() &&
+                               NumberOflogSources.Count > 0;
     }
         
 }

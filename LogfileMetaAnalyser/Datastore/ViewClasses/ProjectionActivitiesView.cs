@@ -18,10 +18,10 @@ namespace LogfileMetaAnalyser.Datastore
 
         public int GetElementCount(string key)
         {
-            var dsref = datastore.projectionActivity;
+            var dsref = datastore.ProjectionActivity;
 
             if (key == BaseKey || key == $"{BaseKey}/byPType" || key == $"{BaseKey}/byTsType") 
-                return dsref.projections.Count;
+                return dsref.Projections.Count;
 
 
             if (key.StartsWith(BaseKey + "/byPType/"))
@@ -32,7 +32,7 @@ namespace LogfileMetaAnalyser.Datastore
                 if (i >= 0)
                     ptype = ptype.Substring(0, i);
 
-                return dsref.projections.Count(t => t.projectionType.ToString() == ptype);
+                return dsref.Projections.Count(t => t.projectionType.ToString() == ptype);
             }
 
             if (key.StartsWith(BaseKey + "/byTsType/"))            
@@ -43,7 +43,7 @@ namespace LogfileMetaAnalyser.Datastore
                 if (i >= 0)
                     tsType = tsType.Substring(0, i);
 
-                return dsref.projections.Count(t => t.conn_TargetSystem.Replace("/", "") == tsType);
+                return dsref.Projections.Count(t => t.conn_TargetSystem.Replace("/", "") == tsType);
             }
 
 
@@ -90,9 +90,9 @@ namespace LogfileMetaAnalyser.Datastore
         {
             MultiListViewUC uc = new MultiListViewUC();
             ContextLinesUC contextLinesUc = new ContextLinesUC(logfileFilterExporter);
-            var dsref = datastore.projectionActivity;
+            var dsref = datastore.ProjectionActivity;
 
-            var projListScope = dsref.projections.Where(p => (p.uuid == uuidFilter || uuidFilter == "*") &&
+            var projListScope = dsref.Projections.Where(p => (p.uuid == uuidFilter || uuidFilter == "*") &&
                                                   (p.projectionType.ToString() == PTypeFilter || PTypeFilter == "*") &&
                                                   (p.conn_TargetSystem.Replace("/", "") == TsTypeFilter || TsTypeFilter == "*")
                                                  );
@@ -105,16 +105,16 @@ namespace LogfileMetaAnalyser.Datastore
             //the journal is very vague whether it was recorded or not and even when, e.g. failures are not always included ;D
             int numOfSubControls = FillListVcTypes.count;
 
-            bool isToShowJournalSetup = datastore.projectionActivity.NumberOfJournalSetupTotal > 0;
+            bool isToShowJournalSetup = datastore.ProjectionActivity.NumberOfJournalSetupTotal > 0;
             //numOfSubControls -= isToShowJournalSetup ? 0 : 1;
 
-            bool isToShowJournalObjests = datastore.projectionActivity.NumberOfJournalObjectTotal > 0;
+            bool isToShowJournalObjests = datastore.ProjectionActivity.NumberOfJournalObjectTotal > 0;
             //numOfSubControls -= isToShowJournalObjests ? 0 : 1;
 
-            bool isToShowJournalMessages = datastore.projectionActivity.NumberOfJournalMessagesTotal > 0;
+            bool isToShowJournalMessages = datastore.ProjectionActivity.NumberOfJournalMessagesTotal > 0;
             //numOfSubControls -= isToShowJournalMessages ? 0 : 1;
 
-            bool isToShowJournalFailures = datastore.projectionActivity.NumberOfJournalFailuresTotal > 0;
+            bool isToShowJournalFailures = datastore.ProjectionActivity.NumberOfJournalFailuresTotal > 0;
             //numOfSubControls -= isToShowJournalFailures ? 0 : 1;
 
             
@@ -135,7 +135,7 @@ namespace LogfileMetaAnalyser.Datastore
                 try
                 {
                     string prUuid = args.Item.Name;
-                    var proj = dsref.projections.FirstOrDefault(t => t.uuid == prUuid);
+                    var proj = dsref.Projections.FirstOrDefault(t => t.uuid == prUuid);
                     if (proj == null)
                         return;
 
@@ -163,7 +163,7 @@ namespace LogfileMetaAnalyser.Datastore
                 {
                     string[] keydata = args.Item.Name.Split('@');  //{cy.uuid}@{prUuid}@{(++i)}                 
 
-                    var cycle = dsref.projections.First(t => t.uuid == keydata[1]).projectionCycles.Where(c => c.uuid == keydata[0]);
+                    var cycle = dsref.Projections.First(t => t.uuid == keydata[1]).projectionCycles.Where(c => c.uuid == keydata[0]);
 
                     if (cycle == null || cycle.FirstOrDefault() == null)
                         return;
@@ -193,7 +193,7 @@ namespace LogfileMetaAnalyser.Datastore
                 {
                     string[] keydata = args.Item.Name.Split('@');  //step@projection
 
-                    var projStep = dsref.projections.FirstOrDefault(t => t.uuid == keydata[1]).projectionSteps.Where(t => t.uuid == keydata[0]).FirstOrDefault();
+                    var projStep = dsref.Projections.FirstOrDefault(t => t.uuid == keydata[1]).projectionSteps.Where(t => t.uuid == keydata[0]).FirstOrDefault();
                     if (projStep == null)
                         return;
 
@@ -220,7 +220,7 @@ namespace LogfileMetaAnalyser.Datastore
                     {
                         string[] keydata = args.Item.Name.Split('@');  //detail@step@projection
 
-                        var projStepDetail = dsref.projections.First(t => t.uuid == keydata[2])
+                        var projStepDetail = dsref.Projections.First(t => t.uuid == keydata[2])
                             .projectionSteps.First(t => t.uuid == keydata[1])
                             .syncStepDetail
                             .GetSyncStepDetailByUuid(keydata[0]);
@@ -247,7 +247,7 @@ namespace LogfileMetaAnalyser.Datastore
                 {
                     string[] keydata = args.Item.Name.Split('@');  //{prSystemConn.uuid}@{pr.uuid}
 
-                    var systemConn = dsref.projections.First(t => t.uuid == keydata[1])
+                    var systemConn = dsref.Projections.First(t => t.uuid == keydata[1])
                         .systemConnectors.First(t => t.uuid == keydata[0]);
 
                     if (systemConn == null)
@@ -276,9 +276,9 @@ namespace LogfileMetaAnalyser.Datastore
                 {
                     string[] keydata = args.Item.Name.Split('@');  //{sql.loggerSourceId}@{pr.uuid}
 
-                    var sqlsession = dsref.projections.First(t => t.uuid == keydata[1])
+                    var sqlsession = dsref.Projections.First(t => t.uuid == keydata[1])
                         .specificSqlInformation
-                        .sqlSessions.FirstOrDefault(t => t.uuid == keydata[0]);
+                        .SqlSessions.FirstOrDefault(t => t.uuid == keydata[0]);
 
                     if (sqlsession == null)
                         return;
@@ -306,9 +306,9 @@ namespace LogfileMetaAnalyser.Datastore
                 {
                     string[] keydata = args.Item.Name.Split('@');  //{longsql.uuid}@{sql.loggerSourceId}@{pr.uuid}
 
-                    var longrunner = dsref.projections.First(t => t.uuid == keydata[2])
+                    var longrunner = dsref.Projections.First(t => t.uuid == keydata[2])
                         .specificSqlInformation
-                        .sqlSessions.First(t => t.uuid == keydata[1])?
+                        .SqlSessions.First(t => t.uuid == keydata[1])?
                         .longRunningStatements?.First(l => l.uuid == keydata[0]);
                                 
                     if (longrunner?.message != null)
@@ -334,9 +334,9 @@ namespace LogfileMetaAnalyser.Datastore
                 {
                     string[] keydata = args.Item.Name.Split('@');  //{trans.uuid}@{sql.loggerSourceId}@{pr.uuid}
 
-                    var transact = dsref.projections.First(t => t.uuid == keydata[2])
+                    var transact = dsref.Projections.First(t => t.uuid == keydata[2])
                         .specificSqlInformation
-                        .sqlSessions.First(t => t.uuid == keydata[1])?
+                        .SqlSessions.First(t => t.uuid == keydata[1])?
                         .transactions?.First(l => l.uuid == keydata[0]);
 
                     if (transact == null)
@@ -364,7 +364,7 @@ namespace LogfileMetaAnalyser.Datastore
                 {
                     string[] keydata = args.Item.Name.Split('@');  //{journalobj.uuid}@{proj.uuid}
 
-                    var journal = dsref.projections.First(t => t.uuid == keydata[1])
+                    var journal = dsref.Projections.First(t => t.uuid == keydata[1])
                         .projectionJournal;
 
                     if (journal == null)
@@ -397,7 +397,7 @@ namespace LogfileMetaAnalyser.Datastore
             if (isToShowJournalObjests)
             {
                 uc.SetupSubLevel(FillListVcTypes.p4_2__PrJournalObj, 1);
-                uc[FillListVcTypes.p4_2__PrJournalObj].SetupCaption($"sync journal treated objects (total recorded number of messages: {datastore.projectionActivity.NumberOfJournalObjectTotal})");
+                uc[FillListVcTypes.p4_2__PrJournalObj].SetupCaption($"sync journal treated objects (total recorded number of messages: {datastore.ProjectionActivity.NumberOfJournalObjectTotal})");
                 uc[FillListVcTypes.p4_2__PrJournalObj].SetupHeaders(new string[] { "Object", "Object Id", "Method", "Schema type", "Sequence number", "Is import" });
                 uc[FillListVcTypes.p4_2__PrJournalObj].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
                 {
@@ -405,7 +405,7 @@ namespace LogfileMetaAnalyser.Datastore
                     {
                         string[] keydata = args.Item.Name.Split('@');  //{journalObjects.uuid}@{proj.uuid}
 
-                        var journalObj = dsref.projections.First(t => t.uuid == keydata[1])
+                        var journalObj = dsref.Projections.First(t => t.uuid == keydata[1])
                             .projectionJournal
                             .journalObjects.Where(jo => jo.uuid == keydata[0]).FirstOrDefault();
 
@@ -434,7 +434,7 @@ namespace LogfileMetaAnalyser.Datastore
                     {
                         string[] keydata = args.Item.Name.Split('@');  //JournaleProp.UUID @ Projection.UUID
 
-                        var journal = dsref.projections.First(t => t.uuid == keydata[1])
+                        var journal = dsref.Projections.First(t => t.uuid == keydata[1])
                             .projectionJournal;
 
                         if (journal == null)
@@ -471,7 +471,7 @@ namespace LogfileMetaAnalyser.Datastore
             {
                 uc.SetupSubLevel(FillListVcTypes.p4_3__PrJournalMessage, 1);
 
-                uc[FillListVcTypes.p4_3__PrJournalMessage].SetupCaption($"sync journal messages (total number of recorded messages: {datastore.projectionActivity.NumberOfJournalMessagesTotal})");
+                uc[FillListVcTypes.p4_3__PrJournalMessage].SetupCaption($"sync journal messages (total number of recorded messages: {datastore.ProjectionActivity.NumberOfJournalMessagesTotal})");
                 uc[FillListVcTypes.p4_3__PrJournalMessage].SetupHeaders(new string[] { "Time", "Context", "Type", "Messagetext", "Source" });
                 uc[FillListVcTypes.p4_3__PrJournalMessage].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
                 {
@@ -479,7 +479,7 @@ namespace LogfileMetaAnalyser.Datastore
                     {
                         string[] keydata = args.Item.Name.Split('@');  //JournaleMessage.UUID @ Projection.UUID
 
-                        var journal = dsref.projections.First(t => t.uuid == keydata[1]).projectionJournal;
+                        var journal = dsref.Projections.First(t => t.uuid == keydata[1]).projectionJournal;
 
                         if (journal == null)
                             return;
@@ -503,7 +503,7 @@ namespace LogfileMetaAnalyser.Datastore
             if (isToShowJournalFailures)
             {
                 uc.SetupSubLevel(FillListVcTypes.p4_4__PrJournalFailure, 1);
-                uc[FillListVcTypes.p4_4__PrJournalFailure].SetupCaption($"sync journal failure messages (total number of recorded messages: {datastore.projectionActivity.NumberOfJournalFailuresTotal})");
+                uc[FillListVcTypes.p4_4__PrJournalFailure].SetupCaption($"sync journal failure messages (total number of recorded messages: {datastore.ProjectionActivity.NumberOfJournalFailuresTotal})");
                 uc[FillListVcTypes.p4_4__PrJournalFailure].SetupHeaders(new string[] {"Time", "Projection step", "Schema type", "Object", "Reason", "Object state" });
                 uc[FillListVcTypes.p4_4__PrJournalFailure].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
                 {
@@ -511,7 +511,7 @@ namespace LogfileMetaAnalyser.Datastore
                     {
                         string[] keydata = args.Item.Name.Split('@');  //JournaleFailure.UUID @ Projection.UUID
 
-                        var journal = dsref.projections.First(t => t.uuid == keydata[1]).projectionJournal;
+                        var journal = dsref.Projections.First(t => t.uuid == keydata[1]).projectionJournal;
 
                         if (journal == null)
                             return;
@@ -540,7 +540,7 @@ namespace LogfileMetaAnalyser.Datastore
                         string[] keydata = args.Item.Name.Split('@');  //DPRJournalProperty.uuid @ DPRJournalObject.uuid @ DPRJournalFailure.uuid @ Projection.UUID
 
 
-                        var journal = dsref.projections.First(t => t.uuid == keydata[3]).projectionJournal;
+                        var journal = dsref.Projections.First(t => t.uuid == keydata[3]).projectionJournal;
 
                         if (journal == null)
                             return;
@@ -789,7 +789,7 @@ namespace LogfileMetaAnalyser.Datastore
 
                     case FillListVcTypes.p3__PrSql: //Projection sql information - Headers(new string[] { "session id", "is suspicious", "session start", "session ends", "session duration", "transaction count", "top duration transaction", "long running statement count", "top duration statement" });
                         foreach (var pr in scope.Where(p => prUuid == "" || p.uuid == prUuid))
-                            foreach (var sql in pr.specificSqlInformation.sqlSessions)
+                            foreach (var sql in pr.specificSqlInformation.SqlSessions)
                                 uc[ucNumber].AddItemRow($"{sql.uuid}@{pr.uuid}", new string[]
                                 {
                                     sql.loggerSourceId,
@@ -812,9 +812,9 @@ namespace LogfileMetaAnalyser.Datastore
                         foreach (var pr in scope.Where(p => p.uuid == prUuid))
                         {
                             if (secondId == "")  //sql session id
-                                secondId = pr.specificSqlInformation.sqlSessions.FirstOrDefault()?.uuid ?? "-";
+                                secondId = pr.specificSqlInformation.SqlSessions.FirstOrDefault()?.uuid ?? "-";
 
-                            var lst = pr.specificSqlInformation.sqlSessions.Where(s => s.uuid == secondId).FirstOrDefault()?.longRunningStatements;
+                            var lst = pr.specificSqlInformation.SqlSessions.Where(s => s.uuid == secondId).FirstOrDefault()?.longRunningStatements;
                             foreach (var longsql in lst.EmptyIfNull())
                                 uc[ucNumber].AddItemRow($"{longsql.uuid}@{secondId}@{pr.uuid}", new string[]
                                 {
@@ -834,9 +834,9 @@ namespace LogfileMetaAnalyser.Datastore
                         foreach (var pr in scope.Where(p => p.uuid == prUuid))
                         {
                             if (secondId == "")  //sql session id
-                                secondId = pr.specificSqlInformation.sqlSessions.FirstOrDefault()?.uuid ?? "-";
+                                secondId = pr.specificSqlInformation.SqlSessions.FirstOrDefault()?.uuid ?? "-";
 
-                            var lst = pr.specificSqlInformation.sqlSessions.Where(s => s.uuid == secondId).FirstOrDefault()?.transactions;
+                            var lst = pr.specificSqlInformation.SqlSessions.Where(s => s.uuid == secondId).FirstOrDefault()?.transactions;
                             foreach (var trans in lst.EmptyIfNull())
                                 uc[ucNumber].AddItemRow($"{trans.uuid}@{secondId}@{pr.uuid}", new string[]
                                 {
