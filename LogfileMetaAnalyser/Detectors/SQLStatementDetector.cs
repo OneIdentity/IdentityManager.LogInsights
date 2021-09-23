@@ -327,9 +327,10 @@ namespace LogfileMetaAnalyser.Detectors
                     if (!sqlSessionInfo[msg.spid].nonSystemTables.Any(t => string.Compare(t, tabname, true) == 0))
                         sqlSessionInfo[msg.spid].nonSystemTables.Add(tabname);
 
-                //store a sql command
-                //if (dura >= threshold_suspicious_duration_SqlCommand_msec)
-                sqlSessionInfo[msg.spid].longRunningStatements.Add(sqlcmd); 
+                //store a sql command 
+                // when long running or 
+                if (sqlcmd.durationMsec >= threshold_suspicious_duration_SqlCommand_msec || sqlcmd.isPayloadTableInvolved)
+                    sqlSessionInfo[msg.spid].longRunningStatements.Add(sqlcmd); 
             }
 			
 			detectorStats.parseDuration += (DateTime.Now - procMsgStartpoint).TotalMilliseconds;			
