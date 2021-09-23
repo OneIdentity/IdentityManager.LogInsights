@@ -182,7 +182,7 @@ namespace LogfileMetaAnalyser.LogReader
             var lineNo = 1;
             foreach (var row in table.Rows.OrderBy(r => (DateTime)r[timestampIdx]))
             {
-                var locator = new Locator(entryNo, lineNo, _connString.Query);
+                var locator = new Locator(entryNo, lineNo, "AppInsights");
 
                 var id = (string)row[itemIdIdx];
                 var timeStamp = (DateTime)row[timestampIdx];
