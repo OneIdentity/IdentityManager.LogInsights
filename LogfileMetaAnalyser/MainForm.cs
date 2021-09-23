@@ -26,7 +26,9 @@ namespace LogfileMetaAnalyser
             _activeReader = reader;
 
             _analyzerCore.Initialize(_activeReader);
-            
+
+            _logfileFilterExporter.LogReader = _activeReader; 
+
             RefreshStatusLabel(1);
 
             StartAnalysis();

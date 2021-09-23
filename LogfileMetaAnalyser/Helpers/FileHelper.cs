@@ -184,8 +184,19 @@ namespace LogfileMetaAnalyser.Helpers
 
             string newFileFolder = (newfoldername == "") ? Path.GetDirectoryName(oldFilename) : newfoldername;
 
+            foreach (char c in Path.GetInvalidPathChars())
+                newFileFolder = newFileFolder.Replace(c, '_');
+
+            newFileFolder = Regex.Replace(newFileFolder, @"https?:..", "_", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+            if (!EnsurePathElementsExists(newFileFolder))
+                newFileFolder = Path.GetDirectoryName(oldFilename);
+
             string oldFileBase = Path.GetFileNameWithoutExtension(oldFilename);
             string oldFileExt = Path.GetExtension(oldFilename);
+
+            foreach (char c in Path.GetInvalidFileNameChars())
+                oldFileBase = oldFileBase.Replace(c, '_');
 
             string newname = Path.Combine(newFileFolder, $"{oldFileBase}{postfix}{oldFileExt}");
 
@@ -194,6 +205,38 @@ namespace LogfileMetaAnalyser.Helpers
                 newname = Path.Combine(newFileFolder, $"{oldFileBase}{postfix}_{i++}{oldFileExt}");
 
             return (newname);
+        }
+
+        public static bool EnsurePathElementsExists(string folder)
+        {
+            if (string.IsNullOrEmpty(folder))
+                return false;
+
+            //we do not check or create folders on a share
+            if (folder.StartsWith(@"\\"))
+                return true; 
+
+            char sep = Path.DirectorySeparatorChar;
+
+            //are we on top of file system OR is this a relative path where we cannot climp up
+            if (Path.IsPathRooted(folder) || !folder.Contains(sep) || folder.Length <= 3)
+            {
+                if (!Directory.Exists(folder))
+                    Directory.CreateDirectory(folder);
+
+                return Directory.Exists(folder);
+            }
+
+            //we are not on top of file system             //C:\folder\sub\abc
+            string parentFolder = folder.Substring(0, folder.LastIndexOf(sep));
+
+            //check for parent
+            if (EnsurePathElementsExists(parentFolder))            
+                //now we know that parent folder exists, so create this folder if not yet available
+                if (!Directory.Exists(folder))
+                    Directory.CreateDirectory(folder);
+
+            return Directory.Exists(folder);
         }
 
         public static string EnsureFolderisWritableOrReturnDefault(string foldername, string defaultfolder = ".")
