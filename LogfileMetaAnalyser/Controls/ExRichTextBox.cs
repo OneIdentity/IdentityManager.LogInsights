@@ -179,7 +179,14 @@ namespace LogfileMetaAnalyser.Controls
 
         #region WinCalls
 
-        private const int WM_PAINT = 15;
+        [DllImport("user32.dll")]
+        extern static IntPtr SendMessage(IntPtr hWnd, Int32 wMsg, Int32 wParam, ref Point lParam);
+
+        [DllImport("user32.dll")]
+        extern static IntPtr BeginPaint(IntPtr hwnd, out PAINTSTRUCT lpPaint);
+
+        [DllImport("user32.dll")]
+        extern static bool EndPaint(IntPtr hWnd, [In] ref PAINTSTRUCT lpPaint);
 
         [StructLayout(LayoutKind.Sequential)]
         struct PAINTSTRUCT
@@ -192,11 +199,24 @@ namespace LogfileMetaAnalyser.Controls
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 32)] public byte[] rgbReserved;
         }
 
-        [DllImport("user32.dll")]
-        static extern IntPtr BeginPaint(IntPtr hwnd, out PAINTSTRUCT lpPaint);
+        const int WM_PAINT = 15;
+        const int WM_USER = 0x400;
+        const int WM_SETREDRAW = 0x000B;
+        const int EM_GETEVENTMASK = WM_USER + 59;
+        const int EM_SETEVENTMASK = WM_USER + 69;
+        const int EM_GETSCROLLPOS = WM_USER + 221;
+        const int EM_SETSCROLLPOS = WM_USER + 222;
 
-        [DllImport("user32.dll")]
-        static extern bool EndPaint(IntPtr hWnd, [In] ref PAINTSTRUCT lpPaint);
+        private void Scrolltest()
+        {
+            Point _ScrollPoint = Point.Empty;
+
+            SendMessage(this.Handle, EM_GETSCROLLPOS, 0, ref _ScrollPoint);
+
+            _ScrollPoint.Y = 0;
+
+            SendMessage(this.Handle, EM_GETSCROLLPOS, 0, ref _ScrollPoint);
+        }
 
         public void SetInnerMargins( int left, int top, int right, int bottom)
         {
@@ -233,13 +253,110 @@ namespace LogfileMetaAnalyser.Controls
         }
 
         [DllImport(@"User32.dll", EntryPoint = @"SendMessage", CharSet = CharSet.Auto)]
-        private static extern int SendMessageRefRect(IntPtr hWnd, uint msg, int wParam, ref RECT rect);
+        extern private static int SendMessageRefRect(IntPtr hWnd, uint msg, int wParam, ref RECT rect);
 
         [DllImport(@"user32.dll", EntryPoint = @"SendMessage", CharSet = CharSet.Auto)]
-        private static extern int SendMessage(IntPtr hwnd, int wMsg, IntPtr wParam, ref Rectangle lParam);
+        extern private static int SendMessage(IntPtr hwnd, int wMsg, IntPtr wParam, ref Rectangle lParam);
 
         private const int EmGetrect = 0xB2;
         private const int EmSetrect = 0xB3;
+
+
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        extern static bool GetScrollInfo(IntPtr hwnd, int fnBar, ref SCROLLINFO lpsi);
+
+        [DllImport("user32.dll")]
+        extern static int SetScrollInfo(IntPtr hwnd, int fnBar, [In] ref SCROLLINFO lpsi, bool fRedraw);
+
+        [DllImport("User32.dll", CharSet = CharSet.Auto, EntryPoint = "SendMessage")]
+        extern static IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
+        struct SCROLLINFO
+        {
+            public uint cbSize;
+            public uint fMask;
+            public int nMin;
+            public int nMax;
+            public uint nPage;
+            public int nPos;
+            public int nTrackPos;
+        }
+
+        enum ScrollBarDirection
+        {
+            SB_HORZ = 0,
+            SB_VERT = 1,
+            SB_CTL = 2,
+            SB_BOTH = 3
+        }
+
+        enum ScrollInfoMask
+        {
+            SIF_RANGE = 0x1,
+            SIF_PAGE = 0x2,
+            SIF_POS = 0x4,
+            SIF_DISABLENOSCROLL = 0x8,
+            SIF_TRACKPOS = 0x10,
+            SIF_ALL = SIF_RANGE + SIF_PAGE + SIF_POS + SIF_TRACKPOS
+        }
+
+        const int WM_VSCROLL = 277;
+        const int SB_LINEUP = 0;
+        const int SB_LINEDOWN = 1;
+        const int SB_THUMBPOSITION = 4;
+        const int SB_THUMBTRACK = 5;
+        const int SB_TOP = 6;
+        const int SB_BOTTOM = 7;
+        const int SB_ENDSCROLL = 8;
+
+        public void ScrollToLine(int iLine)
+        {
+            if (iLine < 0)
+                return;
+
+            int iChar = GetFirstCharIndexFromLine(iLine);
+
+            Point cPos = GetPositionFromCharIndex(iChar);
+
+            IntPtr handle = Handle;
+
+            // Get current scroller position
+
+            SCROLLINFO si = new SCROLLINFO();
+            si.cbSize = (uint)Marshal.SizeOf(si);
+            si.fMask = (uint)ScrollInfoMask.SIF_ALL;
+            GetScrollInfo(handle, (int)ScrollBarDirection.SB_VERT, ref si);
+
+            // Increase position by pixles
+            si.nPos += cPos.Y;
+
+            // Reposition scroller
+            SetScrollInfo(handle, (int)ScrollBarDirection.SB_VERT, ref si, true);
+
+            // Send a WM_VSCROLL scroll message using SB_THUMBTRACK as wParam
+            // SB_THUMBTRACK: low-order word of wParam, si.nPos high-order word of  wParam
+
+            IntPtr ptrWparam = new IntPtr(SB_THUMBTRACK + 0x10000 * si.nPos);
+            IntPtr ptrLparam = new IntPtr(0);
+            SendMessage(handle, WM_VSCROLL, ptrWparam, ptrLparam);
+
+            //SendMessage(rtbLog.Handle, WM_VSCROLL, (IntPtr)SB_PAGEBOTTOM, IntPtr.Zero);
+
+            //rtbLog.Select(iChar, 0);
+        }
+
+        public void BeginUpdate()
+        {
+            SendMessage(Handle, WM_SETREDRAW, (IntPtr)0, IntPtr.Zero);
+        }
+
+        public void EndUpdate()
+        {
+            SendMessage(Handle, WM_SETREDRAW, (IntPtr)1, IntPtr.Zero);
+        }
+
 
         private void SetFormattingRect(Rectangle rect)
         {
@@ -255,5 +372,10 @@ namespace LogfileMetaAnalyser.Controls
         }
 
         #endregion
+
+        public void ScrollToLineX(int jumppos)
+        {
+           Scrolltest();
+        }
     }
 }
