@@ -49,6 +49,8 @@ namespace LogfileMetaAnalyser.Detectors
             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
             sw.Start();
 
+            var projectionActivity = _datastore.GetOrAdd<ProjectionActivity>();
+            var statisticsStore = _datastore.GetOrAdd<StatisticsStore>();
 
             /*
              	DPRJournal 
@@ -189,7 +191,7 @@ namespace LogfileMetaAnalyser.Detectors
 
             //===========================================
             //Finally
-            logger.Info($"found {dprJournalDict.Count} DPRJournal objects and {_datastore.ProjectionActivity.Projections.Count} projections.");
+            logger.Info($"found {dprJournalDict.Count} DPRJournal objects and {projectionActivity.Projections.Count} projections.");
             TryToAssignDprJournalToAProjection(dprJournalDict);
 
             
@@ -197,7 +199,7 @@ namespace LogfileMetaAnalyser.Detectors
             foreach (var kp in dprJournalDict.Where(kp => kp.Value.belongsToProjectionUuid != ""))
             {
                 DprJournal j = kp.Value;
-                var projection = _datastore.ProjectionActivity.Projections.Where(p => p.uuid == j.belongsToProjectionUuid).FirstOrDefault();
+                var projection = projectionActivity.Projections.FirstOrDefault(p => p.uuid == j.belongsToProjectionUuid);
 
                 if (projection != null)
                     projection.projectionJournal = j;
@@ -208,7 +210,7 @@ namespace LogfileMetaAnalyser.Detectors
             //stats
             detectorStats.detectorName = string.Format("{0} <{1}>", this.GetType().Name, this.identifier);
             detectorStats.finalizeDuration = sw.ElapsedMilliseconds;
-            _datastore.Statistics.DetectorStatistics.Add(detectorStats);
+            statisticsStore.DetectorStatistics.Add(detectorStats);
             logger.Debug(detectorStats.ToString());
 
             //dispose
@@ -230,7 +232,7 @@ namespace LogfileMetaAnalyser.Detectors
         private void TryToAssignDprJournalToAProjection(Dictionary<string, DprJournal> dprJournalDict)
         {
             //assignment to a sync activity....  -> belongsToProjectionUuid
-            var projections = _datastore.ProjectionActivity.Projections;
+            var projections = _datastore.GetOrAdd<ProjectionActivity>().Projections;
 
             foreach (var kp in dprJournalDict)
             {

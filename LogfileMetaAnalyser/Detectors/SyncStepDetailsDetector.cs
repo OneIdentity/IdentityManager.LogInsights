@@ -154,6 +154,8 @@ namespace LogfileMetaAnalyser.Detectors
             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
             sw.Start();
 
+            var projectionActivity = _datastore.GetOrAdd<ProjectionActivity>();
+
             //for each found sync step we try to find a projection with a sync step that matches our found ones
             foreach (var kp_listSyncStepDetail in systemConnectionGeneralQueryObjectInfos)
             {
@@ -162,7 +164,7 @@ namespace LogfileMetaAnalyser.Detectors
 
                 logger.Debug($"handling sync step detail for SystemConnID {systemConnectionId}");
 
-                var potListOfProjections = _datastore.ProjectionActivity.Projections
+                var potListOfProjections = projectionActivity.Projections
                                                 .Where(p => p.systemConnectors.Any(sc => sc.loggerSourceId == systemConnectionId));
 
                 if (potListOfProjections.HasNoData())
@@ -258,7 +260,7 @@ namespace LogfileMetaAnalyser.Detectors
             //stats
             detectorStats.detectorName = $"{GetType().Name} <{identifier}>";
             detectorStats.finalizeDuration = sw.ElapsedMilliseconds;
-            _datastore.Statistics.DetectorStatistics.Add(detectorStats);
+            _datastore.GetOrAdd<StatisticsStore>().DetectorStatistics.Add(detectorStats);
             logger.Debug(detectorStats.ToString());
 
             //dispose

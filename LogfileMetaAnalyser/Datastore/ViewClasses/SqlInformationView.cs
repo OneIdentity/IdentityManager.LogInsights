@@ -20,7 +20,7 @@ namespace LogfileMetaAnalyser.Datastore
         public int GetElementCount(string key)
         {
             if (key == $"{BaseKey}/sessions")
-                return datastore.GeneralSqlInformation.numberOfSqlSessions;
+                return datastore.GetOrAdd<SqlInformation>().numberOfSqlSessions;
 
             return 0;
         }
@@ -32,7 +32,7 @@ namespace LogfileMetaAnalyser.Datastore
 
             MultiListViewUC uc = new MultiListViewUC();
             ContextLinesUC contextLinesUc = new ContextLinesUC(logfileFilterExporter);
-            var dsref = datastore.GeneralSqlInformation;
+            var dsref = datastore.GetOrAdd<SqlInformation>();
 
             if (key == BaseKey)
             {

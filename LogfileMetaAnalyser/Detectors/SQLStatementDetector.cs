@@ -69,14 +69,18 @@ namespace LogfileMetaAnalyser.Detectors
 
             DateTime finStartpoint = DateTime.Now;
 
+            var generalSqlInformation = _datastore.GetOrAdd<SqlInformation>();
+            var projectionActivity = _datastore.GetOrAdd<ProjectionActivity>();
+            var statisticsStore = _datastore.GetOrAdd<StatisticsStore>();
+
 
             //1.) if flag sqlSessionInfo[].touchesDprModuleTables = true but we have no projection assignment yet, and there is only one, we can safely assign it
-            if (_datastore.ProjectionActivity.Projections.Count == 1)
+            if (projectionActivity.Projections.Count == 1)
             {
                 logger.Debug("we only have 1 projection: if flag sqlSessionInfo[].touchesDprModuleTables = true but we have no projection assignment yet, and there is only one, we can safely assign it");
 
                 foreach (var sqlsession in sqlSessionInfo.Where(kp => kp.Value.touchesDprModuleTables))
-                    sqlsession.Value.belongsToProjectionId.Add(_datastore.ProjectionActivity.Projections[0].uuid);
+                    sqlsession.Value.belongsToProjectionId.Add(projectionActivity.Projections[0].uuid);
             }
 
 
@@ -85,17 +89,17 @@ namespace LogfileMetaAnalyser.Detectors
             {
                 logger.Debug("we have only one sql session with touchesDprModuleTables==true but several projections, so we can add each projection id to the sql session");
 
-                sqlSessionInfo.First(t => t.Value.touchesDprModuleTables).Value.belongsToProjectionId.AddRange(_datastore.ProjectionActivity.Projections.Select(p => p.uuid));
+                sqlSessionInfo.First(t => t.Value.touchesDprModuleTables).Value.belongsToProjectionId.AddRange(projectionActivity.Projections.Select(p => p.uuid));
             }
 
 
             //3.) a sql session likely belongs to a specific projection if those tables were handled which are part of projection's step's left schema class
-            if (_datastore.ProjectionActivity.Projections.Count > 1)
+            if (projectionActivity.Projections.Count > 1)
             {
                 logger.Debug("a sql session likely belongs to a specific projection if those tables were handled which are part of projection's step's left schema class");
 
                 foreach (var sqlsesion in sqlSessionInfo.Where(kp => kp.Value.belongsToProjectionId.Count == 0))
-                    foreach (var projection in _datastore.ProjectionActivity
+                    foreach (var projection in projectionActivity
                                                             .Projections
                                                             .Where(p => p.dtTimestampEnd.InRange(sqlsesion.Value.dtTimestampStart, sqlsesion.Value.dtTimestampEnd)))
                     {
@@ -120,7 +124,7 @@ namespace LogfileMetaAnalyser.Detectors
             //4.)
             logger.Debug("try to assign a sql session to a projection with help of statements inside the time range of a projection");
             foreach (var sqlsesion in sqlSessionInfo.Where(kp => kp.Value.belongsToProjectionId.Count == 0))
-                foreach (var projection in _datastore.ProjectionActivity.Projections)
+                foreach (var projection in projectionActivity.Projections)
                     if (sqlsesion.Value.longRunningStatements.Any(lr => lr.isPayloadTableInvolved && lr.dtTimestampStart.InRange(projection.dtTimestampStart, projection.dtTimestampEnd)))  //at least one payload statement within the lifetime of a projection
                     {
                         logger.Debug($"\tsql session {sqlsesion.Value.loggerSourceId} belongs to projection id {projection.uuid}");
@@ -143,18 +147,18 @@ namespace LogfileMetaAnalyser.Detectors
 
             //finally assign results to datastore
             //a) general information            
-            _datastore.GeneralSqlInformation.ThresholdSuspiciousDurationSqlCommandMsec = threshold_suspicious_duration_SqlCommand_msec;
-            _datastore.GeneralSqlInformation.ThresholdSuspiciousDurationSqlTransactionSec  = threshold_suspicious_duration_SqlTransaction_sec;
-            _datastore.GeneralSqlInformation.numberOfSqlSessions = sqlSessionInfo.Count;
-            _datastore.GeneralSqlInformation.isSuspicious = sqlSessionInfo.Any(s => s.Value.isSuspicious);
-            _datastore.GeneralSqlInformation.SqlSessions.AddRange(sqlSessionInfo.Select(i => i.Value.AsSqlSession(DateTime.MinValue, DateTime.MaxValue)));
+            generalSqlInformation.ThresholdSuspiciousDurationSqlCommandMsec = threshold_suspicious_duration_SqlCommand_msec;
+            generalSqlInformation.ThresholdSuspiciousDurationSqlTransactionSec  = threshold_suspicious_duration_SqlTransaction_sec;
+            generalSqlInformation.numberOfSqlSessions = sqlSessionInfo.Count;
+            generalSqlInformation.isSuspicious = sqlSessionInfo.Any(s => s.Value.isSuspicious);
+            generalSqlInformation.SqlSessions.AddRange(sqlSessionInfo.Select(i => i.Value.AsSqlSession(DateTime.MinValue, DateTime.MaxValue)));
             logger.Debug($"pushing to ds: generalSqlInformation generally");
 
             //b) each projection
             foreach (var sqlsession in sqlSessionInfo.Values.Where(x => x.belongsToProjectionId.Count > 0))
                 foreach (var projuuid in sqlsession.belongsToProjectionId.Distinct())
                 {
-                    var proj = _datastore.ProjectionActivity.Projections.FirstOrDefault(p => p.uuid == projuuid);
+                    var proj = projectionActivity.Projections.FirstOrDefault(p => p.uuid == projuuid);
 
                     proj.specificSqlInformation.ThresholdSuspiciousDurationSqlCommandMsec = threshold_suspicious_duration_SqlCommand_msec;
                     proj.specificSqlInformation.ThresholdSuspiciousDurationSqlTransactionSec = threshold_suspicious_duration_SqlTransaction_sec;
@@ -170,9 +174,9 @@ namespace LogfileMetaAnalyser.Detectors
 
             //stats
             detectorStats.detectorName = string.Format("{0} <{1}>", this.GetType().Name, this.identifier);
-            detectorStats.numberOfDetections += 4 + _datastore.GeneralSqlInformation.SqlSessions.Count;
+            detectorStats.numberOfDetections += 4 + generalSqlInformation.SqlSessions.Count;
             detectorStats.finalizeDuration = (DateTime.Now - finStartpoint).TotalMilliseconds;
-            _datastore.Statistics.DetectorStatistics.Add(detectorStats);
+            statisticsStore.DetectorStatistics.Add(detectorStats);
             logger.Debug(detectorStats.ToString());
 
             //dispose

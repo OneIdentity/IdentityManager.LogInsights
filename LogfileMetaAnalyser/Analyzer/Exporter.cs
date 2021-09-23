@@ -43,7 +43,7 @@ namespace LogfileMetaAnalyser
                              
                 //try to preselect ProjectionActivity
                 ProjectionType ptype;
-                string uuid = datastore.ProjectionActivity.GetUuidByLoggerId(inputMsg.spid, out ptype);
+                string uuid = datastore.GetOrAdd<ProjectionActivity>().GetUuidByLoggerId(inputMsg.spid, out ptype);
                 if (!string.IsNullOrEmpty(uuid))
                 {
                     exportSettings.filterByActivity.isfilterEnabled_ProjectionActivity = true;
@@ -85,7 +85,7 @@ namespace LogfileMetaAnalyser
 
 
             //prepare the export
-            var files = datastore.GeneralLogData.LogfileInformation
+            var files = datastore.GetOrAdd<GeneralLogData>().LogfileInformation
                             .Where(f => frm.exportSettings.inputOutputOptions.includeFiles.Count == 0 ||
                                         frm.exportSettings.inputOutputOptions.includeFiles.Contains(f.Value.filename))
                             .OrderBy(f => f.Value.logfileTimerange_Start)
