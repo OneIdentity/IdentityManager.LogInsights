@@ -67,32 +67,35 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    # Create the release
-    - name: Create release
-      id: create_release
-      uses: actions/create-release@latest
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+    # # Create the release
+    # - name: Create release
+    #   id: create_release
+    #   uses: actions/create-release@latest
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+    #   with:
+    #     tag_name: ${{ github.ref }}
+    #     release_name: Release ${{ github.ref }}
+    #     body: ${{steps.build_changelog.outputs.changelog}}
+    #     draft: true
+    #     prerelease: true
+
+    # # And upload the ZIP into the release
+    # - name: Upload ZIP
+    #   uses: actions/upload-release-asset@v1
+    #   env:
+    #     GITHUB_TOKEN: ${{ github.token }}
+    #   with:
+    #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+    #     asset_path: ${{ env.Project_Dir }}/bin/Publish/x64/${{ env.Zip_Name }}.zip
+    #     asset_name: ${{ env.Zip_Name }}.zip
+    #     asset_content_type: application/zip
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        body: ${{steps.build_changelog.outputs.changelog}}
         draft: true
         prerelease: true
-
-    # - name: Upload build artifacts
-    #   uses: actions/upload-artifact@v2
-    #   with:
-    #     name: ${{ env.Zip_Name }}.zip
-    #     path: ${{ env.Project_Dir }}/bin/Publish/x64/${{ env.Zip_Name }}.zip
-
-    # And upload the ZIP into the release
-    - name: Upload ZIP
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ env.Project_Dir }}/bin/Publish/x64/${{ env.Zip_Name }}.zip
-        asset_name: ${{ env.Zip_Name }}.zip
-        asset_content_type: application/zip
+        body: ${{steps.build_changelog.outputs.changelog}}
+        files: ${{ env.Project_Dir }}/bin/Publish/x64/${{ env.Zip_Name }}.zip
