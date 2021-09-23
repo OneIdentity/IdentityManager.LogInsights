@@ -11,16 +11,91 @@ using LogfileMetaAnalyser.ExceptionHandling;
 
 namespace LogfileMetaAnalyser.Datastore
 {
-    class JobServiceActivitiesView : DatastoreBaseView, IDatastoreView
+    internal class JobServiceActivitiesView : DatastoreBaseView
     {
-        public JobServiceActivitiesView()
-        { }
+        public JobServiceActivitiesView(TreeView navigationTree, 
+            Control.ControlCollection upperPanelControl,
+            Control.ControlCollection lowerPanelControl, 
+            DataStore datastore, 
+            Exporter logfileFilterExporter) :
+            base(navigationTree, upperPanelControl, lowerPanelControl, datastore, logfileFilterExporter)
+        {
+        }
+
+
+        public override int SortOrder => 400;
+
+        public override IEnumerable<string> Build()
+        {
+            var result = new List<string>();
+            string key = BaseKey;
+            var dsref = Datastore.GetOrAdd<JobServiceActivity>();
+            int cnt;
+            int cntJsJobs = GetElementCount(key);
+            
+            TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, $"Jobservice activities ({cntJsJobs})", "activity", Constants.treenodeBackColorNormal);
+            result.Add(key);
+
+
+            key = $"{BaseKey}/byCompTask";
+            cnt = GetElementCount(key);
+            TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, $"by component and task ({cnt})", "component", Constants.treenodeBackColorNormal);
+            result.Add(key);
+
+            foreach (var task in dsref.DistinctTaskFull.OrderBy(t => t))
+            {
+                key = $"{BaseKey}/byCompTask/{task.Replace("/", "")}";
+                TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, $"{task} ({GetElementCount(key)})", "component", GetBgColor(!dsref.JobServiceJobs.Any(t => t.taskfull == task && !t.isSmoothExecuted)));
+                result.Add(key);
+            }
+
+
+            key = $"{BaseKey}/byQueue";
+            TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, $"by queue name ({GetElementCount(key)})", "component", Constants.treenodeBackColorNormal);
+            result.Add(key);
+
+            foreach (var queuename in dsref.DistinctQueueName.OrderBy(t => t))
+            {
+                string qn = (string.IsNullOrEmpty(queuename) ? "<empty>" : queuename);
+                key = $"{BaseKey}/byQueue/{qn.Replace("/", "")}";
+                TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, $"{qn} ({GetElementCount(key)})", "component", GetBgColor(!dsref.JobServiceJobs.Any(t => t.queuename == queuename && !t.isSmoothExecuted)));
+                result.Add(key);
+            }
+
+
+            if (cnt > 0)
+            {
+                key = $"{BaseKey}/byCompTaskPerf";
+                TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, $"run time performance ({cnt})", "component", Constants.treenodeBackColorNormal);
+                result.Add(key);
+            }
+
+
+            key = $"{BaseKey}/withRetries";
+            cnt = GetElementCount(key);
+            if (cnt > 0)
+            {                
+                TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, $"jobs with retries or errors/warnings ({cnt})", "warning", Constants.treenodeBackColorSuspicious);
+                result.Add(key);
+            }
+
+            
+            key = $"{BaseKey}/withMissingStartFinish";
+            cnt = GetElementCount(key);
+            if (cnt > 0)
+            {                
+                TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, $"jobs with missing start or finish message ({cnt})", "warning", Constants.treenodeBackColorSuspicious);
+                result.Add(key);
+            }
+
+            return result;
+        }
 
         public override string BaseKey => $"{base.BaseKey}/JobserviceAct";
 
-        public int GetElementCount(string key)
+        public override int GetElementCount(string key)
         {
-            var dsref = datastore.GetOrAdd<JobServiceActivity>();
+            var dsref = Datastore.GetOrAdd<JobServiceActivity>();
 
             if (key == BaseKey)
                 return dsref.JobServiceJobs.Count;
@@ -59,7 +134,7 @@ namespace LogfileMetaAnalyser.Datastore
             return 0;
         }
 
-        public void ExportView(string key)
+        public override void ExportView(string key)
         {
             if (!key.StartsWith(BaseKey))
                 return;
@@ -82,16 +157,16 @@ namespace LogfileMetaAnalyser.Datastore
 
             if (uc.HasData())
             {
-                upperPanelControl.Add(uc);
-                lowerPanelControl.Add(contextLinesUc);
+                UpperPanelControl.Add(uc);
+                LowerPanelControl.Add(contextLinesUc);
             }
         }
 
         private Tuple<MultiListViewUC, ContextLinesUC> ListJsJobsbyTable(string key)
         {
             MultiListViewUC uc = new MultiListViewUC();
-            ContextLinesUC contextLinesUc = new ContextLinesUC(logfileFilterExporter);
-            var dsref = datastore.GetOrAdd<JobServiceActivity>();
+            ContextLinesUC contextLinesUc = new ContextLinesUC(LogfileFilterExporter);
+            var dsref = Datastore.GetOrAdd<JobServiceActivity>();
 
 
             string caption = "Job service jobs";
@@ -206,8 +281,8 @@ namespace LogfileMetaAnalyser.Datastore
         private Tuple<MultiListViewUC, ContextLinesUC> ListJsJobsPerformance(string key)
         {
             MultiListViewUC uc = new MultiListViewUC();
-            ContextLinesUC contextLinesUc = new ContextLinesUC(logfileFilterExporter);
-            var dsref = datastore.GetOrAdd<JobServiceActivity>();
+            ContextLinesUC contextLinesUc = new ContextLinesUC(LogfileFilterExporter);
+            var dsref = Datastore.GetOrAdd<JobServiceActivity>();
 
             uc.SetupLayout(1);
             uc[0].SetupCaption("Job Service job run time performance");

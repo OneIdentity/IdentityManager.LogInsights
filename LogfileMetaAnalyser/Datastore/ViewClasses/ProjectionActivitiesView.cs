@@ -10,15 +10,77 @@ using LogfileMetaAnalyser.ExceptionHandling;
 
 namespace LogfileMetaAnalyser.Datastore
 {
-    class ProjectionActivitiesView : DatastoreBaseView, IDatastoreView
+    internal class ProjectionActivitiesView : DatastoreBaseView
     {
-        public ProjectionActivitiesView() { }
+        public ProjectionActivitiesView(TreeView navigationTree, 
+            Control.ControlCollection upperPanelControl,
+            Control.ControlCollection lowerPanelControl, 
+            DataStore datastore, 
+            Exporter logfileFilterExporter) :
+            base(navigationTree, upperPanelControl, lowerPanelControl, datastore, logfileFilterExporter)
+        {
+        }
+
+        public override int SortOrder => 500;
+
+        public override IEnumerable<string> Build()
+        {
+            var result = new List<string>();
+            string key = BaseKey;
+            var dsref = Datastore.GetOrAdd<ProjectionActivity>();
+
+            TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, $"Projection activities ({GetElementCount(key)})", "sync", Constants.treenodeBackColorNormal);
+            result.Add(key);
+
+
+            //by projection type (adHoc, ImportSync, Export Sync, ...)
+            key = $"{BaseKey}/byPType";
+            TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, $"by projection activity type ({GetElementCount(key)})", "sync", Constants.treenodeBackColorNormal);
+            result.Add(key);
+
+            foreach (var ptype in dsref.Projections.Select(t => t.projectionType).Distinct().OrderBy(t => t))
+            {
+                key = $"{BaseKey}/byPType/{ptype.ToString()}";
+                TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, $"{ptype.ToString()} ({GetElementCount(key)})", "sync", Constants.treenodeBackColorNormal);
+                result.Add(key);
+
+                foreach (var proj in dsref.Projections.Where(t => t.projectionType == ptype).OrderBy(t => t.dtTimestampStart))
+                {
+                    key = $"{BaseKey}/byPType/{ptype.ToString()}/#{proj.uuid}";
+                    TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, proj.GetLabel(), "job", Constants.treenodeBackColorNormal);
+                    result.Add(key);
+                }
+            }
+
+
+            //by target system type (Active Directory, SAP, CSV, Native Database, ...)
+            key = $"{BaseKey}/byTsType";
+            TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, $"by projection targetsystem type ({GetElementCount(key)})", "sync", Constants.treenodeBackColorNormal);
+            result.Add(key);
+
+
+            foreach (var tstype in dsref.Projections.Select(t => t.conn_TargetSystem).Distinct().OrderBy(t => t))
+            {
+                key = $"{BaseKey}/byTsType/{tstype.Replace("/","")}";
+                TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, $"{tstype} ({GetElementCount(key)})", "sync", Constants.treenodeBackColorNormal);
+                result.Add(key);
+
+                foreach (var proj in dsref.Projections.Where(t => t.conn_TargetSystem == tstype).OrderBy(t => t.dtTimestampStart))
+                {
+                    key = $"{BaseKey}/byTsType/{tstype.Replace("/", "")}/#{proj.uuid}";
+                    TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, proj.GetLabel(), "job", Constants.treenodeBackColorNormal);
+                    result.Add(key);
+                }
+            }
+
+            return result;
+        }
 
         public override string BaseKey => $"{base.BaseKey}/ProjectionAct";
 
-        public int GetElementCount(string key)
+        public override int GetElementCount(string key)
         {
-            var dsref = datastore.GetOrAdd<ProjectionActivity>();
+            var dsref = Datastore.GetOrAdd<ProjectionActivity>();
 
             if (key == BaseKey || key == $"{BaseKey}/byPType" || key == $"{BaseKey}/byTsType") 
                 return dsref.Projections.Count;
@@ -50,7 +112,7 @@ namespace LogfileMetaAnalyser.Datastore
             return 0;
         }
 
-        public void ExportView(string key)
+        public override void ExportView(string key)
         {
             if (!key.StartsWith(BaseKey))
                 return;
@@ -89,8 +151,8 @@ namespace LogfileMetaAnalyser.Datastore
         private void ExportProjectionInformation(string uuidFilter, string PTypeFilter, string TsTypeFilter)
         {
             MultiListViewUC uc = new MultiListViewUC();
-            ContextLinesUC contextLinesUc = new ContextLinesUC(logfileFilterExporter);
-            var dsref = datastore.GetOrAdd<ProjectionActivity>();
+            ContextLinesUC contextLinesUc = new ContextLinesUC(LogfileFilterExporter);
+            var dsref = Datastore.GetOrAdd<ProjectionActivity>();
 
             var projListScope = dsref.Projections.Where(p => (p.uuid == uuidFilter || uuidFilter == "*") &&
                                                   (p.projectionType.ToString() == PTypeFilter || PTypeFilter == "*") &&
@@ -100,8 +162,8 @@ namespace LogfileMetaAnalyser.Datastore
 #warning RFE#1.c: todo Projection.Maintenance
             //#6: Maintenance
 
-            var projectionActivity = datastore.GetOrAdd<ProjectionActivity>();
-            
+            var projectionActivity = Datastore.GetOrAdd<ProjectionActivity>();
+
             //layout definition
             //=============================
             //the journal is very vague whether it was recorded or not and even when, e.g. failures are not always included ;D
@@ -585,8 +647,8 @@ namespace LogfileMetaAnalyser.Datastore
             if (uc.HasData())
             {
                 uc.Resume();
-                upperPanelControl.Add(uc);
-                lowerPanelControl.Add(contextLinesUc);
+                UpperPanelControl.Add(uc);
+                LowerPanelControl.Add(contextLinesUc);
             }
         }
 

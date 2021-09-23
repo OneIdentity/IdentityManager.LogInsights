@@ -228,7 +228,7 @@ namespace LogfileMetaAnalyser
             await _analyzerCore.AnalyzeStructureAsync().ConfigureAwait(true);
 
             RefreshStatusLabel(3);
-            bool rt = _datastoreViewer.ExportAsNavigationTreeView(ref treeViewLeft);
+            _datastoreViewer.ExportAsNavigationTreeView(treeViewLeft);
         }
 
         private void debugDatastoreToolStripMenuItem_Click(object sender, EventArgs e)

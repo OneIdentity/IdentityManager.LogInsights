@@ -11,28 +11,63 @@ using LogfileMetaAnalyser.ExceptionHandling;
 
 namespace LogfileMetaAnalyser.Datastore
 {
-    class SqlInformationView : DatastoreBaseView, IDatastoreView
+    internal class SqlInformationView : DatastoreBaseView
     {
-        public SqlInformationView( ) { }
+        public SqlInformationView(TreeView navigationTree,
+            Control.ControlCollection upperPanelControl,
+            Control.ControlCollection lowerPanelControl,
+            DataStore datastore,
+            Exporter logfileFilterExporter) :
+            base(navigationTree, upperPanelControl, lowerPanelControl, datastore, logfileFilterExporter)
+        {
+        }
+
+        public override int SortOrder => 300;
+
+        public override IEnumerable<string> Build()
+        {
+            string key = BaseKey;
+            var dsref = Datastore.GetOrAdd<SqlInformation>();
+            var result = new List<string>();
+
+            TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, "General SQL session information", "information", Constants.treenodeBackColorNormal);
+            result.Add(key);
+
+            if (dsref.SqlSessions.Count > 0)
+            {
+                key = $"{BaseKey}/sessions";
+                TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, $"General SQL session information ({GetElementCount(key)})", "information", Constants.treenodeBackColorNormal);
+                result.Add(key);
+
+                foreach (var session in dsref.SqlSessions.OrderBy(t => t.loggerSourceId))
+                {
+                    key = $"{BaseKey}/sessions/{session.uuid}";
+                    TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, $"Sql session {session.ToString()}", (session.isSuspicious ? "warning" : "information"), GetBgColor(!session.isSuspicious));
+                    result.Add(key);
+                }
+            }
+
+            return result;
+        }
 
         public override string BaseKey => $"{base.BaseKey}/genSqlInfo";
 
-        public int GetElementCount(string key)
+        public override int GetElementCount(string key)
         {
             if (key == $"{BaseKey}/sessions")
-                return datastore.GetOrAdd<SqlInformation>().numberOfSqlSessions;
+                return Datastore.GetOrAdd<SqlInformation>().numberOfSqlSessions;
 
             return 0;
         }
 
-        public void ExportView(string key)
+        public override void ExportView(string key)
         {
             if (!key.StartsWith(BaseKey))
                 return;
 
             MultiListViewUC uc = new MultiListViewUC();
-            ContextLinesUC contextLinesUc = new ContextLinesUC(logfileFilterExporter);
-            var dsref = datastore.GetOrAdd<SqlInformation>();
+            ContextLinesUC contextLinesUc = new ContextLinesUC(LogfileFilterExporter);
+            var dsref = Datastore.GetOrAdd<SqlInformation>();
 
             if (key == BaseKey)
             {
@@ -191,12 +226,11 @@ namespace LogfileMetaAnalyser.Datastore
             if (uc != null && uc.HasData())
             {
                 uc.Resume();
-                upperPanelControl.Add(uc);
+                UpperPanelControl.Add(uc);
             }
 
             if (contextLinesUc != null)
-                lowerPanelControl.Add(contextLinesUc);
+                LowerPanelControl.Add(contextLinesUc);
         }
-
     }
 }

@@ -1,27 +1,40 @@
-﻿using System; 
-using System.Linq;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 using System.Drawing;
-
 using LogfileMetaAnalyser.Helpers;
-using LogfileMetaAnalyser.Controls;
+using System.Collections.Generic;
 
 namespace LogfileMetaAnalyser.Datastore
 {
-    class TopNodeViewer : DatastoreBaseView, IDatastoreView
+    internal class TopNodeViewer : DatastoreBaseView
     {
-        public TopNodeViewer()
-        { }
+        public TopNodeViewer(TreeView navigationTree, 
+            Control.ControlCollection upperPanelControl,
+            Control.ControlCollection lowerPanelControl, 
+            DataStore datastore, 
+            Exporter logfileFilterExporter) :
+            base(navigationTree, upperPanelControl, lowerPanelControl, datastore, logfileFilterExporter)
+        {
+        }
 
-        public int GetElementCount(string key)
+
+        public override int GetElementCount(string key)
         {
             return -1;
         }
 
-        public void ExportView(string key)
+        public override IEnumerable<string> Build()
+        {
+            TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, BaseKey, "Analyze report", "report", Color.Transparent);
+            return new[] { BaseKey };
+        }
+
+        public override int SortOrder => 0;
+
+        public override void ExportView(string key)
         {
             //nothing here yet
             return;
         }
+
     }
 }

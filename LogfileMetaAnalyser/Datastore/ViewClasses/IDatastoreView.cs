@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 
 namespace LogfileMetaAnalyser.Datastore
@@ -6,14 +7,18 @@ namespace LogfileMetaAnalyser.Datastore
     public interface IDatastoreView
     {
         string BaseKey { get; }
-        DataStore datastore { set; }
-        Exporter logfileFilterExporter { set; }
-
-        Control.ControlCollection upperPanelControl { set; }
-        Control.ControlCollection lowerPanelControl { set; }
+        DataStore Datastore { get; }
+        Exporter LogfileFilterExporter { get; }
+        Control.ControlCollection UpperPanelControl { get; }
+        Control.ControlCollection LowerPanelControl { get; }
+        TreeView NavigationTree { get; }
 
         void ExportView(string key);
 
         int GetElementCount(string key);
+
+        int SortOrder { get; }
+
+        IEnumerable<string> Build();
     }
 }
