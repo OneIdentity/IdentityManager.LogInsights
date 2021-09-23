@@ -82,7 +82,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(334, 25);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Log File Meta Analyze Tool";
+            this.label1.Text = "One Identity Manager Log Insights";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // labelHelp
