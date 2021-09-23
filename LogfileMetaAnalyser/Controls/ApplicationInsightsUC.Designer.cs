@@ -37,7 +37,15 @@ namespace LogfileMetaAnalyser.Controls
             this.panelTop = new System.Windows.Forms.Panel();
             this.lblHeader = new System.Windows.Forms.Label();
             this.textQuery = new System.Windows.Forms.TextBox();
+            this.cmbTimeSpan = new System.Windows.Forms.ComboBox();
+            this.labelTimeSpan = new System.Windows.Forms.Label();
+            this.panelCustom = new System.Windows.Forms.Panel();
+            this.dtTo = new System.Windows.Forms.DateTimePicker();
+            this.labelTo = new System.Windows.Forms.Label();
+            this.labelFrom = new System.Windows.Forms.Label();
+            this.dtFrom = new System.Windows.Forms.DateTimePicker();
             this.panelTop.SuspendLayout();
+            this.panelCustom.SuspendLayout();
             this.SuspendLayout();
             // 
             // lblAplicationID
@@ -117,21 +125,108 @@ namespace LogfileMetaAnalyser.Controls
             // 
             this.textQuery.AcceptsReturn = true;
             this.textQuery.AcceptsTab = true;
-            this.textQuery.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.textQuery.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textQuery.Location = new System.Drawing.Point(8, 176);
             this.textQuery.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.textQuery.Multiline = true;
             this.textQuery.Name = "textQuery";
-            this.textQuery.Size = new System.Drawing.Size(480, 101);
+            this.textQuery.Size = new System.Drawing.Size(480, 102);
             this.textQuery.TabIndex = 6;
+            this.textQuery.Text = "traces\r\n| union exceptions\r\n| where customDimensions.appName == \"JobService\"\r\n| s" +
+    "ort by timestamp\r\n| take 10000";
             this.textQuery.TextChanged += new System.EventHandler(this.text_TextChanged);
+            // 
+            // cmbTimeSpan
+            // 
+            this.cmbTimeSpan.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbTimeSpan.FormattingEnabled = true;
+            this.cmbTimeSpan.Items.AddRange(new object[] {
+            "All",
+            "Last 30 minutes",
+            "Last hour",
+            "Last 4 hours",
+            "Last 12 hours",
+            "Last 24 hours",
+            "Last 2 days",
+            "Last 7 days",
+            "Custom"});
+            this.cmbTimeSpan.Location = new System.Drawing.Point(8, 313);
+            this.cmbTimeSpan.Name = "cmbTimeSpan";
+            this.cmbTimeSpan.Size = new System.Drawing.Size(171, 23);
+            this.cmbTimeSpan.TabIndex = 9;
+            this.cmbTimeSpan.SelectedIndexChanged += new System.EventHandler(this.cmbTimeSpan_SelectedIndexChanged);
+            // 
+            // labelTimeSpan
+            // 
+            this.labelTimeSpan.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelTimeSpan.Location = new System.Drawing.Point(8, 293);
+            this.labelTimeSpan.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelTimeSpan.Name = "labelTimeSpan";
+            this.labelTimeSpan.Size = new System.Drawing.Size(171, 17);
+            this.labelTimeSpan.TabIndex = 10;
+            this.labelTimeSpan.Text = "Time range";
+            // 
+            // panelCustom
+            // 
+            this.panelCustom.Controls.Add(this.dtTo);
+            this.panelCustom.Controls.Add(this.labelTo);
+            this.panelCustom.Controls.Add(this.labelFrom);
+            this.panelCustom.Controls.Add(this.dtFrom);
+            this.panelCustom.Location = new System.Drawing.Point(185, 294);
+            this.panelCustom.Name = "panelCustom";
+            this.panelCustom.Size = new System.Drawing.Size(302, 48);
+            this.panelCustom.TabIndex = 11;
+            this.panelCustom.Visible = false;
+            // 
+            // dtTo
+            // 
+            this.dtTo.CustomFormat = "yyyy-MM-dd HH:mm:ss";
+            this.dtTo.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
+            this.dtTo.Location = new System.Drawing.Point(149, 19);
+            this.dtTo.Name = "dtTo";
+            this.dtTo.Size = new System.Drawing.Size(150, 23);
+            this.dtTo.TabIndex = 13;
+            // 
+            // labelTo
+            // 
+            this.labelTo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelTo.Location = new System.Drawing.Point(149, -1);
+            this.labelTo.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelTo.Name = "labelTo";
+            this.labelTo.Size = new System.Drawing.Size(154, 17);
+            this.labelTo.TabIndex = 12;
+            this.labelTo.Text = "To (UTC)";
+            // 
+            // labelFrom
+            // 
+            this.labelFrom.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelFrom.Location = new System.Drawing.Point(3, 0);
+            this.labelFrom.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.labelFrom.Name = "labelFrom";
+            this.labelFrom.Size = new System.Drawing.Size(154, 17);
+            this.labelFrom.TabIndex = 11;
+            this.labelFrom.Text = "From (UTC)";
+            // 
+            // dtFrom
+            // 
+            this.dtFrom.CustomFormat = "yyyy-MM-dd HH:mm:ss";
+            this.dtFrom.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
+            this.dtFrom.Location = new System.Drawing.Point(3, 19);
+            this.dtFrom.Name = "dtFrom";
+            this.dtFrom.Size = new System.Drawing.Size(140, 23);
+            this.dtFrom.TabIndex = 0;
             // 
             // ApplicationInsightsUC
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.panelCustom);
+            this.Controls.Add(this.labelTimeSpan);
+            this.Controls.Add(this.cmbTimeSpan);
             this.Controls.Add(this.textQuery);
             this.Controls.Add(this.labelQueury);
             this.Controls.Add(this.panelTop);
@@ -141,9 +236,10 @@ namespace LogfileMetaAnalyser.Controls
             this.Controls.Add(this.lblAplicationID);
             this.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.Name = "ApplicationInsightsUC";
-            this.Size = new System.Drawing.Size(496, 292);
+            this.Size = new System.Drawing.Size(496, 345);
             this.panelTop.ResumeLayout(false);
             this.panelTop.PerformLayout();
+            this.panelCustom.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -159,5 +255,12 @@ namespace LogfileMetaAnalyser.Controls
         private System.Windows.Forms.Panel panelTop;
         private System.Windows.Forms.Label lblHeader;
         private System.Windows.Forms.TextBox textQuery;
+        private System.Windows.Forms.ComboBox cmbTimeSpan;
+        private System.Windows.Forms.Label labelTimeSpan;
+        private System.Windows.Forms.Panel panelCustom;
+        private System.Windows.Forms.DateTimePicker dtTo;
+        private System.Windows.Forms.Label labelTo;
+        private System.Windows.Forms.Label labelFrom;
+        private System.Windows.Forms.DateTimePicker dtFrom;
     }
 }

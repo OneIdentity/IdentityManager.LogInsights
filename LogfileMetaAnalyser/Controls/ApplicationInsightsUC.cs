@@ -1,7 +1,7 @@
 ﻿using System;
 
 using LogfileMetaAnalyser.LogReader;
-
+using System.Globalization;
 using Windows.Security.Credentials;
 
 namespace LogfileMetaAnalyser.Controls
@@ -26,12 +26,22 @@ namespace LogfileMetaAnalyser.Controls
                     textApiKey.Text = entry.Password;
                 }
 
-                CheckValid();
+                cmbTimeSpan.SelectedIndex = 0;
+
+                dtTo.Value = DateTime.UtcNow;
+                dtFrom.Value = dtTo.Value.AddHours(-1);
             }
             catch
             {
                 // Ignore exceptions
             }
+        }
+
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+
+            CheckValid();
         }
 
         protected override string GetConnectionString()
@@ -43,7 +53,49 @@ namespace LogfileMetaAnalyser.Controls
 					Query = textQuery.Text
 				};
 
+            if (cmbTimeSpan.SelectedIndex > 0)
+            {
+                csb.TimeSpan = GetTimeSpan();
+            }
+
             return csb.ConnectionString;
+        }
+
+        private string GetTimeSpan()
+        {
+            DateTime dtFrom;
+            DateTime dtTo = DateTime.UtcNow;
+
+            /*
+            "All",
+            "Last 30 minutes",
+            "Last hour",
+            "Last 4 hours",
+            "Last 12 hours",
+            "Last 24 hours",
+            "Last 2 days",
+            "Last 7 days",
+            "Custom"});
+             */
+
+            switch (cmbTimeSpan.SelectedIndex)
+            {
+                case 1: dtFrom = dtTo.AddMinutes(-30); break;
+                case 2: dtFrom = dtTo.AddHours(-1); break;
+                case 3: dtFrom = dtTo.AddHours(-4); break;
+                case 4: dtFrom = dtTo.AddHours(-12); break;
+                case 5: dtFrom = dtTo.AddHours(-24); break;
+                case 6: dtFrom = dtTo.AddDays(-2); break;
+                case 7: dtFrom = dtTo.AddDays(-7); break;
+                case 8:
+                    dtFrom = this.dtFrom.Value;
+                    dtTo = this.dtTo.Value;
+                    break;
+
+                default: throw new Exception("Unknown time selection");
+            }
+
+            return dtFrom.ToString("O", CultureInfo.InvariantCulture) + "/" + dtTo.ToString("O", CultureInfo.InvariantCulture);
         }
 
         public override ILogReader ConnectToReader()
@@ -63,6 +115,8 @@ namespace LogfileMetaAnalyser.Controls
             bValid &= !String.IsNullOrEmpty(textAppID.Text);
 
             bValid &= !String.IsNullOrEmpty(textApiKey.Text);
+
+            bValid &= !String.IsNullOrEmpty(textQuery.Text);
 
             return bValid;
         }
@@ -99,6 +153,11 @@ namespace LogfileMetaAnalyser.Controls
             {
                 return null;
             }
+        }
+
+        private void cmbTimeSpan_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            panelCustom.Visible = cmbTimeSpan.SelectedIndex == 8;
         }
     }
 }
