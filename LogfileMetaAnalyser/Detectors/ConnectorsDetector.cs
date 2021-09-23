@@ -273,7 +273,7 @@ namespace LogfileMetaAnalyser.Detectors
             if (projections.Count == 1)
             {
                 foreach (var conn in systemConnectorsAndConnections.Values)
-                    conn.belongsToProjectorId.Add(projections.First().loggerSourceId);
+                    conn.belongsToProjectorId.Add(projections[0].loggerSourceId);
 
                 logger.Trace("TryMatchConnectorIDToProjectorID: if we only found one projection, all log entries must belong to it");
                 return;
