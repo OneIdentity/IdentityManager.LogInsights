@@ -7,7 +7,7 @@
 
 _Provide insights over the contents of One Identity Manager log files or log entries in Azure Application Insights._
 
-![LogInsights screen shot](LogfileMetaAnalyser.png)
+![LogInsights screen shot](LogInsights.png)
 
 
 <!-- TABLE OF CONTENTS -->
