@@ -76,26 +76,28 @@
             // 
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.label1.Location = new System.Drawing.Point(4, 45);
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.label1.Location = new System.Drawing.Point(4, 26);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(334, 25);
+            this.label1.Size = new System.Drawing.Size(334, 62);
             this.label1.TabIndex = 0;
-            this.label1.Text = "One Identity Manager Log Insights";
+            this.label1.Text = "One Identity Manager\r\nLog Insights";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // labelHelp
             // 
-            this.labelHelp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelHelp.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.labelHelp.AutoSize = true;
             this.labelHelp.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.labelHelp.LinkArea = new System.Windows.Forms.LinkArea(83, 6);
             this.labelHelp.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(5)))), ((int)(((byte)(170)))), ((int)(((byte)(215)))));
-            this.labelHelp.Location = new System.Drawing.Point(4, 205);
+            this.labelHelp.Location = new System.Drawing.Point(4, 115);
             this.labelHelp.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelHelp.Name = "labelHelp";
-            this.labelHelp.Size = new System.Drawing.Size(334, 186);
+            this.labelHelp.Padding = new System.Windows.Forms.Padding(0, 40, 0, 0);
+            this.labelHelp.Size = new System.Drawing.Size(334, 226);
             this.labelHelp.TabIndex = 1;
             this.labelHelp.TabStop = true;
             this.labelHelp.Text = resources.GetString("labelHelp.Text");
