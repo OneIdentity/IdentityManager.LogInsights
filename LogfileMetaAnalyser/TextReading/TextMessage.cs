@@ -92,7 +92,13 @@ namespace LogfileMetaAnalyser
 					
 					string idspace = (!string.IsNullOrEmpty(id)) ? " " : "";
 
-                    return $"{messageTimestamp:yyyy-MM-dd HH:mm:ss.ffff} {loggerLevel} ({loggerSource ?? ""}{idspace}{id}): {payloadMessage ?? ""}";                
+                    //sadly the logfiles do not hold milliseconds, but the App Insight Provider supports that
+                    //we cannot differentiate between these two types, so lets cut them off in case of zero
+                    string timestampFormat = "yyyy-MM-dd HH:mm:ss.ffff";
+                    if (messageTimestamp.Millisecond == 0)
+                        timestampFormat = "yyyy-MM-dd HH:mm:ss";
+
+                    return $"{messageTimestamp.ToString(timestampFormat)} {loggerLevel} ({loggerSource ?? ""}{idspace}{id}): {payloadMessage ?? ""}";                
                 });
 
                 return _MessageText;
