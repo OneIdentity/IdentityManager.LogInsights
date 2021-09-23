@@ -55,7 +55,7 @@ namespace LogfileMetaAnalyser.Controls
 			{
 				rtbError.Rtf = ToRichText(_Exception, chbExtended.Checked ? Options.All : Options.Default);
 			}
-            catch (Exception exception)
+            catch
             {
                 // ignored
             }
