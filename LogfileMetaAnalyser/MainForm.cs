@@ -218,7 +218,7 @@ namespace LogfileMetaAnalyser
             }
         }
 
-     
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code", "CAC002:ConfigureAwaitChecker", Justification = "<Pending>")]
         private async void StartAnalysis()
         {
             if (_activeReader == null)
@@ -237,7 +237,7 @@ namespace LogfileMetaAnalyser
             {
                 using (var fm = new TextBoxFrm())
                 {
-                    fm.SetupLabel($"Data Store JSON export");
+                    fm.SetupLabel("Data Store JSON export");
                     fm.SetupData(_datastoreViewer.ExportAsJson());
 
                     fm.ShowDialog(this);
@@ -249,6 +249,7 @@ namespace LogfileMetaAnalyser
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code", "CAC002:ConfigureAwaitChecker", Justification = "<Pending>")]
         private async void filterLogfilesToScopeTheImportantStuffToolStripMenuItem_Click(object sender, EventArgs e)
         {
             try
