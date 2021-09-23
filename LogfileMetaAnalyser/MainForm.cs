@@ -47,7 +47,11 @@ namespace LogfileMetaAnalyser
         {             
             InitializeComponent();
 
-            splitContainerRightIn.Panel1.Controls.Add(new LogfileMetaAnalyser.Controls.WelcomeUC());
+            var cWelcome = new LogfileMetaAnalyser.Controls.WelcomeUC();
+
+            cWelcome.StartAnalysis += loadLogsToolStripMenuItem_Click;
+
+            splitContainerRightIn.Panel1.Controls.Add(cWelcome);
 
 
             //init controls
@@ -112,6 +116,11 @@ namespace LogfileMetaAnalyser
             });
 
             HandleCmdLineParams();
+        }
+
+        private void CWelcome_StartAnalysis(object sender, EventArgs e)
+        {
+            
         }
 
         private void HandleCmdLineParams()
