@@ -34,7 +34,7 @@ namespace LogfileMetaAnalyser
 
         private bool _CheckForClose()
         {
-            return _activeReader == null || MessageBox.Show("Do you want to start a new analysis?", "Discard current report?", MessageBoxButtons.YesNo) == DialogResult.Yes;
+            return _activeReader == null || MessageBox.Show(this, "Do you want to start a new analysis?", "Discard current report?", MessageBoxButtons.YesNo) == DialogResult.Yes;
 
         }
 
