@@ -55,17 +55,19 @@ namespace LogfileMetaAnalyser.Controls
                     if (SelectedItem == null || SelectedItem.data == null)
                         return;
 
+                    /*
                     //jump to the end first 
                     if (rtbLog.Lines.Length > 5)
                     {
                         rtbLog.SelectionStart = rtbLog.Text.Length;
                         // scroll it automatically
-                        rtbLog.ScrollToCaret();
+                        rtbLog.ScrollToLine();
                     }
+                    */
 
                     //now jump to the correct pos
-                    //int jumppos = Math.Max(1, SelectedItem.data.fileposRelativeInView - 3);
-                    //rtbLog.SelectedView.GoToLine(jumppos);
+                    int jumppos = Math.Max(1, SelectedItem.data.fileposRelativeInView - 3);
+                    rtbLog.ScrollToLine(jumppos);
                 }
                 catch (Exception e)
                 {
@@ -260,7 +262,7 @@ namespace LogfileMetaAnalyser.Controls
 
             try
             {
-                BeginUpdate();
+                rtbLog.BeginUpdate();
 
                 rtbLog.SuspendLayout();
 
@@ -337,17 +339,23 @@ namespace LogfileMetaAnalyser.Controls
                 
                 //highlighting
                 foreach (var tp in highlightEditorPositions)
-                    for (int linePos = tp.Item1; linePos < Math.Min(rtbLog.Lines.Length, tp.Item2); linePos++)
-                        SetLineColor( linePos, Constants.contextLinesUcHighlightColor);
+                {
+                    int iForm = tp.Item1;
+                    int iTo = Math.Min(rtbLog.Lines.Length, tp.Item2);
 
-                
+                    SetLineColor( new Range(iForm, iTo), Constants.contextLinesUcHighlightColor);
+                }
+
+
                 //set scrollbar position (go to line)
                 if (highlightEditorPositions.Count > 0)
                 {
                     int jumpToEditorLine = jumpToLastMarker ? highlightEditorPositions.Last().Item1 - 1 : highlightEditorPositions[0].Item1 - 1;
 
-                    ScrollToLine(jumpToEditorLine);
+                    rtbLog.ScrollToLine(jumpToEditorLine);
                 }
+                else
+                    rtbLog.ScrollToLine(0);
                 
 
                 //save the displayed msg for later use
@@ -358,7 +366,7 @@ namespace LogfileMetaAnalyser.Controls
                 //rtbLog.ResumePainting();
                 rtbLog.ResumeLayout();
 
-                EndUpdate();
+                rtbLog.EndUpdate();
 
                 rtbLog.Invalidate();
             }
@@ -389,103 +397,6 @@ namespace LogfileMetaAnalyser.Controls
 
 
             return filectxLst;
-        }
-
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool GetScrollInfo(IntPtr hwnd, int fnBar, ref SCROLLINFO lpsi);
-
-        [DllImport("user32.dll")]
-        static extern int SetScrollInfo(IntPtr hwnd, int fnBar, [In] ref SCROLLINFO lpsi, bool fRedraw);
-
-        [DllImport("User32.dll", CharSet = CharSet.Auto, EntryPoint = "SendMessage")]
-        static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
-
-        struct SCROLLINFO
-        {
-            public uint cbSize;
-            public uint fMask;
-            public int nMin;
-            public int nMax;
-            public uint nPage;
-            public int nPos;
-            public int nTrackPos;
-        }
-
-        enum ScrollBarDirection
-        {
-            SB_HORZ = 0,
-            SB_VERT = 1,
-            SB_CTL = 2,
-            SB_BOTH = 3
-        }
-
-        enum ScrollInfoMask
-        {
-            SIF_RANGE = 0x1,
-            SIF_PAGE = 0x2,
-            SIF_POS = 0x4,
-            SIF_DISABLENOSCROLL = 0x8,
-            SIF_TRACKPOS = 0x10,
-            SIF_ALL = SIF_RANGE + SIF_PAGE + SIF_POS + SIF_TRACKPOS
-        }
-
-        const int WM_VSCROLL = 277;
-        const int SB_LINEUP = 0;
-        const int SB_LINEDOWN = 1;
-        const int SB_THUMBPOSITION = 4;
-        const int SB_THUMBTRACK = 5;
-        const int SB_TOP = 6;
-        const int SB_BOTTOM = 7;
-        const int SB_ENDSCROLL = 8;
-
-        private const int WM_SETREDRAW = 0x0b;
-
-
-        private void ScrollToLine(int iLine)
-        {
-            if (iLine < 0)
-                return;
-
-            int iChar = rtbLog.GetFirstCharIndexFromLine(iLine);
-
-            Point cPos = rtbLog.GetPositionFromCharIndex(iChar);
-
-            IntPtr handle = rtbLog.Handle;
-
-                // Get current scroller position
-
-                SCROLLINFO si = new SCROLLINFO();
-                si.cbSize = (uint)Marshal.SizeOf(si);
-                si.fMask = (uint)ScrollInfoMask.SIF_ALL;
-                GetScrollInfo(handle, (int)ScrollBarDirection.SB_VERT, ref si);
-
-                // Increase position by pixles
-                si.nPos += cPos.Y;
-
-                // Reposition scroller
-                SetScrollInfo(handle, (int)ScrollBarDirection.SB_VERT, ref si, true);
-
-                // Send a WM_VSCROLL scroll message using SB_THUMBTRACK as wParam
-                // SB_THUMBTRACK: low-order word of wParam, si.nPos high-order word of  wParam
-
-                IntPtr ptrWparam = new IntPtr(SB_THUMBTRACK + 0x10000 * si.nPos);
-                IntPtr ptrLparam = new IntPtr(0);
-                SendMessage(handle, WM_VSCROLL, ptrWparam, ptrLparam);
-
-                //SendMessage(rtbLog.Handle, WM_VSCROLL, (IntPtr)SB_PAGEBOTTOM, IntPtr.Zero);
-
-            rtbLog.Select( iChar, 0);
-        }
-
-        public void BeginUpdate()
-        {
-            SendMessage(rtbLog.Handle, WM_SETREDRAW, (IntPtr)0, IntPtr.Zero);
-        }
-
-        public void EndUpdate()
-        {
-            SendMessage(rtbLog.Handle, WM_SETREDRAW, (IntPtr)1, IntPtr.Zero);
         }
 
         
@@ -522,6 +433,17 @@ namespace LogfileMetaAnalyser.Controls
             string s = rtbLog.Lines[iLine];
 
             rtbLog.Select(firstCharIndex, s.Length);
+            rtbLog.SelectionBackColor = c;
+        }
+
+        public void SetLineColor(Range rLines, Color c)
+        {
+            int firstRowPos = rtbLog.GetFirstCharIndexFromLine(rLines.Start.Value);
+            int lastRowPos = rtbLog.GetFirstCharIndexFromLine(rLines.End.Value);
+
+            string lastRow = rtbLog.Lines[rLines.End.Value];
+
+            rtbLog.Select(firstRowPos, lastRowPos + lastRow.Length);
             rtbLog.SelectionBackColor = c;
         }
     }
