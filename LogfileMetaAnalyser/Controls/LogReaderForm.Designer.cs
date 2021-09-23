@@ -51,7 +51,7 @@ namespace LogfileMetaAnalyser.Controls
             this.panelButtom.Controls.Add(this.btnCancel);
             this.panelButtom.Controls.Add(this.btnOk);
             this.panelButtom.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelButtom.Location = new System.Drawing.Point(0, 326);
+            this.panelButtom.Location = new System.Drawing.Point(0, 363);
             this.panelButtom.Name = "panelButtom";
             this.panelButtom.Size = new System.Drawing.Size(758, 53);
             this.panelButtom.TabIndex = 0;
@@ -96,7 +96,7 @@ namespace LogfileMetaAnalyser.Controls
             this.ctlAppInsights.Location = new System.Drawing.Point(3, 3);
             this.ctlAppInsights.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
             this.ctlAppInsights.Name = "ctlAppInsights";
-            this.ctlAppInsights.Size = new System.Drawing.Size(486, 312);
+            this.ctlAppInsights.Size = new System.Drawing.Size(645, 349);
             this.ctlAppInsights.TabIndex = 0;
             this.ctlAppInsights.IsValidChanged += new System.EventHandler(this.SelectedProvider_IsValidChanged);
             // 
@@ -111,7 +111,7 @@ namespace LogfileMetaAnalyser.Controls
             this.tabControl.Multiline = true;
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(758, 326);
+            this.tabControl.Size = new System.Drawing.Size(758, 363);
             this.tabControl.TabIndex = 4;
             this.tabControl.SelectedIndexChanged += new System.EventHandler(this.tabControl_SelectedIndexChanged);
             // 
@@ -134,7 +134,7 @@ namespace LogfileMetaAnalyser.Controls
             this.tabPageAppInsights.Location = new System.Drawing.Point(103, 4);
             this.tabPageAppInsights.Name = "tabPageAppInsights";
             this.tabPageAppInsights.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPageAppInsights.Size = new System.Drawing.Size(492, 318);
+            this.tabPageAppInsights.Size = new System.Drawing.Size(651, 355);
             this.tabPageAppInsights.TabIndex = 1;
             this.tabPageAppInsights.ToolTipText = "Application Insights";
             this.tabPageAppInsights.UseVisualStyleBackColor = true;
@@ -153,7 +153,7 @@ namespace LogfileMetaAnalyser.Controls
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(758, 379);
+            this.ClientSize = new System.Drawing.Size(758, 416);
             this.Controls.Add(this.tabControl);
             this.Controls.Add(this.panelButtom);
             this.MinimumSize = new System.Drawing.Size(610, 320);
