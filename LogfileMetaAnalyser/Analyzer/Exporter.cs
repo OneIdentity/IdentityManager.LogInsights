@@ -15,15 +15,16 @@ namespace LogfileMetaAnalyser
 {
     public class Exporter
     {
-        private DataStore datastore;
+        private DataStore m_datastore;
         private ExportSettings exportSettings;
+        public ILogReader LogReader;
 
         public event EventHandler<double> OnExportProgressChanged;
 
 
         public Exporter(DataStore datastore)
         {
-            this.datastore = datastore;
+            m_datastore = datastore;            
             exportSettings = new ExportSettings(datastore);
         }
 
@@ -43,7 +44,7 @@ namespace LogfileMetaAnalyser
                              
                 //try to preselect ProjectionActivity
                 ProjectionType ptype;
-                string uuid = datastore.GetOrAdd<ProjectionActivity>().GetUuidByLoggerId(inputMsg.spid, out ptype);
+                string uuid = m_datastore.GetOrAdd<ProjectionActivity>().GetUuidByLoggerId(inputMsg.spid, out ptype);
                 if (!string.IsNullOrEmpty(uuid))
                 {
                     exportSettings.filterByActivity.isfilterEnabled_ProjectionActivity = true;
@@ -69,14 +70,14 @@ namespace LogfileMetaAnalyser
         private async Task FilterAndExportBase()
         {
             //check general data vailability
-            if (!datastore.HasData())
+            if (!m_datastore.HasData() || LogReader == null)
             {
                 MessageBox.Show("No data was yet collected. Please let us analyze at least one logfile first!");
                 return;
             }
 
             //show the export setting form
-            var frm = new Controls.ExportWithFilterFrm(datastore, exportSettings);
+            var frm = new Controls.ExportWithFilterFrm(m_datastore, exportSettings);
 
             if (frm.ShowDialog() != DialogResult.OK || frm.exportSettings == null)
                 return;
@@ -85,7 +86,7 @@ namespace LogfileMetaAnalyser
 
 
             //prepare the export
-            var files = datastore.GetOrAdd<GeneralLogData>().LogfileInformation
+            var files = m_datastore.GetOrAdd<GeneralLogData>().LogfileInformation
                             .Where(f => frm.exportSettings.inputOutputOptions.includeFiles.Count == 0 ||
                                         frm.exportSettings.inputOutputOptions.includeFiles.Contains(f.Value.filename))
                             .OrderBy(f => f.Value.logfileTimerange_Start)
@@ -102,42 +103,52 @@ namespace LogfileMetaAnalyser
                 throw new NotSupportedException("The option to merge the export rows into one single file is not yet supported. Sorry.");
 
 
-            //let's go through each file
-            TextMessage msg;
-            int curFileNr = 0;
-            float percentDone = 0;
+            OnExportProgressChanged?.Invoke(this, 0.5D);
 
-            foreach (string inputfilename in files)
+
+            string exportfilename = FileHelper.GetNewFilename(LogReader.Display,  //TODO
+                                                    exportSettings.inputOutputOptions.filenamePostfix, 
+                                                    exportSettings.inputOutputOptions.outputFolder);
+
+            if (string.IsNullOrEmpty(Path.GetExtension(exportfilename)))
+                exportfilename = $"{exportfilename}.txt";
+
+
+            var enumerator = LogReader.ReadAsync()
+                        .Partition(1024)
+                        .GetAsyncEnumerator();
+
+            var preloader = new DataPreloader<IReadOnlyList<LogEntry>>(async () =>
             {
-                curFileNr++;
-                percentDone = (100f * (curFileNr - 1) / files.Length);
+                if (!await enumerator.MoveNextAsync().ConfigureAwait(false))
+                    return null;
 
-                string exportfilename = FileHelper.GetNewFilename(inputfilename, exportSettings.inputOutputOptions.filenamePostfix, exportSettings.inputOutputOptions.outputFolder);
+                return enumerator.Current;
+            });
 
-                using (var reader = new NLogReader(new[]{inputfilename}, Encoding.UTF8))
-                using (var writer = new StreamWriter(exportfilename, false, Encoding.UTF8))
+
+            IReadOnlyCollection<LogEntry> partition;
+            bool? writeLn = null;
+            using (var writer = new StreamWriter(exportfilename, false, Encoding.UTF8))
+                while ((partition = await preloader.GetNextAsync().ConfigureAwait(false)) != null)
                 {
-                    //refire the progress event
-                    //if (OnExportProgressChanged != null)
-                    //    reader.OnProgressChanged += new EventHandler<ReadLogByBlockEventArgs>((object o, ReadLogByBlockEventArgs args) =>
-                    //    {
-                    //        OnExportProgressChanged(this, (args.progressPercent / files.Length) + percentDone);
-                    //    });
+                    var textMsgs = partition.Select(p => new TextMessage(p)).ToArray();
 
-                    //reading
-                    await foreach (var entry in reader.ReadAsync().ConfigureAwait(false))
-                    {
-                        msg = new TextMessage(entry);
+                    foreach (var msg in textMsgs)
+                        if (exportSettings.IsMessageMatch(msg))
+                        {
+                            //do we need a line break at the end?
+                            if (writeLn == null && !string.IsNullOrEmpty(msg.messageText))
+                                writeLn = !msg.messageText.EndsWith(Environment.NewLine);
+                             
+                            if (writeLn == false)
+                                await writer.WriteAsync(msg.messageText).ConfigureAwait(false);
+                            else
+                                await writer.WriteLineAsync(msg.messageText).ConfigureAwait(false);
+                        }
+                } 
 
-                        //checking and writing
-                        if (exportSettings.IsMessageMatch(msg))                            
-                            await writer.WriteAsync(msg.messageText).ConfigureAwait(false); //do not use WriteLineAsync as the newline is still at the end of each message
-                    }
-                }
-
-                //refire the progress event - this file is 100% done
-                OnExportProgressChanged?.Invoke(this, (100f / files.Length) + percentDone);
-            } //each file
+            OnExportProgressChanged?.Invoke(this, 1D);
         }
 
     }

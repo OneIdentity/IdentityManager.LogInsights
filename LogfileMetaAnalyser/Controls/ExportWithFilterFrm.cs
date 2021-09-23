@@ -354,7 +354,7 @@ namespace LogfileMetaAnalyser.Controls
 
                 DateTimePicker dtp2 = new DateTimePicker()
                 {
-                    Name = "DateTimePicker_endDate",
+                    Name = "DateTimePicker_endDate",                    
                     Value = exportSettings.filterByLogtype.endDate,
                     MinDate = generalLogData.LogDataOverallTimeRangeStart,
                     MaxDate = generalLogData.LogDataOverallTimeRangeFinish,
