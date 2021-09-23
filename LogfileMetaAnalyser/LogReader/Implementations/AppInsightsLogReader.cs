@@ -244,8 +244,17 @@ namespace LogfileMetaAnalyser.LogReader
 
                 lineNo += _NumberOfLines(message);
 
-                yield return new LogEntry(locator, id, timeStamp, type, (int)severity, message, logger, appName, "",
-                    "");
+                yield return new LogEntry 
+                {
+                    Locator = locator,
+                    Id = id,
+                    TimeStamp = timeStamp,
+                    Level = type,
+                    Severity = (int)severity,
+                    Message = message,
+                    Logger = logger,
+                    AppName = appName
+                };
             }
         }
 
