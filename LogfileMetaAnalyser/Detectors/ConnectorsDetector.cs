@@ -57,7 +57,9 @@ namespace LogfileMetaAnalyser.Detectors
             logger.Debug("entering FinalizeDetector()");
 			DateTime finStartpoint = DateTime.Now;
 
-            
+            var projectionActivity = _datastore.GetOrAdd<ProjectionActivity>();
+            var statisticsStore = _datastore.GetOrAdd<StatisticsStore>();
+
             //some post work on the collected system connector information
             foreach (var c in systemConnectorsAndConnections)
             {
@@ -80,7 +82,7 @@ namespace LogfileMetaAnalyser.Detectors
 
 
             //for each projection we need to put the system connector information in
-            var projections = _datastore.ProjectionActivity.Projections;
+            var projections = projectionActivity.Projections;
             var projectionsToGetConnData = projections.Where(p => systemConnectorsAndConnections.Any(con => con.Value.belongsToProjectorId.Contains(p.loggerSourceId)));
 
             foreach (var proj in projectionsToGetConnData)
@@ -121,7 +123,7 @@ namespace LogfileMetaAnalyser.Detectors
             //stats
             detectorStats.detectorName = string.Format("{0} <{1}>", this.GetType().Name, this.identifier);
             detectorStats.finalizeDuration = (DateTime.Now - finStartpoint).TotalMilliseconds;
-            _datastore.Statistics.DetectorStatistics.Add(detectorStats);
+            statisticsStore.DetectorStatistics.Add(detectorStats);
             logger.Debug(detectorStats.ToString());
 
             //dispose
@@ -267,7 +269,7 @@ namespace LogfileMetaAnalyser.Detectors
 
         private void TryMatchConnectorIDToProjectorID()   
         {
-            var projections = _datastore.ProjectionActivity.Projections;
+            var projections = _datastore.GetOrAdd<ProjectionActivity>().Projections;
 
             //good luck case: if we only found one projection, all log entries must belong to it            
             if (projections.Count == 1)
@@ -357,10 +359,12 @@ namespace LogfileMetaAnalyser.Detectors
             if (!systemConnectorsAndConnections.Any(t => t.Value.belongsToSide == SystemConnBelongsTo.Unknown))
                 return;
 
+            var projectionActivity = _datastore.GetOrAdd<ProjectionActivity>();
+
             Dictionary<string, string> matchMatrix_Left = new Dictionary<string, string>();
             Dictionary<string, string> matchMatrix_Right = new Dictionary<string, string>();
 
-            foreach (var proj in _datastore.ProjectionActivity.Projections)
+            foreach (var proj in projectionActivity.Projections)
                 foreach (var projstep in proj.projectionSteps)
                 {
                     matchMatrix_Left.AddOrUpdate(proj.loggerSourceId, projstep.leftConnection);

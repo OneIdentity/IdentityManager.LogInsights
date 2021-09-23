@@ -18,7 +18,7 @@ namespace LogfileMetaAnalyser.Datastore
 
         public int GetElementCount(string key)
         {
-            var dsref = datastore.ProjectionActivity;
+            var dsref = datastore.GetOrAdd<ProjectionActivity>();
 
             if (key == BaseKey || key == $"{BaseKey}/byPType" || key == $"{BaseKey}/byTsType") 
                 return dsref.Projections.Count;
@@ -90,7 +90,7 @@ namespace LogfileMetaAnalyser.Datastore
         {
             MultiListViewUC uc = new MultiListViewUC();
             ContextLinesUC contextLinesUc = new ContextLinesUC(logfileFilterExporter);
-            var dsref = datastore.ProjectionActivity;
+            var dsref = datastore.GetOrAdd<ProjectionActivity>();
 
             var projListScope = dsref.Projections.Where(p => (p.uuid == uuidFilter || uuidFilter == "*") &&
                                                   (p.projectionType.ToString() == PTypeFilter || PTypeFilter == "*") &&
@@ -100,21 +100,23 @@ namespace LogfileMetaAnalyser.Datastore
 #warning RFE#1.c: todo Projection.Maintenance
             //#6: Maintenance
 
+            var projectionActivity = datastore.GetOrAdd<ProjectionActivity>();
+            
             //layout definition
             //=============================
             //the journal is very vague whether it was recorded or not and even when, e.g. failures are not always included ;D
             int numOfSubControls = FillListVcTypes.count;
 
-            bool isToShowJournalSetup = datastore.ProjectionActivity.NumberOfJournalSetupTotal > 0;
+            bool isToShowJournalSetup = projectionActivity.NumberOfJournalSetupTotal > 0;
             //numOfSubControls -= isToShowJournalSetup ? 0 : 1;
 
-            bool isToShowJournalObjests = datastore.ProjectionActivity.NumberOfJournalObjectTotal > 0;
+            bool isToShowJournalObjests = projectionActivity.NumberOfJournalObjectTotal > 0;
             //numOfSubControls -= isToShowJournalObjests ? 0 : 1;
 
-            bool isToShowJournalMessages = datastore.ProjectionActivity.NumberOfJournalMessagesTotal > 0;
+            bool isToShowJournalMessages = projectionActivity.NumberOfJournalMessagesTotal > 0;
             //numOfSubControls -= isToShowJournalMessages ? 0 : 1;
 
-            bool isToShowJournalFailures = datastore.ProjectionActivity.NumberOfJournalFailuresTotal > 0;
+            bool isToShowJournalFailures = projectionActivity.NumberOfJournalFailuresTotal > 0;
             //numOfSubControls -= isToShowJournalFailures ? 0 : 1;
 
             
@@ -397,7 +399,7 @@ namespace LogfileMetaAnalyser.Datastore
             if (isToShowJournalObjests)
             {
                 uc.SetupSubLevel(FillListVcTypes.p4_2__PrJournalObj, 1);
-                uc[FillListVcTypes.p4_2__PrJournalObj].SetupCaption($"sync journal treated objects (total recorded number of messages: {datastore.ProjectionActivity.NumberOfJournalObjectTotal})");
+                uc[FillListVcTypes.p4_2__PrJournalObj].SetupCaption($"sync journal treated objects (total recorded number of messages: {projectionActivity.NumberOfJournalObjectTotal})");
                 uc[FillListVcTypes.p4_2__PrJournalObj].SetupHeaders(new string[] { "Object", "Object Id", "Method", "Schema type", "Sequence number", "Is import" });
                 uc[FillListVcTypes.p4_2__PrJournalObj].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
                 {
@@ -471,7 +473,7 @@ namespace LogfileMetaAnalyser.Datastore
             {
                 uc.SetupSubLevel(FillListVcTypes.p4_3__PrJournalMessage, 1);
 
-                uc[FillListVcTypes.p4_3__PrJournalMessage].SetupCaption($"sync journal messages (total number of recorded messages: {datastore.ProjectionActivity.NumberOfJournalMessagesTotal})");
+                uc[FillListVcTypes.p4_3__PrJournalMessage].SetupCaption($"sync journal messages (total number of recorded messages: {projectionActivity.NumberOfJournalMessagesTotal})");
                 uc[FillListVcTypes.p4_3__PrJournalMessage].SetupHeaders(new string[] { "Time", "Context", "Type", "Messagetext", "Source" });
                 uc[FillListVcTypes.p4_3__PrJournalMessage].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
                 {
@@ -503,7 +505,7 @@ namespace LogfileMetaAnalyser.Datastore
             if (isToShowJournalFailures)
             {
                 uc.SetupSubLevel(FillListVcTypes.p4_4__PrJournalFailure, 1);
-                uc[FillListVcTypes.p4_4__PrJournalFailure].SetupCaption($"sync journal failure messages (total number of recorded messages: {datastore.ProjectionActivity.NumberOfJournalFailuresTotal})");
+                uc[FillListVcTypes.p4_4__PrJournalFailure].SetupCaption($"sync journal failure messages (total number of recorded messages: {projectionActivity.NumberOfJournalFailuresTotal})");
                 uc[FillListVcTypes.p4_4__PrJournalFailure].SetupHeaders(new string[] {"Time", "Projection step", "Schema type", "Object", "Reason", "Object state" });
                 uc[FillListVcTypes.p4_4__PrJournalFailure].ItemClicked += new ListViewItemSelectionChangedEventHandler((object o, ListViewItemSelectionChangedEventArgs args) =>
                 {

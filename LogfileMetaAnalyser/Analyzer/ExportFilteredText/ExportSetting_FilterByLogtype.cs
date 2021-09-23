@@ -32,7 +32,7 @@ namespace LogfileMetaAnalyser
                     return _startDate;
 
                 if (_startDate.IsNull())
-                    _startDate = dsref.GeneralLogData.LogDataOverallTimeRangeStart;
+                    _startDate = dsref.GetOrAdd<GeneralLogData>().LogDataOverallTimeRangeStart;
 
                 _startDate_valid = true;
 
@@ -53,7 +53,7 @@ namespace LogfileMetaAnalyser
                     return _endDate;
 
                 if (_endDate.IsNull())
-                    _endDate = dsref.GeneralLogData.LogDataOverallTimeRangeFinish;
+                    _endDate = dsref.GetOrAdd<GeneralLogData>().LogDataOverallTimeRangeFinish;
 
                 _endDate_valid = true;
                 return _endDate;

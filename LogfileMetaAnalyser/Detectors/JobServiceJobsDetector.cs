@@ -47,7 +47,7 @@ namespace LogfileMetaAnalyser.Detectors
         public void InitializeDetector()
         {
             jobs = new Dictionary<string, JobserviceJob>();
-            jobs = _datastore.JobServiceActivities?.JobServiceJobs?.ToDictionary(j => j.uidJob);
+            jobs = _datastore.GetOrAdd<JobServiceActivity>()?.JobServiceJobs?.ToDictionary(j => j.uidJob);
                         
             detectorStats.Clear();
         }
@@ -57,20 +57,23 @@ namespace LogfileMetaAnalyser.Detectors
             logger.Debug("entering FinalizeDetector()");
             DateTime finStartpoint = DateTime.Now;
 
+            var jobServiceActivities = _datastore.GetOrAdd<JobServiceActivity>();
+            var statistics = _datastore.GetOrAdd<StatisticsStore>();
+
             var jobLst = jobs.Values.Where(j => j.jobserviceJobattempts.Count > 0).ToArray();
             int cnt = jobLst.Length;
             foreach (var job in jobLst)
             {
                 if (cnt < 100)
                     logger.Debug($"pushing to ds: jobserviceActivities: {job.ToString()}");
-                _datastore.JobServiceActivities.JobServiceJobs.Add(job);
+                jobServiceActivities.JobServiceJobs.Add(job);
             }
 
             //stats
             detectorStats.detectorName = string.Format("{0} <{1}>", this.GetType().Name, this.identifier);
-            detectorStats.numberOfDetections = _datastore.JobServiceActivities.JobServiceJobs.Count;
+            detectorStats.numberOfDetections = jobServiceActivities.JobServiceJobs.Count;
             detectorStats.finalizeDuration = (DateTime.Now - finStartpoint).TotalMilliseconds;
-            _datastore.Statistics.DetectorStatistics.Add(detectorStats);
+            statistics.DetectorStatistics.Add(detectorStats);
             logger.Debug(detectorStats.ToString());
 
             //dispose

@@ -15,7 +15,7 @@ namespace LogfileMetaAnalyser.Datastore
 
         public event EventHandler StoreInvalidation;
 
-        public T GetOrAdd<T>() where T : IDataStoreContent
+        public T GetOrAdd<T>() where T : IDataStoreContent, new()
         {
             return (T)_content.GetOrAdd(
                 typeof(T),
@@ -33,18 +33,5 @@ namespace LogfileMetaAnalyser.Datastore
         {
             return _content.Values.Any(s => s.HasData);
         }
-
-        // Convenience helpers
-
-        public TimetraceReferenceStore TimeTraceRef => GetOrAdd<TimetraceReferenceStore>();
-
-        public JobServiceActivity JobServiceActivities => GetOrAdd<JobServiceActivity>();
-        public ProjectionActivity ProjectionActivity => GetOrAdd<ProjectionActivity>();
-
-        public GeneralLogData GeneralLogData => GetOrAdd<GeneralLogData>();
-        public SqlInformation GeneralSqlInformation => GetOrAdd<SqlInformation>();
-
-        public StatisticsStore Statistics => GetOrAdd<StatisticsStore>();
-
     }
 }

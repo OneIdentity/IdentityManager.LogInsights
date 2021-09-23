@@ -134,7 +134,7 @@ namespace LogfileMetaAnalyser.Datastore
         {
             IDatastoreView viewer = new GeneralLogView() { upperPanelControl = upperPanelControl, lowerPanelControl = lowerPanelControl, datastore = datastore, logfileFilterExporter = this.logfileFilterExporter };
             string key = viewer.BaseKey;
-            var dsref = datastore.GeneralLogData;
+            var dsref = datastore.GetOrAdd<GeneralLogData>();
 
 
             //Branch: General information
@@ -185,7 +185,7 @@ namespace LogfileMetaAnalyser.Datastore
         {
             IDatastoreView viewer = new SqlInformationView() { upperPanelControl = upperPanelControl, lowerPanelControl = lowerPanelControl, datastore = datastore, logfileFilterExporter = this.logfileFilterExporter };
             string key = viewer.BaseKey;
-            var dsref = datastore.GeneralSqlInformation;
+            var dsref = datastore.GetOrAdd<SqlInformation>();
 
             TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, "General SQL session information", "information", Constants.treenodeBackColorNormal);
             responsibleViewerClass.Add(key, viewer);
@@ -209,7 +209,7 @@ namespace LogfileMetaAnalyser.Datastore
         {
             IDatastoreView viewer = new JobServiceActivitiesView() { upperPanelControl = upperPanelControl, lowerPanelControl = lowerPanelControl, datastore = datastore, logfileFilterExporter = this.logfileFilterExporter };
             string key = viewer.BaseKey;
-            var dsref = datastore.JobServiceActivities;
+            var dsref = datastore.GetOrAdd<JobServiceActivity>();
             int cnt;
             int cntJsJobs = viewer.GetElementCount(key); 
 
@@ -273,7 +273,7 @@ namespace LogfileMetaAnalyser.Datastore
         {
             IDatastoreView viewer = new ProjectionActivitiesView() { upperPanelControl = upperPanelControl, lowerPanelControl = lowerPanelControl, datastore = datastore, logfileFilterExporter = this.logfileFilterExporter };
             string key = viewer.BaseKey;
-            var dsref = datastore.ProjectionActivity;
+            var dsref = datastore.GetOrAdd<ProjectionActivity>();
 
             TreeNodeCollectionHelper.CreateNode(tw.Nodes, key, $"Projection activities ({viewer.GetElementCount(key)})", "sync", Constants.treenodeBackColorNormal);
             responsibleViewerClass.Add(key, viewer);
