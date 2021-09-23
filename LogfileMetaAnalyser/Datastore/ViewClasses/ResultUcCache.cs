@@ -9,7 +9,7 @@ using LogfileMetaAnalyser.Datastore;
 
 namespace LogfileMetaAnalyser
 {
-    class ResultUcCache
+    internal class ResultUcCache
     {
         public Dictionary<string, Control[]> upperPanelCache = new Dictionary<string, Control[]>();
         public Dictionary<string, Control[]> lowerPanelCache = new Dictionary<string, Control[]>();

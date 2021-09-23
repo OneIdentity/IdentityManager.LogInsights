@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LogfileMetaAnalyser.Composition;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -53,36 +54,6 @@ namespace LogfileMetaAnalyser
             m_LogReader = reader;
         }
 
-        private IEnumerable<ILogDetector> BuildDetectorsRepo()
-        {
-            const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-
-            var mainAsm = typeof(ILogDetector).Assembly;
-            var path = Path.GetDirectoryName(mainAsm.Location);
-            var assemblies = new List<Assembly> { mainAsm };
-
-            var files = Directory.GetFiles(path!, "*Detector.dll", SearchOption.TopDirectoryOnly);
-            foreach (var file in files)
-                assemblies.Add(Assembly.LoadFile(file));
-
-            var types =  assemblies.SelectMany(a => a.GetTypes())
-                .Where(t => typeof(ILogDetector).IsAssignableFrom(t))
-                .Where(t => !t.IsAbstract);
-
-            foreach (var type in types) 
-                yield return CreateDetectorInstance(type, flags, Array.Empty<object>());
-        }
-
-        private ILogDetector CreateDetectorInstance(Type t, BindingFlags flags, object[] parms)
-        {
-            return (ILogDetector)Activator.CreateInstance(
-                t, 
-                flags,
-                default(Binder),
-                parms,
-                default(CultureInfo));
-        }
-
 
         //main procedure to analyze a log file
         public async Task AnalyzeStructureAsync()
@@ -110,7 +81,8 @@ namespace LogfileMetaAnalyser
                 //    new Detectors.SyncJournalDetector()
                 //};
 
-                var detectors = new List<ILogDetector>(BuildDetectorsRepo());
+                var detectors =
+                    new List<ILogDetector>(Composer.BuildRepo<ILogDetector>(Array.Empty<object>(), "*Detector.dll"));
 
 
                 //Auslesen der Required Parent Detectors und zuweisen der resourcen

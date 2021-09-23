@@ -10,15 +10,76 @@ using LogfileMetaAnalyser.ExceptionHandling;
 
 namespace LogfileMetaAnalyser.Datastore
 {
-    public class GeneralLogView : DatastoreBaseView, IDatastoreView
+    public class GeneralLogView : DatastoreBaseView
     {
-        public GeneralLogView() { }
+        public GeneralLogView(TreeView navigationTree, 
+            Control.ControlCollection upperPanelControl,
+            Control.ControlCollection lowerPanelControl,
+            DataStore datastore,
+            Exporter logfileFilterExporter) :
+            base(navigationTree, upperPanelControl, lowerPanelControl, datastore, logfileFilterExporter)
+        {
+        }
+
+        public override int SortOrder => 200;
+
+        public override IEnumerable<string> Build()
+        {
+            string key = BaseKey;
+            var dsref = Datastore.GetOrAdd<GeneralLogData>();
+            var result = new List<string>();
+
+            //Branch: General information
+            TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, "General information", "information", GetBgColor(dsref.mostDetailedLogLevel.IsGreater(LogLevel.Info)));
+            result.Add(key);
+
+
+            //Branch: ErrorsAndWarnings
+            if (dsref.MessageErrors.Count > 0 || dsref.MessageWarnings.Count > 0)
+            {
+                key = $"{BaseKey}/ErrorsAndWarnings";
+                TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, $"message of type error and warning ({GetElementCount(key)})", "warning", Constants.treenodeBackColorSuspicious);
+                result.Add(key);
+            }
+
+            if (dsref.MessageErrors.Count > 0)
+            {
+                key = $"{BaseKey}/ErrorsAndWarnings/Errors";
+                TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, $"message of type error ({GetElementCount(key)})", "error", Constants.treenodeBackColorSuspicious);
+                result.Add(key);
+
+                key = $"{BaseKey}/ErrorsAndWarnings/Errors/distinct";
+                TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, $"message of type error distinct", "error", Constants.treenodeBackColorSuspicious);
+                result.Add(key);
+            }
+
+            if (dsref.MessageWarnings.Count > 0)
+            {
+                key = $"{BaseKey}/ErrorsAndWarnings/Warnings";
+                TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, $"message of type warning ({GetElementCount(key)})", "warning", Constants.treenodeBackColorSuspicious);
+                result.Add(key);
+
+                key = $"{BaseKey}/ErrorsAndWarnings/Warnings/distinct";
+                TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, "message of type warning distinct", "warning", Constants.treenodeBackColorSuspicious);
+                result.Add(key);
+            }
+
+            //Branch: timestamp
+            if (dsref.TimeGaps.Count > 0)
+            {
+                key = $"{BaseKey}/timegaps";
+                TreeNodeCollectionHelper.CreateNode(NavigationTree.Nodes, key, $"timestamp gaps ({GetElementCount(key)})", "warning", Constants.treenodeBackColorSuspicious);
+                result.Add(key);
+            }
+
+            return result;
+        }
 
         public override string BaseKey => $"{base.BaseKey}/GeneralLogView";
 
-        public int GetElementCount(string key)
+        public override int GetElementCount(string key)
         {
-            var dsref = datastore.GetOrAdd<GeneralLogData>();
+            var dsref = Datastore.GetOrAdd<GeneralLogData>();
 
             if (key == $"{BaseKey}/ErrorsAndWarnings")
                 return dsref.MessageErrors.Count + dsref.MessageWarnings.Count;
@@ -35,18 +96,18 @@ namespace LogfileMetaAnalyser.Datastore
             return 0;
         }
 
-        public void ExportView(string key)
+        public override void ExportView(string key)
         {
             if (!key.StartsWith(BaseKey))
                 return;
 
-            var dsref = datastore.GetOrAdd<GeneralLogData>();
+            var dsref = Datastore.GetOrAdd<GeneralLogData>();
 
 
             if (key == BaseKey)  //information
             {
                 MultiListViewUC uc = new MultiListViewUC();
-                ContextLinesUC contextLinesUc = new ContextLinesUC(logfileFilterExporter);
+                ContextLinesUC contextLinesUc = new ContextLinesUC(LogfileFilterExporter);
 
                 uc.SetupLayout(2);
 
@@ -111,15 +172,15 @@ namespace LogfileMetaAnalyser.Datastore
                 });
 
                 uc.Resume();
-                upperPanelControl.Add(uc);
-                lowerPanelControl.Add(contextLinesUc);
+                UpperPanelControl.Add(uc);
+                LowerPanelControl.Add(contextLinesUc);
             } //gen. information
 
 
             if (key.StartsWith(BaseKey + "/ErrorsAndWarnings"))
             {
                 ListViewUC uc = new ListViewUC();
-                ContextLinesUC contextLinesUC = new ContextLinesUC(logfileFilterExporter);
+                ContextLinesUC contextLinesUC = new ContextLinesUC(LogfileFilterExporter);
                 List<DatastoreBaseDataPoint> data = new List<DatastoreBaseDataPoint>();
                 string caption = "";
 
@@ -190,8 +251,8 @@ namespace LogfileMetaAnalyser.Datastore
                     );
 
                     uc.Resume();
-                    upperPanelControl.Add(uc);
-                    lowerPanelControl.Add(contextLinesUC);
+                    UpperPanelControl.Add(uc);
+                    LowerPanelControl.Add(contextLinesUC);
                 }
             }  // if (key.StartsWith("2.geninfo/ErrorsAndWarnings"))
 
@@ -199,7 +260,7 @@ namespace LogfileMetaAnalyser.Datastore
             if (key == BaseKey + "/timegaps")
             {
                 ListViewUC uc = new ListViewUC();
-                ContextLinesUC contextLinesUC = new ContextLinesUC(logfileFilterExporter);
+                ContextLinesUC contextLinesUC = new ContextLinesUC(LogfileFilterExporter);
 
                 uc.SetupCaption("encountered time gaps and jumps");
                 uc.SetupHeaders(new string[] { "File name", "Time gmp start", "Time gap end", "Time gap duration", "Position in log file" });
@@ -233,12 +294,11 @@ namespace LogfileMetaAnalyser.Datastore
                     );
 
                     uc.Resume();
-                    upperPanelControl.Add(uc);
-                    lowerPanelControl.Add(contextLinesUC);
+                    UpperPanelControl.Add(uc);
+                    LowerPanelControl.Add(contextLinesUC);
                 }
             }
 
         }
-
     }
 }
