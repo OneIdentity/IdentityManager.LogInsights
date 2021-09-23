@@ -115,20 +115,17 @@ namespace LogfileMetaAnalyser
         
 
         //constructor
-        public TextMessage(TextLocator textLocator, string initialText): 
+        public TextMessage(TextLocator textLocator, string initialText) :
             this(
-                new LogEntry(
-                    new Locator(
+                new LogEntry {
+                    Locator = new Locator(
                         Convert.ToInt32(textLocator.fileStreamOffset),
                         Convert.ToInt32(textLocator.fileLinePosition),
-                        textLocator.fileName), 
-                    "", 
-                    DateTime.MinValue, 
-                    LogLevel.Info, 
-                    0, 
-                    initialText, 
-                    "", "", "", "")
-                )
+                        textLocator.fileName),
+                    TimeStamp = DateTime.MinValue,
+                    Message = initialText
+                }
+            )
         { }
 
         public TextMessage(LogEntry entry)
