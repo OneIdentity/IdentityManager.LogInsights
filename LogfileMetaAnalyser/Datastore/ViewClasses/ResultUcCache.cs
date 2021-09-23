@@ -24,18 +24,8 @@ namespace LogfileMetaAnalyser
 
         public void AddToCache(string key, Control.ControlCollection upperPanelControl, Control.ControlCollection lowerPanelControl)
         {
-            List<Control> lst = new List<Control>();
-
-            for (int i = 0; i < upperPanelControl.Count; i++)
-                lst.Add(upperPanelControl[i]);
-
-            upperPanelCache.Add(key, lst.ToArray());
-
-            lst.Clear();
-            for (int i = 0; i < lowerPanelControl.Count; i++)
-                lst.Add(lowerPanelControl[i]);
-
-            lowerPanelCache.Add(key, lst.ToArray());
+            upperPanelCache.Add(key, upperPanelControl.OfType<Control>().ToArray());
+            lowerPanelCache.Add(key, lowerPanelControl.OfType<Control>().ToArray());
         }
 
         public void GetFromCache(string key, Control.ControlCollection upperPanelControl, Control.ControlCollection lowerPanelControl)
