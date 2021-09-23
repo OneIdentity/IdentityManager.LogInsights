@@ -3,6 +3,7 @@ using Microsoft.Azure.ApplicationInsights.Query;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading;
@@ -22,65 +23,24 @@ namespace LogfileMetaAnalyser.LogReader
 
         private class _CustomDimensions
         {
-            public string LoggerName
-            {
-                get;
-                set;
-            }
-
-            public string AppName
-            {
-                get;
-                set;
-            }
+            public string LoggerName { get; set; }
+            public string AppName { get; set; }
         }
 
         private class _ExceptionDetail
         {
-            public string Message
-            {
-                get;
-                set;
-            }
-
-            public string Type
-            {
-                get;
-                set;
-            }
-
-            public _StackFrame[] ParsedStack
-            {
-                get;
-                set;
-            }
+            public string Message { get; set; }
+            public string Type { get; set; }
+            public _StackFrame[] ParsedStack { get; set; }
         }
 
+        // ReSharper disable once ClassNeverInstantiated.Local
         private class _StackFrame
         {
-            public string Method
-            {
-                get;
-                set;
-            }
-
-            public string Assembly
-            {
-                get;
-                set;
-            }
-
-            public int Level
-            {
-                get;
-                set;
-            }
-
-            public int Line
-            {
-                get;
-                set;
-            }
+            public string Method { get; set; }
+            public string Assembly { get; set; }
+            public int Level { get; set; }
+            public int Line { get; set; }
         }
 
 
@@ -130,7 +90,6 @@ namespace LogfileMetaAnalyser.LogReader
             var messageIdx = -1;
             var severityIdx = -1;
             var itemIdIdx = -1;
-            var itemTypeIdx = -1;
             var customDimensionsIdx = -1;
             var outerMessageIdx = -1;
             var detailsIdx = -1;
@@ -147,10 +106,6 @@ namespace LogfileMetaAnalyser.LogReader
 
                     case "timestamp":
                         timestampIdx = i;
-                        break;
-
-                    case "itemType":
-                        itemTypeIdx = i;
                         break;
 
                     case "message":
@@ -182,17 +137,12 @@ namespace LogfileMetaAnalyser.LogReader
             var lineNo = 1;
             foreach (var row in table.Rows.OrderBy(r => (DateTime)r[timestampIdx]))
             {
-                var locator = new Locator(entryNo, lineNo, "AppInsights");
+                var locator = new Locator(entryNo++, lineNo, "AppInsights");
 
                 var id = (string)row[itemIdIdx];
                 var timeStamp = (DateTime)row[timestampIdx];
                 var message = (string)row[messageIdx];
-                var severity = severityIdx > -1 ? (long)row[severityIdx] : 0;
-                var itemTypeStr = itemTypeIdx > -1 ? (string)row[itemTypeIdx] : null;
-
-                var type = LogLevelTools.ConvertFromStringToEnum(itemTypeStr);
-                if ( type == LogLevel.Undef )
-                    type = LogLevel.Info;
+                var severity = severityIdx > -1 ? (long)row[severityIdx] : 1L;
 
                 var logger = "";
                 var appName = "";
@@ -249,8 +199,7 @@ namespace LogfileMetaAnalyser.LogReader
                     Locator = locator,
                     Id = id,
                     TimeStamp = timeStamp,
-                    Level = type,
-                    Severity = (int)severity,
+                    Level = _LevelFromSeverity(severity),
                     Message = message,
                     Logger = logger,
                     AppName = appName
@@ -262,6 +211,19 @@ namespace LogfileMetaAnalyser.LogReader
         /// Gets a short display of the reader and it's data.
         /// </summary>
         public override string Display => $"App Insights Reader - {_client.BaseUri.OriginalString}";
+
+        private static LogLevel _LevelFromSeverity(long severity)
+        {
+            return severity switch
+                {
+                    0L => LogLevel.Debug,
+                    1L => LogLevel.Info,
+                    2L => LogLevel.Warn,
+                    3L => LogLevel.Error,
+                    4L => LogLevel.Critical,
+                    _ => LogLevel.Info
+                };
+        }
 
         private static int _NumberOfLines(string msg)
         {
