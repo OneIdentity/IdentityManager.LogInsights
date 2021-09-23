@@ -47,8 +47,6 @@ To get a local copy up and running follow these simple steps.
 
 Download the [.NET 5 SDK](https://dotnet.microsoft.com/download).
 
-The program runs on Windows 10 1809ff.
-
 ### Building
 
 1. Clone the repo
@@ -72,7 +70,7 @@ Or open it in Visual Studio and run it from there.
 Download a ZIP file from the [Releases](https://github.com/OneIdentity/IdentityManager.LogInsights/releases/)
 page, unzip it into a folder and run `LogInsights.exe`.
 
-The program runs on Windows 10 1809ff.
+The program runs on all Windows versions supported by .NET 5.
 
 <!-- USAGE EXAMPLES -->
 ## Usage
