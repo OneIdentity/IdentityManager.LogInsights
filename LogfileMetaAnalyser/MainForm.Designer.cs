@@ -44,8 +44,8 @@
             this.infoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.debugDatastoreToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
             this.toolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
             this.splitContainerOutVert = new System.Windows.Forms.SplitContainer();
             this.treeViewLeft = new System.Windows.Forms.TreeView();
             this.imageListForTreeview = new System.Windows.Forms.ImageList(this.components);
@@ -86,19 +86,19 @@
             // loadLogsToolStripMenuItem
             // 
             this.loadLogsToolStripMenuItem.Name = "loadLogsToolStripMenuItem";
-            this.loadLogsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.loadLogsToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
             this.loadLogsToolStripMenuItem.Text = "Load logs...";
             this.loadLogsToolStripMenuItem.Click += new System.EventHandler(this.loadLogsToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(131, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -142,30 +142,33 @@
             // statusStrip1
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripProgressBar1,
-            this.toolStripStatusLabel});
-            this.statusStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
-            this.statusStrip1.Location = new System.Drawing.Point(0, 647);
+            this.toolStripStatusLabel,
+            this.toolStripProgressBar1});
+            this.statusStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
+            this.statusStrip1.Location = new System.Drawing.Point(0, 645);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 16, 0);
-            this.statusStrip1.Size = new System.Drawing.Size(1588, 20);
+            this.statusStrip1.Size = new System.Drawing.Size(1588, 22);
             this.statusStrip1.TabIndex = 1;
             this.statusStrip1.Text = "statusStrip1";
-            // 
-            // toolStripProgressBar1
-            // 
-            this.toolStripProgressBar1.MarqueeAnimationSpeed = 30;
-            this.toolStripProgressBar1.Name = "toolStripProgressBar1";
-            this.toolStripProgressBar1.Size = new System.Drawing.Size(292, 18);
-            this.toolStripProgressBar1.Step = 1;
-            this.toolStripProgressBar1.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
-            this.toolStripProgressBar1.Visible = false;
             // 
             // toolStripStatusLabel
             // 
             this.toolStripStatusLabel.Name = "toolStripStatusLabel";
-            this.toolStripStatusLabel.Size = new System.Drawing.Size(10, 15);
+            this.toolStripStatusLabel.Size = new System.Drawing.Size(10, 19);
+            this.toolStripStatusLabel.Spring = true;
             this.toolStripStatusLabel.Text = " ";
+            // 
+            // toolStripProgressBar1
+            // 
+            this.toolStripProgressBar1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripProgressBar1.AutoSize = false;
+            this.toolStripProgressBar1.MarqueeAnimationSpeed = 30;
+            this.toolStripProgressBar1.Name = "toolStripProgressBar1";
+            this.toolStripProgressBar1.Size = new System.Drawing.Size(256, 18);
+            this.toolStripProgressBar1.Step = 1;
+            this.toolStripProgressBar1.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
+            this.toolStripProgressBar1.Visible = false;
             // 
             // splitContainerOutVert
             // 
@@ -181,7 +184,7 @@
             // splitContainerOutVert.Panel2
             // 
             this.splitContainerOutVert.Panel2.Controls.Add(this.splitContainerRightIn);
-            this.splitContainerOutVert.Size = new System.Drawing.Size(1588, 623);
+            this.splitContainerOutVert.Size = new System.Drawing.Size(1588, 621);
             this.splitContainerOutVert.SplitterDistance = 323;
             this.splitContainerOutVert.SplitterWidth = 5;
             this.splitContainerOutVert.TabIndex = 2;
@@ -198,7 +201,7 @@
             this.treeViewLeft.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.treeViewLeft.Name = "treeViewLeft";
             this.treeViewLeft.SelectedImageIndex = 0;
-            this.treeViewLeft.Size = new System.Drawing.Size(323, 623);
+            this.treeViewLeft.Size = new System.Drawing.Size(323, 621);
             this.treeViewLeft.TabIndex = 0;
             // 
             // imageListForTreeview
@@ -235,8 +238,8 @@
             // splitContainerRightIn.Panel2
             // 
             this.splitContainerRightIn.Panel2.BackColor = System.Drawing.Color.White;
-            this.splitContainerRightIn.Size = new System.Drawing.Size(1260, 623);
-            this.splitContainerRightIn.SplitterDistance = 410;
+            this.splitContainerRightIn.Size = new System.Drawing.Size(1260, 621);
+            this.splitContainerRightIn.SplitterDistance = 407;
             this.splitContainerRightIn.SplitterWidth = 5;
             this.splitContainerRightIn.TabIndex = 0;
             // 
@@ -266,6 +269,7 @@
             this.splitContainerRightIn.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
+
         }
 
         #endregion
