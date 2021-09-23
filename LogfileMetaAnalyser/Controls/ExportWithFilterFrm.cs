@@ -655,11 +655,11 @@ namespace LogfileMetaAnalyser.Controls
 
                             if (exportProfiles.profiles_predef.ContainsKey(newprofilename))
                             {
-                                MessageBox.Show("This profile name is already taken by a predefined profile which cannot be overwritten. Choose another profile name!", "predefined profile", MessageBoxButtons.OK);
+                                MessageBox.Show(this, "This profile name is already taken by a predefined profile which cannot be overwritten. Choose another profile name!", "predefined profile", MessageBoxButtons.OK);
                             }
                             else if (exportProfiles.profiles_custom.ContainsKey(newprofilename))
                             {
-                                var qRes = MessageBox.Show("Profile already exists with this name. Overwrite it?", "Overwrite profile?", MessageBoxButtons.YesNoCancel);
+                                var qRes = MessageBox.Show(this, "Profile already exists with this name. Overwrite it?", "Overwrite profile?", MessageBoxButtons.YesNoCancel);
 
                                 if (qRes == DialogResult.Cancel)
                                 {
@@ -694,7 +694,7 @@ namespace LogfileMetaAnalyser.Controls
             {
                 string profilename = comboBox_Profiles.SelectedItem as string;
                 if (string.IsNullOrEmpty(profilename))
-                    MessageBox.Show("No profile selected!");
+                    MessageBox.Show(this, "No profile selected!", Constants.AppDisplay);
                 else
                 {
                     string msg = exportProfiles.DeleteProfile(profilename);
@@ -705,7 +705,7 @@ namespace LogfileMetaAnalyser.Controls
                         comboBox_Profiles.SelectedIndex = 0;
                     }
                     else
-                        MessageBox.Show(msg);
+                        MessageBox.Show(this, msg, Constants.AppDisplay);
                 }
             }
             catch (Exception exception)

@@ -72,7 +72,7 @@ namespace LogfileMetaAnalyser
             //check general data vailability
             if (!m_datastore.HasData() || LogReader == null)
             {
-                MessageBox.Show("No data was yet collected. Please let us analyze at least one logfile first!");
+                MessageBox.Show("No data was yet collected. Please let us analyze at least one logfile first!", Constants.AppDisplay);
                 return;
             }
 
@@ -95,7 +95,7 @@ namespace LogfileMetaAnalyser
 
             if (files.Length == 0)
             {
-                MessageBox.Show("No file or file type to filter was selected!");
+                MessageBox.Show("No file or file type to filter was selected!", Constants.AppDisplay);
                 return;
             }
 
