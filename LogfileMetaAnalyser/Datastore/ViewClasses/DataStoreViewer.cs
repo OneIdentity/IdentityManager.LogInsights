@@ -128,8 +128,8 @@ namespace LogfileMetaAnalyser.Datastore
                             if (ownerForm.IsDisposed || ownerForm.Disposing)
                                 return;
 
-                            if (responsibleViewerClass.ContainsKey(key))
-                                responsibleViewerClass[key].ExportView(key);
+                            if (responsibleViewerClass.TryGetValue(key, out var vc))
+                                vc.ExportView(key);
                             else
                             {
                                 var viewer = responsibleViewerClass.Where(v => key.StartsWith(v.Value.BaseKey)).ToArray();
