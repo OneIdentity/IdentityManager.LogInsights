@@ -125,7 +125,7 @@ namespace LogfileMetaAnalyser
                     //    });
 
                     //reading
-                    await foreach (var entry in reader.ReadAsync())
+                    await foreach (var entry in reader.ReadAsync().ConfigureAwait(false))
                     {
                         msg = new TextMessage(entry);
 

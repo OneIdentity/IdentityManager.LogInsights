@@ -184,7 +184,7 @@ namespace LogfileMetaAnalyser
 
             var preloader = new DataPreloader<IReadOnlyList<LogEntry>>(async () =>
             {
-                if (!await enumerator.MoveNextAsync())
+                if (!await enumerator.MoveNextAsync().ConfigureAwait(false))
                     return null;
 
                 return enumerator.Current;

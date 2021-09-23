@@ -106,7 +106,7 @@ namespace LogfileMetaAnalyser.Controls
             }
         }
 
-
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Code", "CAC001:ConfigureAwaitChecker", Justification = "<Pending>")]
         private async void buttonExport_Click(object sender, EventArgs e)
         {
             try
