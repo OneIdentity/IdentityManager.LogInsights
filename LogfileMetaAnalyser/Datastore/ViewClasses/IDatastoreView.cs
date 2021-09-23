@@ -6,7 +6,7 @@ namespace LogfileMetaAnalyser.Datastore
     public interface IDatastoreView
     {
         string BaseKey { get; }
-        DatastoreStructure datastore { set; }
+        DataStore datastore { set; }
         Exporter logfileFilterExporter { set; }
 
         Control.ControlCollection upperPanelControl { set; }

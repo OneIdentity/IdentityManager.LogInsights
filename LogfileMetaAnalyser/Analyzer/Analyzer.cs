@@ -24,7 +24,7 @@ namespace LogfileMetaAnalyser
 
         private int _AnalyzeDOP;
         private ILogReader m_LogReader;
-        public DatastoreStructure datastore = new DatastoreStructure();
+        public DataStore datastore = new DataStore();
         private Helpers.NLog logger;
 
 

@@ -14,7 +14,7 @@ namespace LogfileMetaAnalyser.Detectors
 
     public abstract class DetectorBase
     {
-        public virtual DatastoreStructure _datastore { get; set; }
+        public virtual DataStore _datastore { get; set; }
 
         public TextReadMode textReadMode = TextReadMode.SingleMessage;
         private TextMessageGroup msgGroup = new TextMessageGroup();
@@ -26,7 +26,7 @@ namespace LogfileMetaAnalyser.Detectors
 
         protected Helpers.NLog logger;
 
-        public virtual DatastoreStructure datastore
+        public virtual DataStore datastore
         {
             set { _datastore = value; }
         }
