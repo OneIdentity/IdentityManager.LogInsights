@@ -1,95 +1,89 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
- 
-using LogfileMetaAnalyser.Helpers;
 
 namespace LogfileMetaAnalyser.Datastore
 {
-    public class ProjectionActivity  
+    public class ProjectionActivity : IDataStoreContent
     {
-        public List<Projection> projections = new List<Projection>();
-        public ProjectionActivity()
-        { }
+        public List<Projection> Projections { get; } = new();
 
-
-        private int _NumberOfAdHocProjections = -1;
+        private int _numberOfAdHocProjections = -1;
         public int NumberOfAdHocProjections
         {
             get
             {
-                if (_NumberOfAdHocProjections < 0)
-                    _NumberOfAdHocProjections = projections.Count(t => t.projectionType == ProjectionType.AdHocProvision);
+                if (_numberOfAdHocProjections < 0)
+                    _numberOfAdHocProjections = Projections.Count(t => t.projectionType == ProjectionType.AdHocProvision);
 
-                return _NumberOfAdHocProjections;
+                return _numberOfAdHocProjections;
             }
         }
 
-        private int _NumberOfSyncProjections = -1;
+        private int _numberOfSyncProjections = -1;
         public int NumberOfSyncProjections
         {
             get
             {
-                if (_NumberOfSyncProjections < 0)
-                    _NumberOfSyncProjections = projections.Count(t => t.projectionType != ProjectionType.AdHocProvision);
+                if (_numberOfSyncProjections < 0)
+                    _numberOfSyncProjections = Projections.Count(t => t.projectionType != ProjectionType.AdHocProvision);
 
-                return _NumberOfSyncProjections;
+                return _numberOfSyncProjections;
             }
         }
 
-        private int _NumberOfJournalSetupTotal = -1;
+        private int _numberOfJournalSetupTotal = -1;
         public int NumberOfJournalSetupTotal
         {
             get
             {
-                if (_NumberOfJournalSetupTotal < 0)
-                    _NumberOfJournalSetupTotal = projections
+                if (_numberOfJournalSetupTotal < 0)
+                    _numberOfJournalSetupTotal = Projections
                                                     .Select(p => p.projectionJournal)
                                                     .Where(j => j != null)
                                                     .Sum(j => j.journalSetupElems.Count);  //only the top level
-                return _NumberOfJournalSetupTotal;
+                return _numberOfJournalSetupTotal;
             }
         }
 
-        private int _NumberOfJournalObjectTotal = -1;
+        private int _numberOfJournalObjectTotal = -1;
         public int NumberOfJournalObjectTotal
         {
             get
             {
-                if (_NumberOfJournalObjectTotal < 0)
-                    _NumberOfJournalObjectTotal = projections
+                if (_numberOfJournalObjectTotal < 0)
+                    _numberOfJournalObjectTotal = Projections
                                                     .Select(p => p.projectionJournal)
                                                     .Where(j => j != null)
                                                     .Sum(j => j.journalObjects.Count);  
-                return _NumberOfJournalObjectTotal;
+                return _numberOfJournalObjectTotal;
             }
         }
 
-        private int _NumberOfJournalMessagesTotal = -1;
+        private int _numberOfJournalMessagesTotal = -1;
         public int NumberOfJournalMessagesTotal
         {
             get
             {
-                if (_NumberOfJournalMessagesTotal < 0)
-                    _NumberOfJournalMessagesTotal = projections
+                if (_numberOfJournalMessagesTotal < 0)
+                    _numberOfJournalMessagesTotal = Projections
                                                     .Select(p => p.projectionJournal)
                                                     .Where(j => j != null)
                                                     .Sum(j => j.journalMessages.Count);
-                return _NumberOfJournalMessagesTotal;
+                return _numberOfJournalMessagesTotal;
             }
         }
 
-        private int _NumberOfJournalFailuresTotal = -1;
+        private int _numberOfJournalFailuresTotal = -1;
         public int NumberOfJournalFailuresTotal
         {
             get
             {
-                if (_NumberOfJournalFailuresTotal < 0)
-                    _NumberOfJournalFailuresTotal = projections
+                if (_numberOfJournalFailuresTotal < 0)
+                    _numberOfJournalFailuresTotal = Projections
                                                     .Select(p => p.projectionJournal)
                                                     .Where(j => j != null)
                                                     .Sum(j => j.journalFailures.Count);
-                return _NumberOfJournalFailuresTotal;
+                return _numberOfJournalFailuresTotal;
             }
         }
 
@@ -100,9 +94,8 @@ namespace LogfileMetaAnalyser.Datastore
             if (string.IsNullOrWhiteSpace(spid))
                 return null;
 
-            var res = projections
-                        .Where(p => GetAllSpidsOfProjection(p).Contains(spid))
-                        .FirstOrDefault();
+            var res = Projections
+                .FirstOrDefault(p => GetAllSpidsOfProjection(p).Contains(spid));
 
             if (res == null)
                 return null;
@@ -126,11 +119,11 @@ namespace LogfileMetaAnalyser.Datastore
 
             //apply the scope
             var projectionLst = projectionType == ProjectionType.Unknown ?
-                                                  projections :
+                                                  Projections :
                                                   (
                                                     projectionType == ProjectionType.AdHocProvision ?
-                                                    projections.Where(p => p.projectionType == Datastore.ProjectionType.AdHocProvision) :
-                                                    projections.Where(p => p.projectionType != Datastore.ProjectionType.AdHocProvision)
+                                                    Projections.Where(p => p.projectionType == Datastore.ProjectionType.AdHocProvision) :
+                                                    Projections.Where(p => p.projectionType != Datastore.ProjectionType.AdHocProvision)
                                                   );
 
 
@@ -167,18 +160,20 @@ namespace LogfileMetaAnalyser.Datastore
 
 
             //found somewhere in specificSqlInformation.sqlSessions
-            var selProjections4 = projectionLst.Where((Projection pr) => pr.specificSqlInformation.sqlSessions
+            var selProjections4 = projectionLst.Where((Projection pr) => pr.specificSqlInformation.SqlSessions
                                                                 .Any(sc => uuidList.Contains(sc.uuid))
                                        );
 
             if (includeWholeTree)
                 result.AddRange(selProjections4.SelectMany(p => GetAllSpidsOfProjection(p)));
             else
-                result.AddRange(selProjections4.SelectMany(p => p.specificSqlInformation.sqlSessions.Select(sc => sc.loggerSourceId)));
+                result.AddRange(selProjections4.SelectMany(p => p.specificSqlInformation.SqlSessions.Select(sc => sc.loggerSourceId)));
 
 
             return result.Distinct();
         }
+
+        public bool HasData => Projections.Count > 0;
 
 
         private Dictionary<Projection, List<string>> _cache_GetAllSpidsOfProjection = new Dictionary<Projection, List<string>>();
@@ -196,7 +191,7 @@ namespace LogfileMetaAnalyser.Datastore
 
             _cache_GetAllSpidsOfProjection[proj].AddRange(proj.systemConnectors.Select(sc => sc.loggerSourceId));
             _cache_GetAllSpidsOfProjection[proj].AddRange(proj.projectionSteps.Select(ps => ps.loggerSourceId));
-            _cache_GetAllSpidsOfProjection[proj].AddRange(proj.specificSqlInformation.sqlSessions.Select(ss => ss.loggerSourceId));
+            _cache_GetAllSpidsOfProjection[proj].AddRange(proj.specificSqlInformation.SqlSessions.Select(ss => ss.loggerSourceId));
 
             return (_cache_GetAllSpidsOfProjection[proj]);
         }

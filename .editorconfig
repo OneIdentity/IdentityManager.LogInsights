@@ -27,7 +27,7 @@ csharp_new_line_before_finally = true
 #require members of object initializers to be on the same line
 csharp_new_line_before_members_in_object_initializers = false
 #require braces to be on a new line for lambdas, properties, types, control_blocks, and methods (also known as "Allman" style)
-csharp_new_line_before_open_brace = lambdas, properties, types, control_blocks, methods
+#csharp_new_line_before_open_brace = lambdas, types, control_blocks, methods
 
 #Formatting - organize using options
 
@@ -63,16 +63,16 @@ csharp_preserve_single_line_statements = true
 #Style - Code block preferences
 
 #prefer no curly braces if allowed
-csharp_prefer_braces = false:suggestion
+#csharp_prefer_braces = false:suggestion
 
 #Style - expression bodied member options
 
 #prefer block bodies for accessors
-csharp_style_expression_bodied_accessors = false:silent
+#csharp_style_expression_bodied_accessors = false:silent
 #prefer block bodies for methods
 csharp_style_expression_bodied_methods = false:silent
 #prefer block bodies for properties
-csharp_style_expression_bodied_properties = false:silent
+#csharp_style_expression_bodied_properties = false:silent
 
 #Style - expression level options
 

@@ -1,24 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-
-using LogfileMetaAnalyser.Helpers;
-
 
 namespace LogfileMetaAnalyser.Datastore
 {
-    public class StatisticsStore
+    public class StatisticsStore : IDataStoreContent
     {
-        public List<DetectorStatistic> detectorStatistics = new List<DetectorStatistic>();
-        public List<ParseStatistic> parseStatistic = new List<ParseStatistic>();
+        public List<DetectorStatistic> DetectorStatistics { get; } = new();
+        public List<ParseStatistic> ParseStatistic { get; } = new();
 
-        public int filesParsed
-        {
-            get { return parseStatistic.Count(f => f.readAndParseFileDuration >= 0); }
-        }
+        public int FilesParsed => ParseStatistic.Count(f => f.readAndParseFileDuration >= 0);
 
-
-        public StatisticsStore() { }
-
+        public bool HasData => DetectorStatistics.Count > 0 ||
+                               ParseStatistic.Count > 0;
     }    
 }

@@ -15,13 +15,13 @@ namespace LogfileMetaAnalyser
 {
     public class Exporter
     {
-        private DatastoreStructure datastore;
+        private DataStore datastore;
         private ExportSettings exportSettings;
 
         public event EventHandler<double> OnExportProgressChanged;
 
 
-        public Exporter(DatastoreStructure datastore)
+        public Exporter(DataStore datastore)
         {
             this.datastore = datastore;
             exportSettings = new ExportSettings(datastore);
@@ -43,7 +43,7 @@ namespace LogfileMetaAnalyser
                              
                 //try to preselect ProjectionActivity
                 ProjectionType ptype;
-                string uuid = datastore.projectionActivity.GetUuidByLoggerId(inputMsg.spid, out ptype);
+                string uuid = datastore.ProjectionActivity.GetUuidByLoggerId(inputMsg.spid, out ptype);
                 if (!string.IsNullOrEmpty(uuid))
                 {
                     exportSettings.filterByActivity.isfilterEnabled_ProjectionActivity = true;
@@ -85,7 +85,7 @@ namespace LogfileMetaAnalyser
 
 
             //prepare the export
-            var files = datastore.generalLogData.logfileInformation
+            var files = datastore.GeneralLogData.LogfileInformation
                             .Where(f => frm.exportSettings.inputOutputOptions.includeFiles.Count == 0 ||
                                         frm.exportSettings.inputOutputOptions.includeFiles.Contains(f.Value.filename))
                             .OrderBy(f => f.Value.logfileTimerange_Start)
