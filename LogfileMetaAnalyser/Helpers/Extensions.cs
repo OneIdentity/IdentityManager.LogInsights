@@ -24,7 +24,7 @@ namespace LogfileMetaAnalyser.Helpers
 			// Build lists and return
 			List<T> ret = null;
 
-			await foreach (var item in src)
+			await foreach (var item in src.ConfigureAwait(false))
 			{
 				ret ??= new List<T>(size);
 
