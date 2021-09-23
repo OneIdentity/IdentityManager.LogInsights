@@ -5,6 +5,8 @@ namespace LogfileMetaAnalyser
 {
     class Constants
     {
+        public static string AppDisplay = "Log Insights";
+
         //https://docs.microsoft.com/en-us/dotnet/standard/base-types/regular-expression-language-quick-reference
 
         public static Regex regexTimeStampAtLinestart =

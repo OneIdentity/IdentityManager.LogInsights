@@ -40,8 +40,6 @@
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.filterLogfilesToScopeTheImportantStuffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.infoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.debugDatastoreToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
@@ -64,8 +62,7 @@
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem,
-            this.exportToolStripMenuItem,
-            this.helpToolStripMenuItem});
+            this.exportToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(7, 2, 0, 2);
@@ -86,26 +83,27 @@
             // loadLogsToolStripMenuItem
             // 
             this.loadLogsToolStripMenuItem.Name = "loadLogsToolStripMenuItem";
-            this.loadLogsToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
+            this.loadLogsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.loadLogsToolStripMenuItem.Text = "Load logs...";
             this.loadLogsToolStripMenuItem.Click += new System.EventHandler(this.loadLogsToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(131, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
             // exportToolStripMenuItem
             // 
             this.exportToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.filterLogfilesToScopeTheImportantStuffToolStripMenuItem});
+            this.filterLogfilesToScopeTheImportantStuffToolStripMenuItem,
+            this.debugDatastoreToolStripMenuItem});
             this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
             this.exportToolStripMenuItem.Size = new System.Drawing.Size(53, 20);
             this.exportToolStripMenuItem.Text = "Export";
@@ -117,25 +115,10 @@
             this.filterLogfilesToScopeTheImportantStuffToolStripMenuItem.Text = "Filter Logfiles to scope the important stuff";
             this.filterLogfilesToScopeTheImportantStuffToolStripMenuItem.Click += new System.EventHandler(this.filterLogfilesToScopeTheImportantStuffToolStripMenuItem_Click);
             // 
-            // helpToolStripMenuItem
-            // 
-            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.infoToolStripMenuItem,
-            this.debugDatastoreToolStripMenuItem});
-            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
-            this.helpToolStripMenuItem.Text = "Help";
-            // 
-            // infoToolStripMenuItem
-            // 
-            this.infoToolStripMenuItem.Name = "infoToolStripMenuItem";
-            this.infoToolStripMenuItem.Size = new System.Drawing.Size(272, 22);
-            this.infoToolStripMenuItem.Text = "Info";
-            // 
             // debugDatastoreToolStripMenuItem
             // 
             this.debugDatastoreToolStripMenuItem.Name = "debugDatastoreToolStripMenuItem";
-            this.debugDatastoreToolStripMenuItem.Size = new System.Drawing.Size(272, 22);
+            this.debugDatastoreToolStripMenuItem.Size = new System.Drawing.Size(295, 22);
             this.debugDatastoreToolStripMenuItem.Text = "Export data store (for debug purpose)";
             this.debugDatastoreToolStripMenuItem.Click += new System.EventHandler(this.debugDatastoreToolStripMenuItem_Click);
             // 
@@ -155,7 +138,7 @@
             // toolStripStatusLabel
             // 
             this.toolStripStatusLabel.Name = "toolStripStatusLabel";
-            this.toolStripStatusLabel.Size = new System.Drawing.Size(10, 19);
+            this.toolStripStatusLabel.Size = new System.Drawing.Size(10, 17);
             this.toolStripStatusLabel.Spring = true;
             this.toolStripStatusLabel.Text = " ";
             // 
