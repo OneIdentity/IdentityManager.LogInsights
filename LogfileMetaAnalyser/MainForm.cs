@@ -26,7 +26,7 @@ namespace LogfileMetaAnalyser
             _activeReader = reader;
 
             _analyzerCore.Initialize(_activeReader);
-            // todo toolStripStatusLabel.Text = analyzerCore.filesToAnalyze.Length + " files to analyze";
+            
             RefreshStatusLabel(1);
 
             StartAnalysis();
@@ -139,39 +139,33 @@ namespace LogfileMetaAnalyser
 
         public void RefreshStatusLabel(byte phase)
         {
-            // TODO
-            //string basetip = "";
+            string basetip = "";
 
-            //if (_analyzerCore != null && _analyzerCore.filesToAnalyze != null && _analyzerCore.filesToAnalyze.Any())
-            //{
-            //    if (_analyzerCore.filesToAnalyze.Length == 1)
-            //        basetip = "1 file to analyze: " + _analyzerCore.filesToAnalyze[0];
-            //    else
-            //        basetip = _analyzerCore.filesToAnalyze.Length + " files to analyze";
-            //}
+            if (_activeReader != null)
+                basetip = $"Analyzing logs with ({_activeReader.Display})...";
 
-            //switch (phase)
-            //{
-            //    case 1:
-            //        if (_analyzerCore == null || _analyzerCore.filesToAnalyze.Length == 0)
-            //        {
-            //            toolStripStatusLabel.Text = "ready";
-            //            toolStripProgressBar1.Visible = false;
-            //        }
-            //        else
-            //            toolStripStatusLabel.Text = basetip;
+            switch (phase)
+            {
+                case 1:
+                    if (_analyzerCore == null)
+                    {
+                        toolStripStatusLabel.Text = "ready";
+                        toolStripProgressBar1.Visible = false;
+                    }
+                    else
+                        toolStripStatusLabel.Text = basetip;
 
-            //        break;
+                    break;
 
-            //    case 2:
-            //        toolStripStatusLabel.Text = basetip + "; analyzing, please wait ...";
-            //        break;
+                case 2:
+                    toolStripStatusLabel.Text = basetip + " please wait...";
+                    break;
 
-            //    case 3:
-            //        toolStripStatusLabel.Text = basetip + "; done!";
-            //        toolStripProgressBar1.Visible = false;
-            //        break;
-            //}
+                case 3:
+                    toolStripStatusLabel.Text = basetip + " done!";
+                    toolStripProgressBar1.Visible = false;
+                    break;
+            }
         }
 
         private void DragEnterMethod(object sender, DragEventArgs e)
@@ -213,28 +207,18 @@ namespace LogfileMetaAnalyser
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.Close();
+            try
+            {
+
+                Close();
+            }
+            catch (Exception ex)
+            {
+                ExceptionHandler.Instance.HandleException(ex);
+            }
         }
 
-        //private void loadDirectoryToolStripMenuItem_Click(object sender, EventArgs e)
-        //{
-        //    folderBrowserDialog1.ShowNewFolderButton = false;
-        //    folderBrowserDialog1.RootFolder = Environment.SpecialFolder.Desktop;
-        //    if (_activeReader == null) // first open
-        //        folderBrowserDialog1.SelectedPath = "C:\\";
-
-        //    if (filesOrDirectoryToLoad.Length == 0 || MessageBox.Show("Do you want to start a new analysis?", "Discard current report?", MessageBoxButtons.YesNo) == DialogResult.Yes)
-        //        if (folderBrowserDialog1.ShowDialog() == DialogResult.OK && folderBrowserDialog1.SelectedPath != "")
-        //            filesOrDirectoryToLoad = new string[] { folderBrowserDialog1.SelectedPath};
-        //}
-
-        //private void loadFilesToolStripMenuItem_Click(object sender, EventArgs e)
-        //{
-        //    if (filesOrDirectoryToLoad.Length == 0 || MessageBox.Show("Do you want to start a new analysis?", "Discard current report?", MessageBoxButtons.YesNo) == DialogResult.Yes)
-        //        if (openFileDialog1.ShowDialog() == DialogResult.OK)
-        //            filesOrDirectoryToLoad = openFileDialog1.FileNames;
-        //}
-
+     
         private async void StartAnalysis()
         {
             if (_activeReader == null)
@@ -251,11 +235,13 @@ namespace LogfileMetaAnalyser
         {
             try
             {
-                TextBoxFrm fm = new TextBoxFrm();
-                fm.SetupLabel($"Data Store JSON export");
-                fm.SetupData(_datastoreViewer.ExportAsJson());            
+                using (var fm = new TextBoxFrm())
+                {
+                    fm.SetupLabel($"Data Store JSON export");
+                    fm.SetupData(_datastoreViewer.ExportAsJson());
 
-                fm.ShowDialog();
+                    fm.ShowDialog(this);
+                }
             }
             catch (Exception exception)
             {

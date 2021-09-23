@@ -106,7 +106,7 @@ namespace LogfileMetaAnalyser.LogReader
         private class _RingBuffer<T> : IEnumerable<T>
         {
             private readonly int m_Length;
-            private readonly Queue<T> m_Buffer; // TODO real ringe buffer based on an array
+            private readonly Queue<T> m_Buffer; // TODO real ring buffer based on an array
 
             internal _RingBuffer(int length, T[] initialData)
             {
