@@ -143,17 +143,14 @@ namespace LogfileMetaAnalyser.Datastore
             ContextLinesUC contextLinesUc;
             Tuple<MultiListViewUC, ContextLinesUC> guiContent;
 
-
             if (key == $"{BaseKey}/byCompTaskPerf")
                 guiContent = ListJsJobsPerformance(key);
             else
                 guiContent = ListJsJobsbyTable(key);
 
-
             uc = guiContent.Item1;
-            contextLinesUc = guiContent.Item2;
 
-            uc.Resume();
+            contextLinesUc = guiContent.Item2;
 
             if (uc.HasData())
             {
