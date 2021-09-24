@@ -69,6 +69,8 @@ namespace LogfileMetaAnalyser.Datastore
             ContextLinesUC contextLinesUc = new ContextLinesUC(LogfileFilterExporter);
             var dsref = Datastore.GetOrAdd<SqlInformation>();
 
+            uc.Suspend();
+
             if (key == BaseKey)
             {
                 uc.SetupLayout(1);
@@ -223,9 +225,10 @@ namespace LogfileMetaAnalyser.Datastore
                 }
             }
 
-            if (uc != null && uc.HasData())
+            uc.Resume();
+
+            if (uc.HasData())
             {
-                uc.Resume();
                 UpperPanelControl.Add(uc);
             }
 
