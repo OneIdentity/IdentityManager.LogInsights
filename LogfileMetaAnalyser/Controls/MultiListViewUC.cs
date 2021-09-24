@@ -11,7 +11,7 @@ namespace LogfileMetaAnalyser.Controls
     public partial class MultiListViewUC : UserControl
     {
         public List<ListViewUC> listOflistviewUC = new List<ListViewUC>();
-        public bool isSuspended = false;
+        private int _suspended = 0;
 
         public MultiListViewUC()
         {
@@ -27,7 +27,7 @@ namespace LogfileMetaAnalyser.Controls
             flowLayoutPanel1.Resize += new EventHandler((object o, EventArgs a) => { ReArrangeSave(); });
         }
 
-        public void SetupLayout(int numberOfListviews, bool toSuspend=true)
+        public void SetupLayout(int numberOfListviews)
         {
             for (int i = 1; i <= numberOfListviews; i++)
             {
@@ -41,9 +41,6 @@ namespace LogfileMetaAnalyser.Controls
                 uc.DataChanged += new EventHandler((object o, EventArgs a) => { ReArrangeSave(); });
                 uc.VisibleChanged += new EventHandler((object o, EventArgs a) => { ReArrangeSave(); });
             }
-
-            if (toSuspend)
-                Suspend();
         }
 
         public void SetupSubLevel(int ucNumber, int level)
@@ -96,31 +93,41 @@ namespace LogfileMetaAnalyser.Controls
 
         public void Suspend()
         {
-            if (isSuspended)
-                return;
+            if (_suspended == 0)
+            {
+                this.SuspendLayout();
 
-            this.SuspendLayout();
-            foreach (var cnt in listOflistviewUC)
-                cnt.Suspend();
+                listOflistviewUC.ForEach(c=> c.Suspend());
+            }
 
-            isSuspended = true;
+            _suspended++;
         }
+
+        public bool IsSuspended => _suspended > 0;
 
         public void Resume()
         {
-            ReArrange();
-            
-            foreach (var cnt in listOflistviewUC)
-                cnt.Resume();
-                       
-            this.ResumeLayout();
+            if (_suspended == 0)
+                throw new Exception("Control is not suspended.");
 
-            isSuspended = false;
+            _suspended--;
+
+            if (_suspended == 0)
+            {
+                ReArrange();
+
+                foreach (var cnt in listOflistviewUC)
+                {
+                    if (cnt.IsSuspended) cnt.Resume();
+                }
+
+                this.ResumeLayout();
+            }
         }
 
         private void ReArrangeSave()
         {
-            if (isSuspended)
+            if (IsSuspended)
                 return;
 
             try
