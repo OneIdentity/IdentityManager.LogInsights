@@ -60,7 +60,7 @@ Download the [.NET 5 SDK](https://dotnet.microsoft.com/download).
    ```
 3. Run the program
    ```powershell
-    dotnet run --project LogfileMetaAnalyser\LogfileMetaAnalyser.csproj
+    dotnet run --project LogInsights\LogInsights.csproj
    ```
 
 Or open it in Visual Studio and run it from there.

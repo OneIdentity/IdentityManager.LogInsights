@@ -1,0 +1,62 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <OutputType>WinExe</OutputType>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+    <StartupObject>LogInsights.Program</StartupObject>
+    <ApplicationIcon>AppIcon.ico</ApplicationIcon>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <Company>One Identity LLC.</Company>
+    <Copyright>© 2021 One Identity LLC.  All rights reserved.</Copyright>
+    <PackageProjectUrl>https://github.com/OneIdentity/IdentityManager.LogInsights</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/OneIdentity/IdentityManager.LogInsights</RepositoryUrl>
+    <AssemblyName>LogInsights</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="TextReading\ReadLogByBlock.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Azure.ApplicationInsights.Query" Version="1.0.0" />
+    <PackageReference Include="GitVersion.MsBuild" Version="5.7.0">
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="NLog" Version="4.7.11" />
+    <PackageReference Include="System.Linq.Async" Version="5.0.0" />
+    <PackageReference Include="ConfigureAwaitChecker.Analyzer" Version="5.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Controls\ContextLinesUC.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\ListViewUC.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\MultiListViewUC.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\TimeTraceUC.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\WaitUC.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\WelcomeUC.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="AppIcon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="nlog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Composition\" />
+  </ItemGroup>
+</Project>
