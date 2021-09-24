@@ -118,88 +118,97 @@ namespace LogfileMetaAnalyser.Datastore
                 MultiListViewUC uc = new MultiListViewUC();
                 ContextLinesUC contextLinesUc = new ContextLinesUC(LogfileFilterExporter);
 
-                uc.SetupLayout(2);
-
-
-                uc[0].SetupCaption(
-                    "General information about this analysis - attention: all information are captured after a read optimization (not really every single line is fully parsed!)");
-                uc[0].SetupHeaders(new string[] {"Attribute", "Value"});
-
-                uc[0].AddItemRow("gt1",
-                    new string[]
-                        {"overall log start (earliest event)", dsref.LogDataOverallTimeRangeStart.ToString("G")});
-                uc[0].AddItemRow("gt2",
-                    new string[] {"overall log end (latest event)", dsref.LogDataOverallTimeRangeFinish.ToString("G")});
-                uc[0].AddItemRow("gt3",
-                    new string[]
-                    {
-                        "overall log time span ",
-                        (dsref.LogDataOverallTimeRangeFinish - dsref.LogDataOverallTimeRangeStart).ToHumanString()
-                    });
-                uc[0].AddItemRow("gl4", new string[] {"most detailed log level", dsref.mostDetailedLogLevel.ToString()},
-                    "", GetBgColor(dsref.mostDetailedLogLevel.IsGreater(LogLevel.Info)));
-
-                foreach (var kp in dsref.NumberOfEntriesPerLoglevel.OrderBy(t => (int)t.Value))
-                    uc[0].AddItemRow("gnl" + kp.Key.ToString(), new string[]
-                    {
-                        $"number of log entries for log level '{kp.Key.ToString()}'",
-                        kp.Value.ToString("n0")
-                    });
-
-                foreach (var kp in dsref.NumberOflogSources.OrderBy(t => t.Key))
-                    uc[0].AddItemRow("gns" + kp.Key.ToString(), new string[]
-                    {
-                        $"number of entries for log message source '{kp.Key.ToString()}'",
-                        kp.Value.ToString("n0")
-                    });
-
-
-                uc[1].SetupCaption("Analyzed files");
-                uc[1].SetupHeaders(new string[]
+                try
                 {
-                    "File name", "Log level", "Start", "End", "Duration", "File size", "Bytes read (opt.)",
-                    "Cnt lines read (opt.)", "Cnt messages read (opt.)", "avg chars per line",
-                    "avg chars per block message", "avg lines per block message"
-                });
+                    uc.Suspend();
 
-                foreach (var kp in dsref.LogfileInformation)
-                    uc[1].AddItemRow(kp.Key, new string[]
+                    uc.SetupLayout(2);
+
+                    uc[0].SetupCaption(
+                        "General information about this analysis - attention: all information are captured after a read optimization (not really every single line is fully parsed!)");
+                    uc[0].SetupHeaders(new string[] {"Attribute", "Value"});
+
+                    uc[0].AddItemRow("gt1",
+                        new string[]
+                            {"overall log start (earliest event)", dsref.LogDataOverallTimeRangeStart.ToString("G")});
+                    uc[0].AddItemRow("gt2",
+                        new string[]
+                            {"overall log end (latest event)", dsref.LogDataOverallTimeRangeFinish.ToString("G")});
+                    uc[0].AddItemRow("gt3",
+                        new string[]
+                        {
+                            "overall log time span ",
+                            (dsref.LogDataOverallTimeRangeFinish - dsref.LogDataOverallTimeRangeStart).ToHumanString()
+                        });
+                    uc[0].AddItemRow("gl4",
+                        new string[] {"most detailed log level", dsref.mostDetailedLogLevel.ToString()},
+                        "", GetBgColor(dsref.mostDetailedLogLevel.IsGreater(LogLevel.Info)));
+
+                    foreach (var kp in dsref.NumberOfEntriesPerLoglevel.OrderBy(t => (int)t.Value))
+                        uc[0].AddItemRow("gnl" + kp.Key.ToString(), new string[]
+                        {
+                            $"number of log entries for log level '{kp.Key.ToString()}'",
+                            kp.Value.ToString("n0")
+                        });
+
+                    foreach (var kp in dsref.NumberOflogSources.OrderBy(t => t.Key))
+                        uc[0].AddItemRow("gns" + kp.Key.ToString(), new string[]
+                        {
+                            $"number of entries for log message source '{kp.Key.ToString()}'",
+                            kp.Value.ToString("n0")
+                        });
+
+
+                    uc[1].SetupCaption("Analyzed files");
+                    uc[1].SetupHeaders(new string[]
                     {
-                        kp.Value.filename,
-                        kp.Value.mostDetailedLogLevel.ToString(),
-                        kp.Value.logfileTimerange_Start.ToString("G"),
-                        kp.Value.logfileTimerange_Finish.ToString("G"),
-                        (kp.Value.logfileTimerange_Finish - kp.Value.logfileTimerange_Start).ToHumanString(),
-                        FileHelper.ToHumanBytes(kp.Value.filesize),
-                        FileHelper.ToHumanBytes(kp.Value.charsRead),
-                        kp.Value.cntLines.ToString(),
-                        kp.Value.cntBlockMsgs.ToString(),
-                        kp.Value.avgCharsPerLine.ToString(1),
-                        kp.Value.avgCharsPerBlockmsg.ToString(1),
-                        kp.Value.avgLinesPerBlockmsg.ToString(1)
+                        "File name", "Log level", "Start", "End", "Duration", "File size", "Bytes read (opt.)",
+                        "Cnt lines read (opt.)", "Cnt messages read (opt.)", "avg chars per line",
+                        "avg chars per block message", "avg lines per block message"
                     });
 
-
-                uc[1].ItemClicked += new ListViewItemSelectionChangedEventHandler(
-                    (object o, ListViewItemSelectionChangedEventArgs args) =>
-                    {
-                        try
+                    foreach (var kp in dsref.LogfileInformation)
+                        uc[1].AddItemRow(kp.Key, new string[]
                         {
-                            string k = args.Item.Name;
-                            var firstmsg = dsref.LogfileInformation[k].firstMessage;
+                            kp.Value.filename,
+                            kp.Value.mostDetailedLogLevel.ToString(),
+                            kp.Value.logfileTimerange_Start.ToString("G"),
+                            kp.Value.logfileTimerange_Finish.ToString("G"),
+                            (kp.Value.logfileTimerange_Finish - kp.Value.logfileTimerange_Start).ToHumanString(),
+                            FileHelper.ToHumanBytes(kp.Value.filesize),
+                            FileHelper.ToHumanBytes(kp.Value.charsRead),
+                            kp.Value.cntLines.ToString(),
+                            kp.Value.cntBlockMsgs.ToString(),
+                            kp.Value.avgCharsPerLine.ToString(1),
+                            kp.Value.avgCharsPerBlockmsg.ToString(1),
+                            kp.Value.avgLinesPerBlockmsg.ToString(1)
+                        });
 
-                            if (firstmsg != null)
-                                contextLinesUc.SetData(firstmsg);
-                        }
-                        catch (Exception e)
+
+                    uc[1].ItemClicked += new ListViewItemSelectionChangedEventHandler(
+                        (object o, ListViewItemSelectionChangedEventArgs args) =>
                         {
-                            ExceptionHandler.Instance.HandleException(e);
-                        }
-                    });
+                            try
+                            {
+                                string k = args.Item.Name;
+                                var firstmsg = dsref.LogfileInformation[k].firstMessage;
 
-                uc.Resume();
-                UpperPanelControl.Add(uc);
-                LowerPanelControl.Add(contextLinesUc);
+                                if (firstmsg != null)
+                                    contextLinesUc.SetData(firstmsg);
+                            }
+                            catch (Exception e)
+                            {
+                                ExceptionHandler.Instance.HandleException(e);
+                            }
+                        });
+
+                    UpperPanelControl.Add(uc);
+                    LowerPanelControl.Add(contextLinesUc);
+                }
+                finally
+                {
+                    uc.Resume();
+                }
             } //gen. information
 
 
