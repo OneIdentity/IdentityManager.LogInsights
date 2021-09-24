@@ -36,5 +36,11 @@ namespace LogInsights.LogReader
             get => TryGetValue(nameof(TimeSpan), out var ret) ? ret as string : string.Empty;
             set => this[nameof(TimeSpan)] = value;
         }
+
+        public string CsvFile
+        {
+            get => TryGetValue(nameof(CsvFile), out var ret) ? ret as string : string.Empty;
+            set => this[nameof(CsvFile)] = value;
+        }
     }
 }
