@@ -7,6 +7,7 @@ using LogfileMetaAnalyser.Helpers;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace LogfileMetaAnalyser.Controls
@@ -16,7 +17,7 @@ namespace LogfileMetaAnalyser.Controls
         public event ListViewItemSelectionChangedEventHandler ItemClicked;
         public event EventHandler DataChanged;
         public int CountDataLines;
-        private bool _bSuspended = false; 
+        private int _iSuspended = 0; 
 
         private string _NoDataMessage = " < No data to display > ";
         public string NoDataMessage
@@ -91,8 +92,6 @@ namespace LogfileMetaAnalyser.Controls
 
         public void SetupCaption(string s)
         {
-            Suspend();
-
             if (!string.IsNullOrEmpty(s))
                 Visible = true;
 
@@ -110,8 +109,6 @@ namespace LogfileMetaAnalyser.Controls
 
         public void SetupHeaders(string[] headers)
         {
-            Suspend();
-
             Visible = true;
 
             listView.Columns.AddRange(headers.Select(h => new System.Windows.Forms.ColumnHeader() {Text = h }).ToArray());
@@ -144,8 +141,6 @@ namespace LogfileMetaAnalyser.Controls
 
         public void AddItemRow(string keyName, string [] columnValues, string group = "", System.Drawing.Color backColor = new System.Drawing.Color())
         {
-            Suspend();
-
             SwitchNoDataMessage(false);
 
             ListViewItem listViewItem = new ListViewItem(columnValues, -1);
@@ -170,30 +165,35 @@ namespace LogfileMetaAnalyser.Controls
 
         public void Suspend()
         {
-            if (_bSuspended)
-                return;
+            if (_iSuspended == 0)
+            {
+                SuspendLayout();
+                listView.SuspendLayout();
+                listView.BeginUpdate();
+            }
 
-            _bSuspended = true;
-
-            SuspendLayout();
-            listView.SuspendLayout();
-            listView.BeginUpdate();
+            _iSuspended++;
         }
+
+        public bool IsSuspended => _iSuspended > 0;
 
         public void Resume()
         {
-            if (!_bSuspended)
-                return;
+            if (_iSuspended == 0)
+                throw new Exception("Control is not suspended.");
 
-            listView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
-            listView.Enabled = GetRowCount() > 0;
+            _iSuspended--;
 
-            listView.EndUpdate();
-            listView.ResumeLayout();
-            ResumeLayout();
+            if (_iSuspended == 0)
+            {
+                listView.AutoResizeColumns(ColumnHeaderAutoResizeStyle.HeaderSize);
+                listView.Enabled = GetRowCount() > 0;
 
-            _bSuspended = false;
-        }
+                listView.EndUpdate();
+                listView.ResumeLayout();
+                ResumeLayout();
+            }
+         }
 
         public void Clear(bool all = false)
         {
