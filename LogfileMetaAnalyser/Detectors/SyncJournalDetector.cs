@@ -353,7 +353,7 @@ namespace LogfileMetaAnalyser.Detectors
             if (!_isEnabled)
                 return;
 
-            DateTime procMsgStartpoint = DateTime.Now; 
+            long tcStart = Environment.TickCount64;
 
             //basic filter, we only need the sql log
             if ( msg == null ||
@@ -464,7 +464,7 @@ namespace LogfileMetaAnalyser.Detectors
             ///change object
             
 
-            detectorStats.parseDuration += (DateTime.Now - procMsgStartpoint).TotalMilliseconds;
+            detectorStats.parseDuration += new TimeSpan(Environment.TickCount64 -tcStart).TotalMilliseconds;
         }
 
     }

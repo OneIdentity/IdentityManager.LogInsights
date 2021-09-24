@@ -280,7 +280,7 @@ namespace LogfileMetaAnalyser.Detectors
             if (!_isEnabled)
                 return;
 			
-			DateTime procMsgStartpoint = DateTime.Now;
+			long tcStart = Environment.TickCount64;
 
             //if (msg != null && (msg.loggerSource != "ProjectorEngine" && !msg.loggerSource.StartsWith("SystemCon")))
             if (msg != null && (msg.spid == "" || !msg.loggerSource.StartsWith("SystemCon")))
@@ -315,7 +315,7 @@ namespace LogfileMetaAnalyser.Detectors
                     ret = _HandleSystemConnectorMessages(msg, regex_ReloadObject_SystemConnector_Start, regex_ReloadObject_SystemConnector_Done, QueryByEnum.ReloadObject);
             }
 
-            detectorStats.parseDuration += (DateTime.Now - procMsgStartpoint).TotalMilliseconds;
+            detectorStats.parseDuration += new TimeSpan(Environment.TickCount64 - tcStart).TotalMilliseconds;
         }
         
         

@@ -67,7 +67,7 @@ namespace LogfileMetaAnalyser.Detectors
         {
             logger.Debug("entering FinalizeDetector()");
 
-            DateTime finStartpoint = DateTime.Now;
+            long tcStart = Environment.TickCount64;
 
             var generalSqlInformation = _datastore.GetOrAdd<SqlInformation>();
             var projectionActivity = _datastore.GetOrAdd<ProjectionActivity>();
@@ -175,7 +175,7 @@ namespace LogfileMetaAnalyser.Detectors
             //stats
             detectorStats.detectorName = string.Format("{0} <{1}>", this.GetType().Name, this.identifier);
             detectorStats.numberOfDetections += 4 + generalSqlInformation.SqlSessions.Count;
-            detectorStats.finalizeDuration = (DateTime.Now - finStartpoint).TotalMilliseconds;
+            detectorStats.finalizeDuration = new TimeSpan(Environment.TickCount64 - tcStart).TotalMilliseconds;
             statisticsStore.DetectorStatistics.Add(detectorStats);
             logger.Debug(detectorStats.ToString());
 
@@ -189,7 +189,7 @@ namespace LogfileMetaAnalyser.Detectors
             if (!_isEnabled)
                 return;
 
-			DateTime procMsgStartpoint = DateTime.Now;
+			long tcStart = Environment.TickCount64;
 			
             if (msg.loggerSource != "SqlLog" || msg.spid == "")
                 return;
@@ -333,7 +333,7 @@ namespace LogfileMetaAnalyser.Detectors
                     sqlSessionInfo[msg.spid].longRunningStatements.Add(sqlcmd); 
             }
 			
-			detectorStats.parseDuration += (DateTime.Now - procMsgStartpoint).TotalMilliseconds;			
+			detectorStats.parseDuration += new TimeSpan(Environment.TickCount64 - tcStart).TotalMilliseconds;			
 		}
 
 
