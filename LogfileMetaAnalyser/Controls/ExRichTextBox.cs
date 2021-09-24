@@ -84,7 +84,7 @@ namespace LogfileMetaAnalyser.Controls
 
 
 
-        #region prtected members
+        #region protected members
 
         protected override void OnPaint(PaintEventArgs e)
         {

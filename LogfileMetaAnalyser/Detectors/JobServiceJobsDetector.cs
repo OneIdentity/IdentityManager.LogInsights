@@ -78,7 +78,8 @@ namespace LogfileMetaAnalyser.Detectors
         public void FinalizeDetector()
         {
             logger.Debug("entering FinalizeDetector()");
-            DateTime finStartpoint = DateTime.Now;
+
+            long tcStart = Environment.TickCount64;
 
             var jobServiceActivities = _datastore.GetOrAdd<JobServiceActivity>();
             var statistics = _datastore.GetOrAdd<StatisticsStore>();
@@ -95,7 +96,7 @@ namespace LogfileMetaAnalyser.Detectors
             //stats
             detectorStats.detectorName = string.Format("{0} <{1}>", this.GetType().Name, this.identifier);
             detectorStats.numberOfDetections = jobServiceActivities.JobServiceJobs.Count;
-            detectorStats.finalizeDuration = (DateTime.Now - finStartpoint).TotalMilliseconds;
+            detectorStats.finalizeDuration = new TimeSpan(Environment.TickCount64 - tcStart).TotalMilliseconds;
             statistics.DetectorStatistics.Add(detectorStats);
             logger.Debug(detectorStats.ToString());
 
@@ -116,7 +117,7 @@ namespace LogfileMetaAnalyser.Detectors
             if (msg.loggerSource != "Jobservice" /* && msg.loggerSource != "SqlLog" */ )
                 return;
 
-            DateTime procMsgStartpoint = DateTime.Now;
+            long tcStart = Environment.TickCount64;
 
             var rt = ProcessMessageBase(ref msg);
             if (rt != null)
@@ -268,7 +269,7 @@ namespace LogfileMetaAnalyser.Detectors
             }
             finally
             {
-                detectorStats.parseDuration += (DateTime.Now - procMsgStartpoint).TotalMilliseconds;
+                detectorStats.parseDuration += new TimeSpan(Environment.TickCount64 - tcStart).TotalMilliseconds;
             }
         }
     }

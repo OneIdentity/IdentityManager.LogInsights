@@ -103,7 +103,7 @@ namespace LogfileMetaAnalyser.LogReader
         /// </summary>
         public override string Display => m_BaseReader.Display;
 
-        private class _RingBuffer<T> : IEnumerable<T>
+        private class _RingBuffer<T> : IEnumerable<T>, ICollection<T>
         {
             private readonly int m_Length;
             private readonly Queue<T> m_Buffer; // TODO real ring buffer based on an array
@@ -120,6 +120,42 @@ namespace LogfileMetaAnalyser.LogReader
                 
                 while (m_Buffer.Count > m_Length)
                     m_Buffer.Dequeue();
+            }
+
+            public void Clear()
+            {
+                m_Buffer.Clear();
+            }
+
+            public bool Contains(T item)
+            {
+                return m_Buffer.Contains(item);
+            }
+
+            public void CopyTo(T[] array, int arrayIndex)
+            {
+                m_Buffer.CopyTo(array, arrayIndex);
+            }
+
+            public bool Remove(T item)
+            {
+                throw new InvalidOperationException();
+            }
+
+            public int Count
+            {
+                get
+                {
+                    return m_Buffer.Count;
+                }
+            }
+
+            public bool IsReadOnly
+            {
+                get
+                {
+                    return false;
+                }
             }
 
             internal T Pop()
@@ -140,6 +176,11 @@ namespace LogfileMetaAnalyser.LogReader
             IEnumerator IEnumerable.GetEnumerator()
             {
                 return GetEnumerator();
+            }
+
+            void ICollection<T>.Add(T item)
+            {
+                Add(item);
             }
         }
 
