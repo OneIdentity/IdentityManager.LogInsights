@@ -59,8 +59,8 @@ namespace LogfileMetaAnalyser.Detectors
             logger.Debug("entering FinalizeDetector()");
             isFinalizing = true;
             ProcessMessage(null);
-			
-			DateTime finStartpoint = DateTime.Now;
+
+            long tcStart = Environment.TickCount64;
 
             foreach (IdMatches m in idmatches.Values)
             {
@@ -75,7 +75,7 @@ namespace LogfileMetaAnalyser.Detectors
             
             //stats
             detectorStats.detectorName = string.Format("{0} <{1}>", this.GetType().Name, this.identifier);
-            detectorStats.finalizeDuration = (DateTime.Now - finStartpoint).TotalMilliseconds;
+            detectorStats.finalizeDuration = new TimeSpan(Environment.TickCount64 -tcStart).TotalMilliseconds;
             detectorStats.numberOfDetections = 0;
             _datastore.GetOrAdd<StatisticsStore>().DetectorStatistics.Add(detectorStats);
 
@@ -89,8 +89,8 @@ namespace LogfileMetaAnalyser.Detectors
             if (!_isEnabled)
                 return;
 
-			DateTime procMsgStartpoint = DateTime.Now;
-			
+            long tcStart = Environment.TickCount64;
+
             var rt = ProcessMessageBase(ref msg);
             if (rt != null)
                 foreach (var xmsg in rt)
@@ -129,7 +129,7 @@ namespace LogfileMetaAnalyser.Detectors
                 
             }
 			
-			detectorStats.parseDuration += (DateTime.Now - procMsgStartpoint).TotalMilliseconds;
+			detectorStats.parseDuration += new TimeSpan(Environment.TickCount64 - tcStart).TotalMilliseconds;
         }
 
         internal class IdMatches

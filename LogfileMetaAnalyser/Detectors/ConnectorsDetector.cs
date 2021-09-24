@@ -55,7 +55,7 @@ namespace LogfileMetaAnalyser.Detectors
         public void FinalizeDetector()
         {
             logger.Debug("entering FinalizeDetector()");
-			DateTime finStartpoint = DateTime.Now;
+			long tcStart = Environment.TickCount64;
 
             var projectionActivity = _datastore.GetOrAdd<ProjectionActivity>();
             var statisticsStore = _datastore.GetOrAdd<StatisticsStore>();
@@ -122,7 +122,7 @@ namespace LogfileMetaAnalyser.Detectors
 
             //stats
             detectorStats.detectorName = string.Format("{0} <{1}>", this.GetType().Name, this.identifier);
-            detectorStats.finalizeDuration = (DateTime.Now - finStartpoint).TotalMilliseconds;
+            detectorStats.finalizeDuration = new TimeSpan( Environment.TickCount64 - tcStart).TotalMilliseconds;
             statisticsStore.DetectorStatistics.Add(detectorStats);
             logger.Debug(detectorStats.ToString());
 

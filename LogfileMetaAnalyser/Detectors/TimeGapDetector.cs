@@ -50,7 +50,7 @@ namespace LogfileMetaAnalyser.Detectors
         {
             logger.Debug("entering FinalizeDetector()");
 
-            DateTime finStartpoint = DateTime.Now;
+            long tcStart = Environment.TickCount64;
 
             var generalLogData = _datastore.GetOrAdd<GeneralLogData>();
             var statisticsStore = _datastore.GetOrAdd<StatisticsStore>();
@@ -66,7 +66,7 @@ namespace LogfileMetaAnalyser.Detectors
             //stats
             detectorStats.detectorName = string.Format("{0} <{1}>", this.GetType().Name, this.identifier);
             detectorStats.numberOfDetections = generalLogData.TimeGaps.Count;
-            detectorStats.finalizeDuration = (DateTime.Now - finStartpoint).TotalMilliseconds;
+            detectorStats.finalizeDuration = new TimeSpan( Environment.TickCount64 -tcStart).TotalMilliseconds;
             statisticsStore.DetectorStatistics.Add(detectorStats);
             logger.Debug(detectorStats.ToString());
 
@@ -107,7 +107,7 @@ namespace LogfileMetaAnalyser.Detectors
             if (!_isEnabled)
                 return;
 
-			DateTime procMsgStartpoint = DateTime.Now;
+			long tcStart = Environment.TickCount64;
 
             var rt = ProcessMessageBase(ref msg);
             if (rt != null)
@@ -145,8 +145,10 @@ namespace LogfileMetaAnalyser.Detectors
 
 
             CurrentLogfileTime = currentTime;
+
+            long tcEnd = Environment.TickCount64;
 			
-			detectorStats.parseDuration += (DateTime.Now - procMsgStartpoint).TotalMilliseconds;			
+			detectorStats.parseDuration += new TimeSpan(tcEnd - tcStart).TotalMilliseconds;			
         }
 
          
