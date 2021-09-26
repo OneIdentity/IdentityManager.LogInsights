@@ -11,6 +11,8 @@ using LogInsights.Datastore;
 using LogInsights.ExceptionHandling;
 using LogInsights.LogReader;
 
+using System.Diagnostics;
+
 namespace LogInsights
 {
     public partial class MainForm : Form
@@ -198,8 +200,39 @@ namespace LogInsights
                 if (files == null || files.Length < 1)
                     return;
 
-                if (_CheckForClose())
-                    _Load(new NLogReader(files));
+                if ( _CheckForClose() )
+                {
+                    var filesByExtension = FileHelper.AllFilesByExtension(files);
+                    var readers = new List<ILogReader>();
+
+                    if ( filesByExtension.Contains(".csv") )
+                        readers.Add(
+                            new AppInsightsLogReader(
+                                new AppInsightsLogReaderConnectionStringBuilder
+                                    {
+                                        CsvFiles = filesByExtension[".csv"].ToArray()
+                                    }));
+
+                    var logFiles = new List<string>();
+
+                    if ( filesByExtension.Contains(".log") )
+                        logFiles.AddRange(filesByExtension[".log"]);
+
+                    if ( filesByExtension.Contains(".txt") )
+                        logFiles.AddRange(filesByExtension[".txt"]);
+
+                    if ( logFiles.Count > 0 )
+                        readers.Add(new NLogReader(logFiles.ToArray()));
+
+                    ILogReader reader = readers.Count switch
+                        {
+                            1 => readers[0],
+                            0 => new NLogReader(files),  // No matching files -> take the ones we got
+                            _ => new CombinedReader(readers.ToArray())
+                        };
+
+                    _Load(reader);
+                }
             }
             catch (Exception exception)
             {

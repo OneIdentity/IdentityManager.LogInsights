@@ -107,33 +107,6 @@ namespace LogInsights.Helpers
             return (res);
         }
 
-
-        public static DirectoryFilenameInformation[] GetFileAndDirectory(string[] filesOrDirectories)
-        {
-            List<DirectoryFilenameInformation> res = new List<DirectoryFilenameInformation>();
-
-            foreach (string fileOrDirectory in filesOrDirectories)
-            {
-                if (System.IO.Directory.Exists(fileOrDirectory))  //fileOrDirectory is a folder
-                    res.Add(new DirectoryFilenameInformation() {
-                                directoryname = fileOrDirectory,
-                                filenames = new string[] { "*.txt", "*.log" } 
-                        });
-                else //fileOrDirectory is a file name
-                {
-                    var d = System.IO.Path.GetDirectoryName(fileOrDirectory);
-                    var f = System.IO.Path.GetFileName(fileOrDirectory);
-                    res.Add(new DirectoryFilenameInformation() {
-                                directoryname = d != "" ? d : ".",
-                                filenames = new string[] { f } 
-                    });
-                }
-            }
-
-            return res.ToArray();
-        } 
-
-       
         public static string GetBestRelativeFilename(string filename, string[] allfiles)
         {
             /*
@@ -151,7 +124,7 @@ namespace LogInsights.Helpers
 
             for (int pos = 0; pos < subfolders.Length; pos++)
             {
-                if (allfilesSubfolder.Any(t => ! (t.Length > pos && t[pos] == subfolders[pos])))
+                if (allfilesSubfolder.Any(t => ! (t?.Length > pos && t[pos] == subfolders[pos])))
                 {
                     if (pos == 0)
                         return (filename);
@@ -267,6 +240,27 @@ namespace LogInsights.Helpers
                 return defaultfolder;
 
             return ".";
+        }
+
+        public static ILookup<string, string> AllFilesByExtension(string[] filesAndDirectories)
+        {
+            IEnumerable<string> AllFiles()
+            {
+                foreach (var name in filesAndDirectories ?? Enumerable.Empty<string>())
+                {
+                    if ( File.Exists(name) )
+                        yield return name;
+
+                    if ( !Directory.Exists(name) )
+                        continue;
+
+                    foreach (var f in Directory.GetFiles(name, "*", SearchOption.AllDirectories))
+                        yield return f;
+                }
+            }
+
+            return AllFiles()
+                .ToLookup(fn => Path.GetExtension(fn).ToLowerInvariant());
         }
     }
 
