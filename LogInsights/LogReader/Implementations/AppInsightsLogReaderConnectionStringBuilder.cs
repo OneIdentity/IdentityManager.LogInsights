@@ -1,4 +1,5 @@
-﻿using System.Data.Common;
+﻿using System;
+using System.Data.Common;
 
 namespace LogInsights.LogReader
 {
@@ -37,10 +38,13 @@ namespace LogInsights.LogReader
             set => this[nameof(TimeSpan)] = value;
         }
 
-        public string CsvFile
+        public string[] CsvFiles
         {
-            get => TryGetValue(nameof(CsvFile), out var ret) ? ret as string : string.Empty;
-            set => this[nameof(CsvFile)] = value;
+            get => TryGetValue(nameof(CsvFiles), out var tmp) && tmp is string fileNames
+                ? fileNames.Split('|', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                : Array.Empty<string>();
+
+            set => this[nameof(CsvFiles)] = value != null ? string.Join('|', value) : string.Empty;
         }
     }
 }

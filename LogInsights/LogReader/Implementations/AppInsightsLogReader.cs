@@ -1,5 +1,4 @@
 ﻿using CsvHelper;
-using CsvHelper.Configuration;
 using CsvHelper.Configuration.Attributes;
 
 using LogInsights.Helpers;
@@ -83,7 +82,7 @@ namespace LogInsights.LogReader
         {
             _connString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
 
-            if ( string.IsNullOrEmpty(_connString.CsvFile) )
+            if ( (_connString.CsvFiles?.Length ?? 0) == 0 )
             {
                 var appId = connectionString.AppId;
                 var apiKey = connectionString.ApiKey;
@@ -98,7 +97,7 @@ namespace LogInsights.LogReader
             }
             else
             {
-                Display = _connString.CsvFile;
+                Display = _connString.CsvFiles[0];
             }
         }
 
@@ -110,7 +109,7 @@ namespace LogInsights.LogReader
         protected override async IAsyncEnumerable<LogEntry> OnReadAsync(
             [EnumeratorCancellation] CancellationToken cancellationToken)
         {
-            var rows = !string.IsNullOrEmpty(_connString.CsvFile)
+            var rows = _connString.CsvFiles?.Length > 0
                 ? _ReadCsvDataAsync()
                 : _ReadAppInsightsDataAsync(cancellationToken);
 
@@ -258,19 +257,34 @@ namespace LogInsights.LogReader
 
         private async IAsyncEnumerable<_Row> _ReadCsvDataAsync()
         {
-            var cfg = new CsvConfiguration(CultureInfo.InvariantCulture)
-                {
-                    
-                };
+            var resultingFiles = _ResolveFiles(_connString.CsvFiles);
 
-            using var reader = new StreamReader(_connString.CsvFile);
-            using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+            foreach (var csvFile in resultingFiles)
+            {
+                using var reader = new StreamReader(csvFile);
+                using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
 
-            await csv.ReadAsync().ConfigureAwait(false);
-            csv.ReadHeader();
+                await csv.ReadAsync().ConfigureAwait(false);
+                csv.ReadHeader();
 
-            while ( await csv.ReadAsync().ConfigureAwait(false) ) 
-                yield return csv.GetRecord<_Row>();
+                while ( await csv.ReadAsync().ConfigureAwait(false) ) 
+                    yield return csv.GetRecord<_Row>();
+            }
+        }
+
+        private static IEnumerable<string> _ResolveFiles(string[] filesAndDirectories)
+        {
+            foreach (var name in filesAndDirectories ?? Enumerable.Empty<string>())
+            {
+                if (File.Exists(name))
+                    yield return name;
+
+                if (!Directory.Exists(name))
+                    continue;
+
+                foreach (var f in Directory.GetFiles(name, "*.csv", SearchOption.AllDirectories))
+                    yield return f;
+            }
         }
 
         /// <summary>
