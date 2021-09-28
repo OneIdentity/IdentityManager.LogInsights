@@ -21,7 +21,7 @@ namespace LogInsights.Datastore
 
         public long logfilePositionEnd
         {
-            get { return messageEnd == null ? -1 : messageEnd.Locator.fileLinePosition; }
+            get { return messageEnd == null ? -1 : messageEnd.Locator.Position; }
         }
         
 
@@ -32,7 +32,7 @@ namespace LogInsights.Datastore
  
         public string logfileNameEnd
         {
-            get { return messageEnd == null ? "" : messageEnd.Locator.fileName; }
+            get { return messageEnd == null ? "" : messageEnd.Locator.Source; }
         }
 
         public uint durationMin
@@ -112,9 +112,9 @@ namespace LogInsights.Datastore
                 return "";
 
 
-            string logfilenameShort = System.IO.Path.GetFileName(messageEnd.Locator.fileName);
+            string logfilenameShort = System.IO.Path.GetFileName(messageEnd.Locator.Source);
 
-            return ($"{logfilenameShort}@+{messageEnd.Locator.fileLinePosition.ToString()}");
+            return ($"{logfilenameShort}@+{messageEnd.Locator.Position.ToString()}");
         }
         public override string GetEventLocator()
         {

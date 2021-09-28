@@ -21,12 +21,12 @@ namespace LogInsights.Datastore
 
         public long logfilePosition
         {
-            get { return message == null ? -1 : message.Locator.fileLinePosition; }
+            get { return message == null ? -1 : message.Locator.Position; }
         }
 
         public string logfileName
         {
-            get { return message == null ? "" : message.Locator.fileName; }
+            get { return message == null ? "" : message.Locator.Source; }
         }
 
 
@@ -42,9 +42,9 @@ namespace LogInsights.Datastore
                 return "";
 
 
-            string logfilenameShort = System.IO.Path.GetFileName(message.Locator.fileName);            
+            string logfilenameShort = System.IO.Path.GetFileName(message.Locator.Source);            
 
-            return ($"{logfilenameShort}@+{message.Locator.fileLinePosition.ToString()}");
+            return ($"{logfilenameShort}@+{message.Locator.Position.ToString()}");
         }
 
     }

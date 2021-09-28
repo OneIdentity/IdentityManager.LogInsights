@@ -126,9 +126,9 @@ namespace LogInsights.Detectors
             }
 
             //init? or new logfile? In this case time gaps are expected
-            if (CurrentLogfilename != msg.Locator.fileName)
+            if (CurrentLogfilename != msg.Locator.Source)
             {
-                CurrentLogfilename = msg.Locator.fileName;
+                CurrentLogfilename = msg.Locator.Source;
                 CurrentLogfileTime = currentTime;
 
                 return;

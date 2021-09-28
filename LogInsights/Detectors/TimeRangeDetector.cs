@@ -108,23 +108,23 @@ namespace LogInsights.Detectors
             if (startDateSet.Count == 0)
                 generalLogData.LogDataOverallTimeRangeStart = msg.TimeStamp;
 
-            if (startDateSet.EnableKey(msg.Locator.fileName)) //first occurance of any line of this log file
+            if (startDateSet.EnableKey(msg.Locator.Source)) //first occurance of any line of this log file
             {
-                generalLogData.LogfileInformation.GetOrAdd(msg.Locator.fileName).filename = msg.Locator.fileName;
-                generalLogData.LogfileInformation[msg.Locator.fileName].firstMessage = msg;
-                generalLogData.LogfileInformation[msg.Locator.fileName].logfileTimerange_Start = msg.TimeStamp;                
-                generalLogData.LogfileInformation[msg.Locator.fileName].filesize = Helpers.FileHelper.GetFileSizes(new String[] { msg.Locator.fileName });
+                generalLogData.LogfileInformation.GetOrAdd(msg.Locator.Source).filename = msg.Locator.Source;
+                generalLogData.LogfileInformation[msg.Locator.Source].firstMessage = msg;
+                generalLogData.LogfileInformation[msg.Locator.Source].logfileTimerange_Start = msg.TimeStamp;                
+                generalLogData.LogfileInformation[msg.Locator.Source].filesize = Helpers.FileHelper.GetFileSizes(new String[] { msg.Locator.Source });
             }
 
             //stats per log file
-            generalLogData.LogfileInformation[msg.Locator.fileName].cntBlockMsgs++;
-            generalLogData.LogfileInformation[msg.Locator.fileName].cntLines += msg.numberOfLines;
-            generalLogData.LogfileInformation[msg.Locator.fileName].charsRead += msg.FullMessage.Length;
+            generalLogData.LogfileInformation[msg.Locator.Source].cntBlockMsgs++;
+            generalLogData.LogfileInformation[msg.Locator.Source].cntLines += msg.numberOfLines;
+            generalLogData.LogfileInformation[msg.Locator.Source].charsRead += msg.FullMessage.Length;
 
 
 			//count msgs - msg log level
 			generalLogData.NumberOfEntriesPerLoglevel.AddOrIncrease(msg.Level);
-			generalLogData.LogfileInformation[msg.Locator.fileName].numberOfEntriesPerLoglevel
+			generalLogData.LogfileInformation[msg.Locator.Source].numberOfEntriesPerLoglevel
 				.AddOrIncrease(msg.Level);
 
 			if (msg.Level != _currentHighestLogLevelFound )
@@ -162,7 +162,7 @@ namespace LogInsights.Detectors
             // as we do not know if this is the last log line of this file, we need to store every timestamp as the last one
             sw.Stop();
             generalLogData.LogDataOverallTimeRangeFinish = msg.TimeStamp;
-            generalLogData.LogfileInformation.GetOrAdd(msg.Locator.fileName).logfileTimerange_Finish = msg.TimeStamp;
+            generalLogData.LogfileInformation.GetOrAdd(msg.Locator.Source).logfileTimerange_Finish = msg.TimeStamp;
 
             detectorStats.parseDuration += sw.ElapsedMilliseconds;
         }

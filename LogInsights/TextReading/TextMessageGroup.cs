@@ -31,7 +31,7 @@ namespace LogInsights
                                      || (
                                         bufferLevel >= 1 && //we already have buffered msgs
                                         !IsGroupClosed() && //the current group is still open
-                                        buffer[bufferLevel - 1].Locator.messageNumber + 10 >= msg.Locator.messageNumber &&   //we allow a gap of 10 messages, we cannot infinitely wait for group closure
+                                        buffer[bufferLevel - 1].Locator.EntryNumber + 10 >= msg.Locator.EntryNumber &&   //we allow a gap of 10 messages, we cannot infinitely wait for group closure
                                         buffer[bufferLevel - 1].EqualMetaData(msg, 1250)  //equal meta data incl. timestamp (+- tolerance of 0 ms!)
                                      );
             if (msgBelongsToGroup)

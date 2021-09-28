@@ -125,9 +125,9 @@ namespace LogInsights
             this(
                 new LogEntry {
                     Locator = new Locator(
-                        Convert.ToInt32(textLocator.fileStreamOffset),
-                        Convert.ToInt32(textLocator.fileLinePosition),
-                        textLocator.fileName),
+                        Convert.ToInt32(textLocator.EntryNumber),
+                        Convert.ToInt32(textLocator.Position),
+                        textLocator.Source),
                     TimeStamp = DateTime.MinValue,
                     Message = initialText
                 }
@@ -140,7 +140,7 @@ namespace LogInsights
             if (entry == null) throw new ArgumentNullException(nameof(entry));
 
             m_Entry = entry;
-            Locator = new TextLocator(entry.Locator.Source, -1, entry.Locator.Position, entry.Locator.EntryNumber);
+            Locator = new TextLocator(entry.Locator.Source, entry.Locator.Position, entry.Locator.EntryNumber);
             Message = entry.Message;
             TimeStamp = entry.TimeStamp;
             numberOfLines = 1; // TODO ?? entry.Message.Count(t => t == '\n') ??
@@ -155,11 +155,10 @@ namespace LogInsights
         {
             //more or less for debugging
             //for productive usage take property messageText
-            return string.Format("msg #{0} in line {1}@{2}/{3}: {4}", 
-                    Locator.messageNumber, 
-                    Locator.fileLinePosition, 
-                    Locator.fileName, 
-                    Locator.fileStreamOffset, 
+            return string.Format("msg #{0} in line {1}@{2}: {3}", 
+                    Locator.EntryNumber, 
+                    Locator.Position, 
+                    Locator.Source, 
                     FullMessage);
         }
 
@@ -236,7 +235,7 @@ namespace LogInsights
             return
                 //refMsg.loggerLevel == loggerLevel &&
                 refMsg.Logger == Logger &&
-                refMsg.Locator.fileName == Locator.fileName &&
+                refMsg.Locator.Source == Locator.Source &&
                 refMsg.Spid == Spid &&
                 refMsg.Pid == Pid &&
                 refMsg.TimeStamp.AlmostEqual(TimeStamp, tolleranceTimestampDiff_ms);

@@ -4,18 +4,16 @@ namespace LogInsights
 {
     public class TextLocator
     {
-        public string fileName = "";
-        public long fileLinePosition;
-        public long fileStreamOffset;
-        public long messageNumber;
+        public string Source = "";
+        public long Position;
+        public long EntryNumber;
         
 
-        public TextLocator(string fileName = "", long fileStreamOffset = -1, long fileLinePosition = -1,  long messageNumber = -1)
+        public TextLocator(string source = "", long position = -1,  long entryNumber = -1)
         {
-            this.fileName = fileName;
-            this.fileLinePosition = fileLinePosition;
-            this.fileStreamOffset = fileStreamOffset;
-            this.messageNumber = messageNumber;
+            this.Source = source;
+            this.Position = position;
+            this.EntryNumber = entryNumber;
         }
     }
 }

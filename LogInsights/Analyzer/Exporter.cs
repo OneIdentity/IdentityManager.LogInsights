@@ -36,11 +36,11 @@ namespace LogInsights
         public async Task FilterAndExportFromMessage(TextMessage inputMsg)
         {
             //change exportSettings before GUI display??
-            if (inputMsg != null && !string.IsNullOrEmpty(inputMsg.Locator.fileName))
+            if (inputMsg != null && !string.IsNullOrEmpty(inputMsg.Locator.Source))
             {
                 //try to preselect FileName and Folder
-                exportSettings.inputOutputOptions.includeFiles.AddIfNotPresent(inputMsg.Locator.fileName);
-                exportSettings.inputOutputOptions.outputFolder = FileHelper.EnsureFolderisWritableOrReturnDefault(Path.GetDirectoryName(inputMsg.Locator.fileName));
+                exportSettings.inputOutputOptions.includeFiles.AddIfNotPresent(inputMsg.Locator.Source);
+                exportSettings.inputOutputOptions.outputFolder = FileHelper.EnsureFolderisWritableOrReturnDefault(Path.GetDirectoryName(inputMsg.Locator.Source));
                              
                 //try to preselect ProjectionActivity
                 ProjectionType ptype;
