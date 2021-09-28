@@ -67,7 +67,6 @@ namespace LogInsights.Controls
             this.lvLogFiles.SmallImageList = this.imageList;
             this.lvLogFiles.TabIndex = 0;
             this.lvLogFiles.UseCompatibleStateImageBehavior = false;
-            this.lvLogFiles.UseWaitCursor = true;
             this.lvLogFiles.View = System.Windows.Forms.View.Details;
             this.lvLogFiles.SelectedIndexChanged += new System.EventHandler(this.lvLogFiles_SelectedIndexChanged);
             // 
