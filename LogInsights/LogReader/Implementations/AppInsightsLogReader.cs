@@ -1,12 +1,17 @@
-﻿using LogInsights.Helpers;
+﻿using CsvHelper;
+using CsvHelper.Configuration.Attributes;
+
+using LogInsights.Helpers;
 using Microsoft.Azure.ApplicationInsights.Query;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
-using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 
 // ReSharper disable UnusedMember.Local
 
@@ -43,6 +48,30 @@ namespace LogInsights.LogReader
             public int Line { get; set; }
         }
 
+        private class _Row
+        {
+            [Name("timestamp [UTC]")]
+            public DateTime TimeStamp { get; set; }
+
+            [Name("message")]
+            public string Message { get; set; }
+
+            [Name("severityLevel")]
+            public long Severity { get; set; }
+
+            [Name("itemId")]
+            public string ItemId { get; set; }
+
+            [Name("customDimensions")]
+            public string CustomDimensions { get; set; }
+
+            [Name("outerMessage")]
+            public string OuterMessage { get; set; }
+
+            [Name("details")]
+            public string Details { get; set; }
+        }
+
 
         public AppInsightsLogReader(string connectionString)
             : this(new AppInsightsLogReaderConnectionStringBuilder(connectionString))
@@ -53,24 +82,100 @@ namespace LogInsights.LogReader
         {
             _connString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
 
-            var appId = connectionString.AppId;
-            var apiKey = connectionString.ApiKey;
+            if ( (_connString.CsvFiles?.Length ?? 0) == 0 )
+            {
+                var appId = connectionString.AppId;
+                var apiKey = connectionString.ApiKey;
 
-            if ( string.IsNullOrEmpty(appId) )
-                throw new Exception($"Missing {nameof(appId)} value.");
-            if ( string.IsNullOrEmpty(apiKey) )
-                throw new Exception($"Missing {nameof(apiKey)} value.");
+                if ( string.IsNullOrEmpty(appId) )
+                    throw new Exception($"Missing {nameof(appId)} value.");
+                if ( string.IsNullOrEmpty(apiKey) )
+                    throw new Exception($"Missing {nameof(apiKey)} value.");
 
-            _client = new ApplicationInsightsDataClient(new ApiKeyClientCredentials(apiKey));
+                _client = new ApplicationInsightsDataClient(new ApiKeyClientCredentials(apiKey));
+                Display = $"App Insights Reader - {_client.BaseUri.OriginalString}";
+            }
+            else
+            {
+                Display = _connString.CsvFiles[0];
+            }
         }
 
         protected override void OnDispose()
         {
-            _client.Dispose();
+            _client?.Dispose();
         }
 
         protected override async IAsyncEnumerable<LogEntry> OnReadAsync(
             [EnumeratorCancellation] CancellationToken cancellationToken)
+        {
+            var rows = _connString.CsvFiles?.Length > 0
+                ? _ReadCsvDataAsync()
+                : _ReadAppInsightsDataAsync(cancellationToken);
+
+            var entryNo = 1;
+            var lineNo = 1;
+            await foreach (var row in rows.OrderBy(r => r.TimeStamp).ConfigureAwait(false) )
+            {
+                var locator = new Locator(entryNo++, lineNo, "AppInsights");
+
+                var logger = "";
+                var appName = "";
+
+                if (! string.IsNullOrEmpty(row.CustomDimensions) )
+                {
+                    try
+                    {
+                        var r = JsonSerializer.Deserialize<_CustomDimensions>(row.CustomDimensions, _jsonOptions);
+
+                        if ( r != null )
+                        {
+                            logger = r.LoggerName;
+                            appName = r.AppName;
+                        }
+                    }
+                    catch
+                    {
+                        // Ignore exception
+                    }
+                }
+
+                _ExceptionDetail[] exceptionDetails = null;
+                if ( !string.IsNullOrEmpty(row.Details) )
+                {
+                    try
+                    {
+                        exceptionDetails = JsonSerializer.Deserialize<_ExceptionDetail[]>(row.Details, _jsonOptions);
+                    }
+                    catch
+                    {
+                        // Ignore exception
+                    }
+                }
+
+                string message = row.Message;
+                if ( string.IsNullOrEmpty(message) && exceptionDetails != null && exceptionDetails.Length > 0 )
+                    message = string.Join(Environment.NewLine, exceptionDetails.Select(d => d.Message));
+
+                if ( string.IsNullOrEmpty(message) && !string.IsNullOrEmpty(row.OuterMessage) )
+                    message = row.OuterMessage;
+
+                lineNo += _NumberOfLines(message);
+
+                yield return new LogEntry 
+                {
+                    Locator = locator,
+                    Id = row.ItemId,
+                    TimeStamp = row.TimeStamp,
+                    Level = _LevelFromSeverity(row.Severity),
+                    Message = message,
+                    Logger = logger,
+                    AppName = appName
+                };
+            }
+        }
+
+        private async IAsyncEnumerable<_Row> _ReadAppInsightsDataAsync([EnumeratorCancellation] CancellationToken ct)
         {
             var events = new Events(_client);
 
@@ -78,21 +183,21 @@ namespace LogInsights.LogReader
                     _connString.AppId,
                     _connString.Query,
                     !string.IsNullOrEmpty(_connString.TimeSpan) ? _connString.TimeSpan : null,
-                    cancellationToken: cancellationToken)
+                    cancellationToken: ct)
                 .ConfigureAwait(false);
 
-            if ( result.Tables.Count < 1 )
+            if (result.Tables.Count < 1)
                 throw new Exception("Missing result table");
 
             var table = result.Tables[0];
 
-            var timestampIdx = -1;
-            var messageIdx = -1;
-            var severityIdx = -1;
-            var itemIdIdx = -1;
-            var customDimensionsIdx = -1;
-            var outerMessageIdx = -1;
-            var detailsIdx = -1;
+            int timestampIdx = -1;
+            int messageIdx = -1;
+            int severityIdx = -1;
+            int itemIdIdx = -1;
+            int customDimensionsIdx = -1;
+            int outerMessageIdx = -1;
+            int detailsIdx = -1;
 
             for (var i = 0; i < table.Columns.Count; i++)
             {
@@ -130,87 +235,62 @@ namespace LogInsights.LogReader
                 }
             }
 
-            if ( timestampIdx < 0 || messageIdx < 0 || itemIdIdx < 0 )
+            if (timestampIdx < 0 ||
+                messageIdx < 0 ||
+                itemIdIdx < 0)
                 throw new Exception("Missing columns");
 
-            var entryNo = 1;
-            var lineNo = 1;
-            foreach (var row in table.Rows.OrderBy(r => (DateTime)r[timestampIdx]))
+            foreach (var row in table.Rows)
             {
-                var locator = new Locator(entryNo++, lineNo, "AppInsights");
-
-                var id = (string)row[itemIdIdx];
-                var timeStamp = (DateTime)row[timestampIdx];
-                var message = (string)row[messageIdx];
-                var severity = severityIdx > -1 ? (long)row[severityIdx] : 1L;
-
-                var logger = "";
-                var appName = "";
-
-                if ( customDimensionsIdx > 0 )
-                {
-                    try
+                yield return new _Row
                     {
-                        var customDimensions = (string)row[customDimensionsIdx];
-                        if ( !string.IsNullOrEmpty(customDimensions) )
-                        {
-                            var r = JsonSerializer.Deserialize<_CustomDimensions>(customDimensions, _jsonOptions);
-
-                            if ( r != null )
-                            {
-                                logger = r.LoggerName;
-                                appName = r.AppName;
-                            }
-                        }
-                    }
-                    catch
-                    {
-                        // Ignore exception
-                    }
-                }
-
-                _ExceptionDetail[] exceptionDetails = null;
-                if ( detailsIdx > -1 )
-                {
-                    try
-                    {
-                        var details = (string)row[detailsIdx];
-                        if ( !string.IsNullOrEmpty(details) )
-                        {
-                            exceptionDetails = JsonSerializer.Deserialize<_ExceptionDetail[]>(details, _jsonOptions);
-                        }
-                    }
-                    catch
-                    {
-                        // Ignore exception
-                    }
-                }
-
-                if ( string.IsNullOrEmpty(message) && exceptionDetails != null && exceptionDetails.Length > 0 )
-                    message = string.Join(Environment.NewLine, exceptionDetails.Select(d => d.Message));
-
-                if ( string.IsNullOrEmpty(message) && outerMessageIdx > -1 )
-                    message = (string)row[outerMessageIdx];
-
-                lineNo += _NumberOfLines(message);
-
-                yield return new LogEntry 
-                {
-                    Locator = locator,
-                    Id = id,
-                    TimeStamp = timeStamp,
-                    Level = _LevelFromSeverity(severity),
-                    Message = message,
-                    Logger = logger,
-                    AppName = appName
+                        ItemId = (string)row[itemIdIdx],
+                        TimeStamp = (DateTime)row[timestampIdx],
+                        Message = (string)row[messageIdx],
+                        Severity = severityIdx > -1 ? (long)row[severityIdx] : 1L,
+                        CustomDimensions = customDimensionsIdx > -1 ? (string)row[customDimensionsIdx] : "",
+                        Details = detailsIdx > -1 ? (string)row[detailsIdx] : "",
+                        OuterMessage = detailsIdx > -1 ? (string)row[outerMessageIdx] : ""
                 };
+            }
+        }
+
+        private async IAsyncEnumerable<_Row> _ReadCsvDataAsync()
+        {
+            var resultingFiles = _ResolveFiles(_connString.CsvFiles);
+
+            foreach (var csvFile in resultingFiles)
+            {
+                using var reader = new StreamReader(csvFile);
+                using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+
+                await csv.ReadAsync().ConfigureAwait(false);
+                csv.ReadHeader();
+
+                while ( await csv.ReadAsync().ConfigureAwait(false) ) 
+                    yield return csv.GetRecord<_Row>();
+            }
+        }
+
+        private static IEnumerable<string> _ResolveFiles(string[] filesAndDirectories)
+        {
+            foreach (var name in filesAndDirectories ?? Enumerable.Empty<string>())
+            {
+                if (File.Exists(name))
+                    yield return name;
+
+                if (!Directory.Exists(name))
+                    continue;
+
+                foreach (var f in Directory.GetFiles(name, "*.csv", SearchOption.AllDirectories))
+                    yield return f;
             }
         }
 
         /// <summary>
         /// Gets a short display of the reader and it's data.
         /// </summary>
-        public override string Display => $"App Insights Reader - {_client.BaseUri.OriginalString}";
+        public override string Display { get; }
 
         private static LogLevel _LevelFromSeverity(long severity)
         {
