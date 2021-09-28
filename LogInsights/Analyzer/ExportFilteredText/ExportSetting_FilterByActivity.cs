@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 
 using LogInsights.Datastore;
 using LogInsights.Helpers;
+using LogInsights.LogReader;
 
 namespace LogInsights 
 {
@@ -221,7 +222,7 @@ namespace LogInsights
         }
 
      
-        public MessageMatchResult IsMessageMatch(TextMessage msg, object additionalData)
+        public MessageMatchResult IsMessageMatch(LogEntry msg, object additionalData)
         {
             //check incoming SPID ... 
             

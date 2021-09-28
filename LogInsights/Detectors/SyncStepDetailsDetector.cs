@@ -275,7 +275,7 @@ namespace LogInsights.Detectors
             isFinalizing = false;
         }
 
-        public void ProcessMessage(TextMessage msg)
+        public void ProcessMessage(LogEntry msg)
         {
             if (!_isEnabled)
                 return;
@@ -295,7 +295,7 @@ namespace LogInsights.Detectors
                 return;
              
 
-			detectorStats.numberOfLinesParsed += msg.numberOfLines;
+			detectorStats.numberOfLinesParsed += msg.NumberOfLines;
 
 
             bool ret = false;
@@ -319,7 +319,7 @@ namespace LogInsights.Detectors
         }
         
         
-        private bool _HandleSystemConnectionMessages(TextMessage msg, Regex regex_Start, Regex regex_Done, QueryByEnum qtypeInput)
+        private bool _HandleSystemConnectionMessages(LogEntry msg, Regex regex_Start, Regex regex_Done, QueryByEnum qtypeInput)
         {
             bool fnd = false;
 
@@ -425,7 +425,7 @@ namespace LogInsights.Detectors
             return fnd;
         }
 
-        private bool _HandleSystemConnectorMessages(TextMessage msg, Regex regex_Start, Regex regex_Done, QueryByEnum qtypeInput)
+        private bool _HandleSystemConnectorMessages(LogEntry msg, Regex regex_Start, Regex regex_Done, QueryByEnum qtypeInput)
         {
             bool fnd = false;
 

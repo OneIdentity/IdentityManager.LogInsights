@@ -33,7 +33,7 @@ namespace LogInsights
             await FilterAndExportBase().ConfigureAwait(false);
         }
 
-        public async Task FilterAndExportFromMessage(TextMessage inputMsg)
+        public async Task FilterAndExportFromMessage(LogEntry inputMsg)
         {
             //change exportSettings before GUI display??
             if (inputMsg != null && !string.IsNullOrEmpty(inputMsg.Locator.Source))
@@ -132,9 +132,7 @@ namespace LogInsights
             using (var writer = new StreamWriter(exportfilename, false, Encoding.UTF8))
                 while ((partition = await preloader.GetNextAsync().ConfigureAwait(false)) != null)
                 {
-                    var textMsgs = partition.Select(p => new TextMessage(p)).ToArray();
-
-                    foreach (var msg in textMsgs)
+                    foreach (var msg in partition)
                         if (exportSettings.IsMessageMatch(msg))
                         {
                             //do we need a line break at the end?

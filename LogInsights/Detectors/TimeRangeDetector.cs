@@ -81,7 +81,7 @@ namespace LogInsights.Detectors
             startDateSet = null;
         }
         
-        public void ProcessMessage(TextMessage msg)
+        public void ProcessMessage(LogEntry msg)
         {
             if (!_isEnabled)
                 return;
@@ -98,7 +98,7 @@ namespace LogInsights.Detectors
             if (msg == null)
                 return;
 
-			detectorStats.numberOfLinesParsed += msg.numberOfLines;
+			detectorStats.numberOfLinesParsed += msg.NumberOfLines;
 
             //count msgs - msg source
             generalLogData.NumberOflogSources.AddOrIncrease(msg.Logger);
@@ -118,7 +118,7 @@ namespace LogInsights.Detectors
 
             //stats per log file
             generalLogData.LogfileInformation[msg.Locator.Source].cntBlockMsgs++;
-            generalLogData.LogfileInformation[msg.Locator.Source].cntLines += msg.numberOfLines;
+            generalLogData.LogfileInformation[msg.Locator.Source].cntLines += msg.NumberOfLines;
             generalLogData.LogfileInformation[msg.Locator.Source].charsRead += msg.FullMessage.Length;
 
 

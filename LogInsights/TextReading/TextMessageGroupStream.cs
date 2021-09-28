@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 
 using LogInsights.Helpers;
+using LogInsights.LogReader;
 
 namespace LogInsights
 {
@@ -22,7 +23,7 @@ namespace LogInsights
             this.maxLines = maxLines;            
         }
 
-        public bool IsGroupClosed(TextMessage msgStreamMessage = null)
+        public bool IsGroupClosed(LogEntry msgStreamMessage = null)
         {
             string streamKeyToCheck = msgStreamMessage == null ? lastStreamKey : GetStreamKey(msgStreamMessage);
 
@@ -32,7 +33,7 @@ namespace LogInsights
             return streams[streamKeyToCheck].IsGroupClosed();
         }
 
-        public void Clear(TextMessage msgStreamMessage = null)
+        public void Clear(LogEntry msgStreamMessage = null)
         {
             string streamKeyToCheck = msgStreamMessage == null ? lastStreamKey : GetStreamKey(msgStreamMessage);
 
@@ -42,7 +43,7 @@ namespace LogInsights
                 streams[streamKeyToCheck] = new TextMessageGroup();
         }
 
-        public TextMessage GetGroupMessage(TextMessage msgStreamMessage = null)
+        public LogEntry GetGroupMessage(LogEntry msgStreamMessage = null)
         {
             string streamKeyToCheck = msgStreamMessage == null ? lastStreamKey : GetStreamKey(msgStreamMessage);
 
@@ -52,13 +53,13 @@ namespace LogInsights
                 return streams[streamKeyToCheck].GetGroupMessage();
         }
 
-        public TextMessage[] GetAllGroupMessages()
+        public LogEntry[] GetAllGroupMessages()
         {
-            List<TextMessage> res = new List<TextMessage>();
+            List<LogEntry> res = new List<LogEntry>();
 
             foreach (var grp in streams.Values)
             {
-                TextMessage tm = grp.GetGroupMessage();
+                LogEntry tm = grp.GetGroupMessage();
                 if (tm != null)
                     res.Add(tm);
             }
@@ -66,7 +67,7 @@ namespace LogInsights
             return res.Count == 0 ? null : res.ToArray();
         }
 
-        public void AppendMessage(TextMessage msg)
+        public void AppendMessage(LogEntry msg)
         {
             lastStreamKey = GetStreamKey(msg);
 
@@ -76,7 +77,7 @@ namespace LogInsights
                 streams[lastStreamKey].AppendMessage(msg);
         }
 
-        private string GetStreamKey(TextMessage msg)
+        private string GetStreamKey(LogEntry msg)
         {
             return string.Format("{0}|{1}", msg.Logger, msg.Spid);
         }

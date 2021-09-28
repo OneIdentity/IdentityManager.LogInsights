@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 
 using LogInsights.Datastore;
 using LogInsights.Helpers;
+using LogInsights.LogReader;
 
 
 namespace LogInsights.Detectors
@@ -142,7 +143,7 @@ namespace LogInsights.Detectors
         }
 
 
-        public void ProcessMessage(TextMessage msg)
+        public void ProcessMessage(LogEntry msg)
         {
             if (!_isEnabled)
                 return;
@@ -159,7 +160,7 @@ namespace LogInsights.Detectors
             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
             sw.Start();
 
-            detectorStats.numberOfLinesParsed += msg.numberOfLines;    
+            detectorStats.numberOfLinesParsed += msg.NumberOfLines;    
 
             if (msg.Spid != "" && 
                 (msg.Logger == "SystemConnector" || msg.Logger == "SystemConnection"))

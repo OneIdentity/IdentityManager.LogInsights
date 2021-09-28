@@ -1,4 +1,6 @@
-﻿using System;
+﻿using LogInsights.LogReader;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +14,7 @@ namespace LogInsights.Datastore
         public bool isDataComplete;
         public string metaData;
 
-        public TextMessage message;
+        public LogEntry message;
 
         public string loggerSourceId  //NLog SPID / sessionID / loggerID
         {

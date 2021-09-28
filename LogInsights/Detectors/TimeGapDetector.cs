@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using LogInsights.Datastore;
 using LogInsights.Helpers;
+using LogInsights.LogReader;
 
 namespace LogInsights.Detectors
 {
@@ -102,7 +103,7 @@ namespace LogInsights.Detectors
         }
 
         
-        public void ProcessMessage(TextMessage msg)
+        public void ProcessMessage(LogEntry msg)
         {
             if (!_isEnabled)
                 return;
@@ -116,7 +117,7 @@ namespace LogInsights.Detectors
             if (msg == null)
                 return;
 
-			detectorStats.numberOfLinesParsed += msg.numberOfLines;    
+			detectorStats.numberOfLinesParsed += msg.NumberOfLines;    
 
             var currentTime = msg.TimeStamp;
             if (currentTime == DateTime.MinValue)  //skip invalid timestamps

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using LogInsights.Datastore;
 using LogInsights.Helpers;
+using LogInsights.LogReader;
 
 namespace LogInsights.Detectors
 {
@@ -348,7 +349,7 @@ namespace LogInsights.Detectors
         }
 
 
-        public void ProcessMessage(TextMessage msg)
+        public void ProcessMessage(LogEntry msg)
         {
             if (!_isEnabled)
                 return;
@@ -375,7 +376,7 @@ namespace LogInsights.Detectors
             if (!msg.FullMessage.Contains("DPRJournal"))
                 return;
             
-            detectorStats.numberOfLinesParsed += msg.numberOfLines;
+            detectorStats.numberOfLinesParsed += msg.NumberOfLines;
 
 
             //new object

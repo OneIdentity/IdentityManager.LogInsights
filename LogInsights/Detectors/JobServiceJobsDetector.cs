@@ -104,7 +104,7 @@ namespace LogInsights.Detectors
             jobs = null;
         }
 
-        public void ProcessMessage(TextMessage msg)
+        public void ProcessMessage(LogEntry msg)
         {
             if (!_isEnabled)
                 return;
@@ -126,7 +126,7 @@ namespace LogInsights.Detectors
             if (msg == null)
                 return;
 
-			detectorStats.numberOfLinesParsed += msg.numberOfLines;
+			detectorStats.numberOfLinesParsed += msg.NumberOfLines;
 
 
             string jobId;

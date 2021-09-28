@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 
 using LogInsights.Helpers;
+using LogInsights.LogReader;
 
 
 namespace LogInsights.Datastore
@@ -11,7 +12,7 @@ namespace LogInsights.Datastore
     {
         public JobserviceJobExecutionState jobExecutionState = JobserviceJobExecutionState.Unknown;
 
-        public TextMessage endmessage;
+        public LogEntry endmessage;
 
         public string resultmessagetext;
 

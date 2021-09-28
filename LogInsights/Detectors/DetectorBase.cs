@@ -1,6 +1,7 @@
 ﻿using System;
 
 using LogInsights.Datastore;
+using LogInsights.LogReader;
 
 namespace LogInsights.Detectors
 {
@@ -76,7 +77,7 @@ namespace LogInsights.Detectors
             logger.Info($"Starting detector with ReadMode = {textReadMode}");
         }
 
-        protected TextMessage[] ProcessMessageBase(ref TextMessage msg)
+        protected LogEntry[] ProcessMessageBase(ref LogEntry msg)
         {
             //return output is a list of all collected text messages that were not yet processed (returned)
             if (isFinalizing && msg != null)
@@ -92,11 +93,11 @@ namespace LogInsights.Detectors
                 case TextReadMode.GroupMessage:
                     if (msg == null) //special case, return all unclosed group messages 
                     {
-                        TextMessage tm = msgGroup.GetGroupMessage();
+                        LogEntry tm = msgGroup.GetGroupMessage();
                         if (tm == null)
                             return null;
 
-                        return new TextMessage[] { tm };
+                        return new LogEntry[] { tm };
                     }
 
                     //put the current msg into the group 
@@ -105,7 +106,7 @@ namespace LogInsights.Detectors
                     if (msgGroup.IsGroupClosed())
                     {
                         //group is closed, transfer the group msg into msg object and put the current income into a new group msg
-                        TextMessage msgOri = msg.Clone();
+                        LogEntry msgOri = msg.Clone();
                         msg = msgGroup.GetGroupMessage();
                         
                         //start a new group
@@ -126,7 +127,7 @@ namespace LogInsights.Detectors
                     if (msgGroupStream.IsGroupClosed())
                     {
                         //group is closed, transfer the group msg into msg object and put the current income into a new group msg
-                        TextMessage msgOri = msg.Clone();
+                        LogEntry msgOri = msg.Clone();
                         msg = msgGroupStream.GetGroupMessage();
 
                         msgGroupStream.Clear(); //clear the last stream

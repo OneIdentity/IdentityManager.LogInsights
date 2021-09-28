@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 
 using LogInsights.Datastore;
 using LogInsights.Helpers;
+using LogInsights.LogReader;
 
 namespace LogInsights.Detectors
 {
@@ -151,7 +152,7 @@ namespace LogInsights.Detectors
             isFinalizing = false;
         }
 
-        public void ProcessMessage(TextMessage msg)
+        public void ProcessMessage(LogEntry msg)
         {
             if (!_isEnabled)
                 return;
@@ -174,7 +175,7 @@ namespace LogInsights.Detectors
 
 
             bool messageProcessed = false;
-            detectorStats.numberOfLinesParsed += msg.numberOfLines;          
+            detectorStats.numberOfLinesParsed += msg.NumberOfLines;          
 
 
             //new sync/projection activity?
@@ -335,7 +336,7 @@ namespace LogInsights.Detectors
             detectorStats.parseDuration += new TimeSpan(Environment.TickCount64 - tcStartpoint).TotalMilliseconds;
         }
 
-        private void CreateNewProjection(Match rm_Act, TextMessage msg)
+        private void CreateNewProjection(Match rm_Act, LogEntry msg)
         {
             Datastore.Projection newProjection = null;
 

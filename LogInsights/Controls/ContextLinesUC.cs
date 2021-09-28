@@ -9,13 +9,14 @@ using System.Text;
 using System.Windows.Forms;
 
 using LogInsights.Helpers;
+using LogInsights.LogReader;
 
 
 namespace LogInsights.Controls
 {
     public partial class ContextLinesUC : UserControl
     {
-        private TextMessage currentMsg = null; 
+        private LogEntry currentMsg = null; 
 
         private Exporter logfileFilterExporter;
 
@@ -129,7 +130,7 @@ namespace LogInsights.Controls
         }
 
          
-        public void SetData(params TextMessage[] theMessages)
+        public void SetData(params LogEntry[] theMessages)
         {
             if (theMessages == null || theMessages.Length == 0)
                 return; 
@@ -137,16 +138,17 @@ namespace LogInsights.Controls
             theMessages = theMessages.Where(m => m != null).OrderBy(m => m.Locator.Position).ToArray();  //clear null messages and sort the rest by line position
 
             //check if theMessageA.contextMsgAfter to theMessageB.contextMsgBefore will close the gap
-            string fn = theMessages[0].Locator.Source;
-            long ppos = theMessages[0].ContextNextEntries.GetLastElemOrDefault(theMessages[0]).Locator.Position;
+            LogEntry theMessage = theMessages[0];
+            string fn = theMessage.Locator.Source;
+            long ppos = theMessage.ContextNextEntries.GetLastElemOrDefault(theMessage).Locator.Position;
             bool isOpenGap = false;
             long msgIdfirstbreak = -1;
             bool isSingleMsg = theMessages.Length == 1;
 
             foreach (var msg in theMessages)
             {
-                //if (msg.contextMsgBefore == null) msg.contextMsgBefore = new TextMessage[] { };
-                //if (msg.contextMsgAfter == null) msg.contextMsgAfter = new TextMessage[] { };
+                //if (msg.contextMsgBefore == null) msg.contextMsgBefore = new LogEntry[] { };
+                //if (msg.contextMsgAfter == null) msg.contextMsgAfter = new LogEntry[] { };
                 
                 if (!isOpenGap && !isSingleMsg)
                 {
@@ -167,16 +169,22 @@ namespace LogInsights.Controls
             //we take messageA and build up a new contextMsgAfter list including the lines of messageB and so on
             if (!isSingleMsg)
             {
-                Dictionary<long, TextMessage> dict_newContextLinesAfter = new Dictionary<long, TextMessage>();
+                var dict_newContextLinesAfter = new Dictionary<int, LogEntry>();
                 dict_newContextLinesAfter.AddRange(
-                                            theMessages[0].ContextNextEntries.Select(e => e.Locator.Position).ToArray(),
-                                            theMessages[0].ContextNextEntries.ToArray());
+                                            theMessage.ContextNextEntries.Select(e => e.Locator.Position).ToArray(),
+                                            theMessage.ContextNextEntries.ToArray());
                 
                 for (int i = 1; i < theMessages.Length; i++)
                 {
                     if (isOpenGap && theMessages[i].Locator.EntryNumber >= msgIdfirstbreak)
                         //append all context lines of msgB after a gap indicator 
-                        dict_newContextLinesAfter.Add(theMessages[i].Locator.Position - 1, new TextMessage(new TextLocator(), " < ... > " + Environment.NewLine));
+                        dict_newContextLinesAfter.Add(
+                            theMessages[i].Locator.Position - 1, 
+                            new LogEntry
+                            {
+                                Locator = new Locator(),
+                                Message = " < ... > " + Environment.NewLine
+                            });
 
                     //add the context (before) messages
                     dict_newContextLinesAfter.AddRange(
@@ -192,28 +200,28 @@ namespace LogInsights.Controls
                                 theMessages[i].ContextNextEntries.ToArray());
                 }
 
-                theMessages[0].ContextNextEntries = 
+                theMessage.ContextNextEntries = 
                     dict_newContextLinesAfter
-                    .Where(msg => !theMessages[0]
+                    .Where(msg => !theMessage
                                     .ContextPreviousEntries
                                     .Any(msgb => msgb.Locator.Position == msg.Key) 
                                   && 
-                                  msg.Key != theMessages[0].Locator.Position)
+                                  msg.Key != theMessage.Locator.Position)
                     .OrderBy(e => e.Key)
                     .Select(e => e.Value)
                     .ToArray();
             }
 
-            rtbLog.ShowLineNumbers = !isOpenGap && theMessages[0].Locator?.Position > 0;
+            rtbLog.ShowLineNumbers = !isOpenGap && theMessage.Locator?.Position > 0;
 
-            bool fullyCompleteMessage = theMessages[0].Locator?.Position > 0;
+            bool fullyCompleteMessage = theMessage.Locator?.Position > 0;
 
-            List<FileInformationContext> jumpLines = _SetData(theMessages[0],
+            List<FileInformationContext> jumpLines = _SetData(theMessage,
                                                               fullyCompleteMessage,
-                                                              fullyCompleteMessage ? theMessages.Select(m => m.Locator.Position) : new long[] { },
+                                                              fullyCompleteMessage ? theMessages.Select(m => m.Locator.Position) : Array.Empty<int>(),
                                                               fullyCompleteMessage);
 
-            currentMsg = theMessages[0];
+            currentMsg = theMessage;
 
             buttonExport.Enabled = true;
             buttonShowInEditor.Enabled = fullyCompleteMessage; 
@@ -253,7 +261,7 @@ namespace LogInsights.Controls
             button_MessagesJumpBack.Enabled = comboBox_OpenInEditor.SelectedIndex > 0;
         }
 
-        private List<FileInformationContext> _SetData(TextMessage theMessage, bool setCaption, IEnumerable<long> highlightFilePositions, bool jumpToLastMarker = false)
+        private List<FileInformationContext> _SetData(LogEntry theMessage, bool setCaption, IEnumerable<int> highlightFilePositions, bool jumpToLastMarker = false)
         {
            
             //rtbLog.SuspendPainting();
@@ -269,7 +277,7 @@ namespace LogInsights.Controls
                 List<Tuple<int, int>> highlightEditorPositions = new List<Tuple<int, int>>();
                 int highlightEditorPositions_tmp_start;
                 if (highlightFilePositions == null)
-                    highlightFilePositions = new long[] { };
+                    highlightFilePositions = Array.Empty<int>();
                 else
                     highlightFilePositions = highlightFilePositions.ToArray();
 
@@ -285,7 +293,7 @@ namespace LogInsights.Controls
 
                 //pre lines
                 if (theMessage.ContextPreviousEntries != null)
-                    foreach (TextMessage tm in theMessage.ContextPreviousEntries)
+                    foreach (LogEntry tm in theMessage.ContextPreviousEntries)
                     {
                         if (highlightFilePositions.Contains(tm.Locator.Position))
                             highlightEditorPositions_tmp_start = Math.Max(0, rtbLog.Lines.Length - 1);
@@ -319,7 +327,7 @@ namespace LogInsights.Controls
 
                 //post lines
                 if (theMessage.ContextNextEntries != null)
-                    foreach (TextMessage tm in theMessage.ContextNextEntries)
+                    foreach (LogEntry tm in theMessage.ContextNextEntries)
                         {
                             if (highlightFilePositions.Contains(tm.Locator.Position))
                                 highlightEditorPositions_tmp_start = Math.Max(0, rtbLog.Lines.Length - 1);

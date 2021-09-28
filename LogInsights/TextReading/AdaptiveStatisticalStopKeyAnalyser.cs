@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 using LogInsights.Helpers;
+using LogInsights.LogReader;
 
 namespace LogInsights
 {
@@ -32,7 +33,7 @@ namespace LogInsights
             statisticalWindowWidthMinusOneRel = statisticalWindowWidthMinusOne / Constants.AdaptiveStatisticalStopKeyAnalyser_statisticalWindowWidth;
         }
 
-        public AdaptiveStatisticalStopKeyAnalyserResult CheckMsg(TextMessage msg)
+        public AdaptiveStatisticalStopKeyAnalyserResult CheckMsg(LogEntry msg)
         {
             if (!Constants.AdaptiveStatisticalStopKeyAnalyser_isEnabled)
                 return AdaptiveStatisticalStopKeyAnalyserResult.Untested;
@@ -62,7 +63,7 @@ namespace LogInsights
             return res;
         }
 
-        private AdaptiveStatisticalStopKeyAnalyserResult CheckForStopTerm(TextMessage msg)
+        private AdaptiveStatisticalStopKeyAnalyserResult CheckForStopTerm(LogEntry msg)
         {
             try
             {

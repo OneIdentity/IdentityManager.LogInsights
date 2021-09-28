@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 
 using LogInsights.Helpers;
+using LogInsights.LogReader;
 
 namespace LogInsights.Detectors
 {
@@ -84,7 +85,7 @@ namespace LogInsights.Detectors
             //idmatchChain = null;
         }
 
-        public void ProcessMessage(TextMessage msg)
+        public void ProcessMessage(LogEntry msg)
         {
             if (!_isEnabled)
                 return;
@@ -98,7 +99,7 @@ namespace LogInsights.Detectors
             if (msg == null)
                 return;
 
-			detectorStats.numberOfLinesParsed += msg.numberOfLines;    
+			detectorStats.numberOfLinesParsed += msg.NumberOfLines;    
 			
             var matches = regex_Uid.Matches(msg.FullMessage);
             if (matches.Count > 1)            

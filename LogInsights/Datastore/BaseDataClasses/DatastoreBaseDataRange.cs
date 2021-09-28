@@ -1,5 +1,6 @@
 ﻿using System;
 using LogInsights.Helpers;
+using LogInsights.LogReader;
 
 namespace LogInsights.Datastore
 {
@@ -12,7 +13,7 @@ namespace LogInsights.Datastore
         public DateTime dtTimestampStart = DateTime.MinValue;
         public DateTime dtTimestampEnd = DateTime.MinValue;
 
-        public TextMessage messageEnd;
+        public LogEntry messageEnd;
 
         public long logfilePositionStart
         {
