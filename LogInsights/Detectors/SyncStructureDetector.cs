@@ -160,7 +160,7 @@ namespace LogInsights.Detectors
             
             //we are either interessted in Projector msgs or all other stuff that might close our group message
             if ( (msg != null) &&
-                (msg.loggerSource != "ProjectorEngine" || msg.spid == "")  //the message is not in-focus
+                (msg.Logger != "ProjectorEngine" || msg.Spid == "")  //the message is not in-focus
                 //&&(msgGroup == null || msgGroup.IsGroupClosed())  //we don't already have a started group message, which now may be closed to parse its in-focus message
                )
                 return;
@@ -180,7 +180,7 @@ namespace LogInsights.Detectors
             //new sync/projection activity?
             if (!messageProcessed)
             {
-                var rm_Act = regex_SyncActivity.Match(msg.messageText);
+                var rm_Act = regex_SyncActivity.Match(msg.FullMessage);
 
                 if (rm_Act.Success)
                 {
@@ -195,14 +195,14 @@ namespace LogInsights.Detectors
             //sync/projection cycle
             //if (!messageProcessed)
             {
-                if (regex_SyncActivityCycleRun.IsMatch(msg.messageText))
+                if (regex_SyncActivityCycleRun.IsMatch(msg.FullMessage))
                 {
                     logger.Trace($"regex match for rx regex_SyncActivityCycleRun: {regex_SyncActivityCycleRun.ToString()}");
 
-                    if (projections.ContainsKey(msg.spid))
-                        projections[msg.spid].Where(p => !p.isDataComplete).Last().projectionCycles.Add(new DatastoreBaseDataPoint()
+                    if (projections.ContainsKey(msg.Spid))
+                        projections[msg.Spid].Where(p => !p.isDataComplete).Last().projectionCycles.Add(new DatastoreBaseDataPoint()
                         {
-                            dtTimestamp = msg.messageTimestamp,
+                            dtTimestamp = msg.TimeStamp,
                             isDataComplete = true,
                             message = msg
                         });
@@ -216,18 +216,18 @@ namespace LogInsights.Detectors
             if (!messageProcessed)
             {
                 //we have a life sign of this projection id
-                var unfinishedProjections = projections.Where(kp => kp.Key == msg.spid).SelectMany(x => x.Value).Where(p => !p.isDataComplete).ToArray();
+                var unfinishedProjections = projections.Where(kp => kp.Key == msg.Spid).SelectMany(x => x.Value).Where(p => !p.isDataComplete).ToArray();
                 foreach (var p in unfinishedProjections)
-                    p.dtTimestampEnd = msg.messageTimestamp;
+                    p.dtTimestampEnd = msg.TimeStamp;
 
                 //in debug log level only
-                if (regex_SyncActivityDone.IsMatch(msg.messageText))                
+                if (regex_SyncActivityDone.IsMatch(msg.FullMessage))                
                 {
                     logger.Trace($"regex match for rx regex_SyncActivityDone: {regex_SyncActivityDone.ToString()}");
 
                     foreach (var p in unfinishedProjections)
                     {
-                        p.dtTimestampEnd = msg.messageTimestamp;
+                        p.dtTimestampEnd = msg.TimeStamp;
                         p.isDataComplete = true;
                     }
                     messageProcessed = true;  //only in this regex block
@@ -243,19 +243,19 @@ namespace LogInsights.Detectors
                 //if (unfinishedProjectionsOfThisSpid.Any())
                 {
 
-                    var rm_Step = regex_SyncStep.Match(msg.messageText);
+                    var rm_Step = regex_SyncStep.Match(msg.FullMessage);
                     if (rm_Step.Success)
                     {
                         logger.Trace($"regex match for rx regex_SyncStep: {regex_SyncStep.ToString()}");
 
                         //try to find the last unfinished projection of the same logger id
-                        var projection = projections.ContainsKey(msg.spid) ? projections[msg.spid].LastOrDefault(p => !p.isDataComplete) : null;
+                        var projection = projections.ContainsKey(msg.Spid) ? projections[msg.Spid].LastOrDefault(p => !p.isDataComplete) : null;
 
                         //oh no, we got information about a projection which never started in the log file(s)
                         if (projection == null)
                         {
                             CreateNewProjection(null, msg);
-                            projection = projections[msg.spid].LastOrDefault(p => !p.isDataComplete);
+                            projection = projections[msg.Spid].LastOrDefault(p => !p.isDataComplete);
                         }
 
                         //create current step info, take the data from the group msg
@@ -271,7 +271,7 @@ namespace LogInsights.Detectors
                             rightConnection     = rm_Step.Groups["RightCon"].Value.TrimEnd().Replace("\n", ""),
                             rightSchemaClassRaw = rm_Step.Groups["RightSchemaClass"].Value.TrimEnd().Replace("\n", ""),
                             map                 = rm_Step.Groups["Map"].Value.TrimEnd().Replace("\n", ""),
-                            dtTimestampStart    = msg.messageTimestamp,
+                            dtTimestampStart    = msg.TimeStamp,
                             message             = msg
                         };
 
@@ -282,7 +282,7 @@ namespace LogInsights.Detectors
 
                         if (lastStep != null)
                         {
-                            lastStep.dtTimestampEnd = msg.messageTimestamp;
+                            lastStep.dtTimestampEnd = msg.TimeStamp;
                             lastStep.isDataComplete = true;
                         }
 
@@ -304,27 +304,27 @@ namespace LogInsights.Detectors
             //if the last step is still unfinished, check if we can close it now
             //if (syncSteps.Count > 0 && syncSteps.Any(v => v.Key == xmsg.spid && v.Value[v.Value.Count-1].lastOccurrence == DateTime.MinValue))
             if (!messageProcessed &&
-                projections.ContainsKey(msg.spid) &&
-                projections[msg.spid].Where(p => !p.isDataComplete).Any(p => p.projectionSteps
-                                                                                        .Any(k => k.loggerSourceId == msg.spid &&
+                projections.ContainsKey(msg.Spid) &&
+                projections[msg.Spid].Where(p => !p.isDataComplete).Any(p => p.projectionSteps
+                                                                                        .Any(k => k.loggerSourceId == msg.Spid &&
                                                                                                     k.dtTimestampEnd.IsNull())
                                                                        )
                 )
             {
-                if (regex_SyncFinalizeInitiated.IsMatch(msg.messageText))
+                if (regex_SyncFinalizeInitiated.IsMatch(msg.FullMessage))
                 {
                     //we can close all open steps of all open prpjections
-                    var openProjections = projections[msg.spid].Where(p => !p.isDataComplete);
+                    var openProjections = projections[msg.Spid].Where(p => !p.isDataComplete);
 
                     foreach (var projection in openProjections)
                     {
                         var unfiniStepsOfThisProjection = projection
                                                             .projectionSteps
-                                                            .Where(k => k.loggerSourceId == msg.spid && k.dtTimestampEnd.IsNull());
+                                                            .Where(k => k.loggerSourceId == msg.Spid && k.dtTimestampEnd.IsNull());
 
                         foreach (var step in unfiniStepsOfThisProjection) //in general this should be only one or no step
                         {
-                            step.dtTimestampEnd = msg.messageTimestamp;
+                            step.dtTimestampEnd = msg.TimeStamp;
                             step.isDataComplete = true;
                         }
                     }
@@ -350,14 +350,14 @@ namespace LogInsights.Detectors
 
                 newProjection = new Projection()
                 {
-                    dtTimestampStart = msg.messageTimestamp,
+                    dtTimestampStart = msg.TimeStamp,
                     syncStartUpConfig = rm_Act.Groups["SyncStartUpConfig"].Value,
                     adHocObject = rm_Act.Groups["AdHocObject"].Value,
                     projectionType = prType,
                     message = msg
                 };
 
-                logger.Debug($"found new projection: type {prType.ToString()}; id {msg.spid}");                
+                logger.Debug($"found new projection: type {prType.ToString()}; id {msg.Spid}");                
             }
             else
             {
@@ -370,11 +370,11 @@ namespace LogInsights.Detectors
                     projectionType = ProjectionType.Unknown,
                     message = msg
                 };
-                logger.Debug($"found new projection: type {ProjectionType.Unknown.ToString()}; id {msg.spid}");
+                logger.Debug($"found new projection: type {ProjectionType.Unknown.ToString()}; id {msg.Spid}");
             }
 
             //finish the last sync with the same spid
-            var unfinishedProjections = projections.Where(kp => kp.Key == msg.spid).SelectMany(x => x.Value).Where(p => !p.isDataComplete);
+            var unfinishedProjections = projections.Where(kp => kp.Key == msg.Spid).SelectMany(x => x.Value).Where(p => !p.isDataComplete);
             foreach (var p in unfinishedProjections)
             {
                 logger.Trace($"finish the last sync with the same spid: {p.loggerSourceId}");
@@ -383,7 +383,7 @@ namespace LogInsights.Detectors
             
             //store in cache
             if (newProjection != null)
-                projections.GetOrAdd(msg.spid).Add(newProjection);
+                projections.GetOrAdd(msg.Spid).Add(newProjection);
         }
 
         public SyncStructureDetector() : base(TextReadMode.GroupMessage)

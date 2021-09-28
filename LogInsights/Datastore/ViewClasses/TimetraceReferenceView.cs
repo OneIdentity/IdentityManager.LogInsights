@@ -238,7 +238,7 @@ namespace LogInsights.Datastore
                 var errorEvents = generalLogData.MessageErrors
                         .Select(t => 
                             new TimelineTrackEvent(
-                                    StringHelper.ShortenText(t.message.messageText), 
+                                    StringHelper.ShortenText(t.message.FullMessage), 
                                     t.dtTimestamp,
                                     t.message
                                     ));
@@ -261,7 +261,7 @@ namespace LogInsights.Datastore
                 var warningEvents = generalLogData.MessageWarnings
                                         .Select(t =>
                                             new TimelineTrackEvent(
-                                                    StringHelper.ShortenText(t.message.messageText),
+                                                    StringHelper.ShortenText(t.message.FullMessage),
                                                     t.dtTimestamp,
                                                     t.message));
 

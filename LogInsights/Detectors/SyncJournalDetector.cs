@@ -357,10 +357,10 @@ namespace LogInsights.Detectors
 
             //basic filter, we only need the sql log
             if ( msg == null ||
-				 string.IsNullOrEmpty(msg.spid) || 
-				 !string.Equals(msg.loggerSource, "SqlLog", StringComparison.Ordinal) || 
-				 msg.loggerLevel != LogLevel.Debug && 
-				 msg.loggerLevel != LogLevel.Error)
+				 string.IsNullOrEmpty(msg.Spid) || 
+				 !string.Equals(msg.Logger, "SqlLog", StringComparison.Ordinal) || 
+				 msg.Level != LogLevel.Debug && 
+				 msg.Level != LogLevel.Error)
                 return;
 
 
@@ -372,14 +372,14 @@ namespace LogInsights.Detectors
                 return;               
                
             //secondary filter
-            if (!msg.messageText.Contains("DPRJournal"))
+            if (!msg.FullMessage.Contains("DPRJournal"))
                 return;
             
             detectorStats.numberOfLinesParsed += msg.numberOfLines;
 
 
             //new object
-            var rm_ObjNew = rx_sql_objectInsert.Match(msg.messageText);
+            var rm_ObjNew = rx_sql_objectInsert.Match(msg.FullMessage);
             if (rm_ObjNew.Success)
             {
                 string objectType = rm_ObjNew.Groups["tablename"].Value.ToLowerInvariant();
@@ -418,9 +418,9 @@ namespace LogInsights.Detectors
                         break;
                 }
 
-                dprObject.dtTimestampStart = msg.messageTimestamp;
+                dprObject.dtTimestampStart = msg.TimeStamp;
                 dprObject.message = msg;
-                dprObject.loggerid = msg.spid;
+                dprObject.loggerid = msg.Spid;
 
                 dprObject.PutDataFromInsert(insertAttributeNames, insertAttributeValues);
 
@@ -434,7 +434,7 @@ namespace LogInsights.Detectors
 
 
             //change object
-            var rm_ObjUpdate = rx_sql_objectUpdate.Match(msg.messageText);
+            var rm_ObjUpdate = rx_sql_objectUpdate.Match(msg.FullMessage);
             if (rm_ObjUpdate.Success)
             {
                 string objectType = rm_ObjUpdate.Groups["tablename"].Value.ToLowerInvariant();
@@ -450,13 +450,13 @@ namespace LogInsights.Detectors
                     //special handling for DprJournal
                     if (objectType == "dprjournal")
                     {
-                        dprObj.dtTimestampEnd = msg.messageTimestamp;  //for the journal, we need this to have a time span for it
+                        dprObj.dtTimestampEnd = msg.TimeStamp;  //for the journal, we need this to have a time span for it
 
                         var updatedColumnLst = SqlHelper.GetValuePairsFromUpdateCmd(updatedColumns);
                         if (updatedColumnLst.TryGetValue("ProjectionState", out var newProjectionState))
                         {
                             if (string.Compare(newProjectionState, "Running", StringComparison.OrdinalIgnoreCase) == 0)
-                                dprObj.dtTimestampStart = msg.messageTimestamp;
+                                dprObj.dtTimestampStart = msg.TimeStamp;
                         }
                     }
                 }                

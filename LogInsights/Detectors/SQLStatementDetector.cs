@@ -191,7 +191,7 @@ namespace LogInsights.Detectors
 
 			long tcStart = Environment.TickCount64;
 			
-            if (msg.loggerSource != "SqlLog" || msg.spid == "")
+            if (msg.Logger != "SqlLog" || msg.Spid == "")
                 return;
 
             var rt = ProcessMessageBase(ref msg);
@@ -204,49 +204,49 @@ namespace LogInsights.Detectors
 			detectorStats.numberOfLinesParsed += msg.numberOfLines;    
 
             //general session information
-            if (!sqlSessionInfo.ContainsKey(msg.spid))
+            if (!sqlSessionInfo.ContainsKey(msg.Spid))
             {
-                sqlSessionInfo.Add(msg.spid, new SqlSessionIntern()
+                sqlSessionInfo.Add(msg.Spid, new SqlSessionIntern()
                 {
-                    dtTimestampStart = msg.messageTimestamp,
+                    dtTimestampStart = msg.TimeStamp,
                     message = msg
                 });
 
-                logger.Trace($"found new sql session {msg.spid}");
+                logger.Trace($"found new sql session {msg.Spid}");
             }
             else
-                sqlSessionInfo[msg.spid].dtTimestampEnd = msg.messageTimestamp;
+                sqlSessionInfo[msg.Spid].dtTimestampEnd = msg.TimeStamp;
 
 
-            if (msg.loggerLevel != LogLevel.Debug)
+            if (msg.Level != LogLevel.Debug)
                 return;
             
                         
             //transaction start
-            if (regex_TransactionBegin.IsMatch(msg.payloadMessage))
+            if (regex_TransactionBegin.IsMatch(msg.Message))
             {
                 logger.Trace($"regex match for rx regex_TransactionBegin: {regex_TransactionBegin.ToString()}");
                 
-                var transList = sqlSessionInfo.GetOrAdd(msg.spid).transactions;
+                var transList = sqlSessionInfo.GetOrAdd(msg.Spid).transactions;
 
                 transList.Add(new TransactionData()
                 {
-                    dtTimestampStart= msg.messageTimestamp, 
+                    dtTimestampStart= msg.TimeStamp, 
                     message = msg
                 });
 
-                logger.Debug($"found new sql transaction {msg.spid} opening");
+                logger.Debug($"found new sql transaction {msg.Spid} opening");
 
                 return;
             }
                 
             //transaction end
-            var rm = regex_TransactionEnd.Match(msg.payloadMessage);
+            var rm = regex_TransactionEnd.Match(msg.Message);
             if (rm.Success)
             {
                 logger.Trace($"regex match for rx regex_TransactionEnd: {regex_TransactionEnd.ToString()}");
 
-                var transList = sqlSessionInfo.GetOrAdd(msg.spid).transactions;
+                var transList = sqlSessionInfo.GetOrAdd(msg.Spid).transactions;
 
                 if (transList.Count == 0) //we ignore open transactions where the start was not logged
                     return;
@@ -254,7 +254,7 @@ namespace LogInsights.Detectors
                 var tran = transList.LastOrDefault(t => t.dtTimestampEnd.IsNull() && !t.dtTimestampStart.IsNull());
                 if (tran != null)
                 {
-                    tran.dtTimestampEnd = msg.messageTimestamp; 
+                    tran.dtTimestampEnd = msg.TimeStamp; 
                     tran.messageEnd = msg;                    
                     tran.isSuccessFullTransaction = rm.Groups["cmd"].Value == "COMMIT";                    
                     tran.isSuspicious = !tran.isSuccessFullTransaction || tran.durationSec >= threshold_suspicious_duration_SqlTransaction_sec;
@@ -266,7 +266,7 @@ namespace LogInsights.Detectors
             }
 
             //basic statement
-            rm = regex_BasicStatement.Match(msg.payloadMessage);
+            rm = regex_BasicStatement.Match(msg.Message);
             if (rm.Success)
             {
                 logger.Trace($"regex match for rx regex_BasicStatement: {regex_BasicStatement.ToString()}");
@@ -274,7 +274,7 @@ namespace LogInsights.Detectors
                 SqlLongRunningStatement sqlcmd = new SqlLongRunningStatement()
                 {
                     durationMsec = ConvertSave.ConvertToUInt(rm.Groups["dura"].Value),
-                    dtTimestampStart = msg.messageTimestamp,
+                    dtTimestampStart = msg.TimeStamp,
                     isDataComplete = true,
                     message = msg
                 };
@@ -299,7 +299,7 @@ namespace LogInsights.Detectors
                 }
                 else if (!string.IsNullOrEmpty(rm.Groups["cmdSelect"].Value))
                 {
-                    var rms = regex_SelectTableStatement.Matches(msg.payloadMessage);
+                    var rms = regex_SelectTableStatement.Matches(msg.Message);
 
                     foreach (Match m in rms)
                         if (sqlcmd.assignedTablenames.All(c => c != m.Groups["cmdSelectTable"].Value))
@@ -311,26 +311,26 @@ namespace LogInsights.Detectors
                 else
                 {
                     sqlcmd.sqlCmdType = SQLCmdType.Other;
-                    sqlcmd.statementText = msg.payloadMessage;
+                    sqlcmd.statementText = msg.Message;
                 }
 
                 //can we assign this sql session to a projection anyway?
-                if (!sqlSessionInfo[msg.spid].touchesDprModuleTables)
+                if (!sqlSessionInfo[msg.Spid].touchesDprModuleTables)
                     if (sqlcmd.assignedTablenames.Any(t => t.ToUpper().StartsWith("DPR")))
-                        sqlSessionInfo[msg.spid].touchesDprModuleTables = true;
+                        sqlSessionInfo[msg.Spid].touchesDprModuleTables = true;
 
                 //assign non system table to this sql session, so we can match it to the projection step schema class name
                 var payloadTables = sqlcmd.assignedTablenames.Where(t => regex_NonSystemTable.IsMatch(t)).ToArray();
                 sqlcmd.isPayloadTableInvolved = payloadTables.Length > 0;
 
                 foreach (string tabname in payloadTables)
-                    if (!sqlSessionInfo[msg.spid].nonSystemTables.Any(t => string.Compare(t, tabname, true) == 0))
-                        sqlSessionInfo[msg.spid].nonSystemTables.Add(tabname);
+                    if (!sqlSessionInfo[msg.Spid].nonSystemTables.Any(t => string.Compare(t, tabname, true) == 0))
+                        sqlSessionInfo[msg.Spid].nonSystemTables.Add(tabname);
 
                 //store a sql command 
                 // when long running or 
                 if (sqlcmd.durationMsec >= threshold_suspicious_duration_SqlCommand_msec || sqlcmd.isPayloadTableInvolved)
-                    sqlSessionInfo[msg.spid].longRunningStatements.Add(sqlcmd); 
+                    sqlSessionInfo[msg.Spid].longRunningStatements.Add(sqlcmd); 
             }
 			
 			detectorStats.parseDuration += new TimeSpan(Environment.TickCount64 - tcStart).TotalMilliseconds;			

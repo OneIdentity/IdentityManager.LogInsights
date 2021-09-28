@@ -228,9 +228,9 @@ namespace LogInsights
             if (isfilterByActivity_SpidFilter_passUnseen)
                 return MessageMatchResult.filterNotApplied;
 
-            bool incomingSpidIsEmpty = string.IsNullOrEmpty(msg.spid);
+            bool incomingSpidIsEmpty = string.IsNullOrEmpty(msg.Spid);
 
-            if (!incomingSpidIsEmpty && filterByActivitySpidHashLst.Contains(msg.spid))
+            if (!incomingSpidIsEmpty && filterByActivitySpidHashLst.Contains(msg.Spid))
                 return MessageMatchResult.positive;
 
             //exception: what happens if our filter attribute has no value? InScope or OutScope ??

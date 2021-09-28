@@ -84,13 +84,13 @@ namespace LogInsights
 
         public MessageMatchResult IsMessageMatch(TextMessage msg, object additionalData)
         {
-            if (msg.messageTimestamp < startDate || msg.messageTimestamp > endDate)
+            if (msg.TimeStamp < startDate || msg.TimeStamp > endDate)
                 return MessageMatchResult.negative;
 
-            if (!logLevelFilters_passUnseen && !logLevelFilters[msg.loggerLevel])
+            if (!logLevelFilters_passUnseen && !logLevelFilters[msg.Level])
                 return MessageMatchResult.negative;
 
-            if (!logSourceFilters_passUnseen && (!logSourceFilters.ContainsKey(msg.loggerSource) || !logSourceFilters[msg.loggerSource]))
+            if (!logSourceFilters_passUnseen && (!logSourceFilters.ContainsKey(msg.Logger) || !logSourceFilters[msg.Logger]))
                 return MessageMatchResult.negative;
 
             return MessageMatchResult.positive;

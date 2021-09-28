@@ -254,7 +254,7 @@ namespace LogInsights.Controls
                     var tripelData = GetTrackDataFromLocationExt(args.Location); //<vrtTimelineTrack, vrtTimelineTrackEvent, string, TextMessage>
                     vrtTimelineTrack track = tripelData.Item1;
                     vrtTimelineTrackEvent trackEvt = tripelData.Item2;
-                    string trackText = tripelData.Item3 ?? tripelData.Item4?.messageText;
+                    string trackText = tripelData.Item3 ?? tripelData.Item4?.FullMessage;
                     TextMessage trackTextMsg = tripelData.Item4;
 
                     if (track == null)

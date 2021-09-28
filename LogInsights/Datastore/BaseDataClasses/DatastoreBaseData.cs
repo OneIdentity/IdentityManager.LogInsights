@@ -16,17 +16,17 @@ namespace LogInsights.Datastore
 
         public string loggerSourceId  //NLog SPID / sessionID / loggerID
         {
-            get { return message?.spid; }
+            get { return message?.Spid; }
         }
 
         public long logfilePosition
         {
-            get { return message == null ? -1 : message.textLocator.fileLinePosition; }
+            get { return message == null ? -1 : message.Locator.fileLinePosition; }
         }
 
         public string logfileName
         {
-            get { return message == null ? "" : message.textLocator.fileName; }
+            get { return message == null ? "" : message.Locator.fileName; }
         }
 
 
@@ -42,9 +42,9 @@ namespace LogInsights.Datastore
                 return "";
 
 
-            string logfilenameShort = System.IO.Path.GetFileName(message.textLocator.fileName);            
+            string logfilenameShort = System.IO.Path.GetFileName(message.Locator.fileName);            
 
-            return ($"{logfilenameShort}@+{message.textLocator.fileLinePosition.ToString()}");
+            return ($"{logfilenameShort}@+{message.Locator.fileLinePosition.ToString()}");
         }
 
     }

@@ -16,16 +16,16 @@ namespace LogInsights
         private readonly LogEntry m_Entry;
 
         //set from outside, no calculation
-        public TextLocator textLocator;
+        public TextLocator Locator;
 
 
-        public TextMessage[] contextMsgBefore=> _contextMsgBefore ??= (m_Entry.ContextPreviousEntries ?? Enumerable.Empty<LogEntry>()).Select(e => e.Tag).OfType<TextMessage>().ToArray();
+        public TextMessage[] ContextPreviousEntries=> _contextMsgBefore ??= (m_Entry.ContextPreviousEntries ?? Enumerable.Empty<LogEntry>()).Select(e => e.Tag).OfType<TextMessage>().ToArray();
 
         [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
         private TextMessage[] _contextMsgBefore;
 
 
-        public TextMessage[] contextMsgAfter
+        public TextMessage[] ContextNextEntries
         {
             get { return _contextMsgAfter ??= (m_Entry.ContextNextEntries ?? Enumerable.Empty<LogEntry>()).Select(e => e.Tag).OfType<TextMessage>().ToArray(); }
             set { _contextMsgAfter = value; }
@@ -36,20 +36,20 @@ namespace LogInsights
 
 
 
-        private string _payloadMessage;        
+        private string _message;        
         /// <summary>
         /// the log message without the meta data (like timestamp)
         /// </summary>
-        public string payloadMessage
+        public string Message
         {
             get
             {
-                return _payloadMessage;
+                return _message;
             }
 
             private set
             {
-                _payloadMessage = value;
+                _message = value;
                 _payloadmessageDevalued = null;
 
                 /*
@@ -63,13 +63,13 @@ namespace LogInsights
         /// <summary>
         /// the log message without meta data (like timestamp) where all literals (like UIDs, names, etc.) were replaced by "<@>"
         /// </summary>
-        public string payloadMessageDevalued
+        public string MessageDevalued
         {
             get
             {               
                 //expensive task, take the cached value or execute the regex replace
                 if (_payloadmessageDevalued == null)
-                    _payloadmessageDevalued = Constants.regexLiterals.Replace(payloadMessage ?? "", "<@>");
+                    _payloadmessageDevalued = Constants.regexLiterals.Replace(Message ?? "", "<@>");
 
                 return _payloadmessageDevalued;
             }
@@ -78,27 +78,27 @@ namespace LogInsights
         /// <summary>
         /// the complete log message incl. meta data (timestamp, log level, ids and log message text)
         /// </summary>
-        public string messageText
+        public string FullMessage
         {
             get 
             {
                 LazyInitializer.EnsureInitialized(ref _MessageText, () =>
                 {
                     //generate a message display
-                    string id = pid ?? "";
+                    string id = Pid ?? "";
 
-                    if (!string.IsNullOrEmpty(spid))
-                        id = $"{id} {spid}";
+                    if (!string.IsNullOrEmpty(Spid))
+                        id = $"{id} {Spid}";
 					
 					string idspace = (!string.IsNullOrEmpty(id)) ? " " : "";
 
                     //sadly the logfiles do not hold milliseconds, but the App Insight Provider supports that
                     //we cannot differentiate between these two types, so lets cut them off in case of zero
                     string timestampFormat = "yyyy-MM-dd HH:mm:ss.ffff";
-                    if (messageTimestamp.Millisecond == 0)
+                    if (TimeStamp.Millisecond == 0)
                         timestampFormat = "yyyy-MM-dd HH:mm:ss";
 
-                    return $"{messageTimestamp.ToString(timestampFormat)} {loggerLevel} ({loggerSource ?? ""}{idspace}{id}): {payloadMessage ?? ""}";                
+                    return $"{TimeStamp.ToString(timestampFormat)} {Level} ({Logger ?? ""}{idspace}{id}): {Message ?? ""}";                
                 });
 
                 return _MessageText;
@@ -110,12 +110,12 @@ namespace LogInsights
 
         //calculated attributes
         //public LogfileType messageLogfileType { get;  set; } = LogfileType.Undef;
-        public DateTime messageTimestamp { get; private set; }         
+        public DateTime TimeStamp { get; private set; }         
         public int numberOfLines { get; private set; }
-        public LogLevel loggerLevel { get; private set; }
-        public string loggerSource { get; private set; } 
-        public string pid { get; private set; }
-        public string spid { get; private set; }
+        public LogLevel Level { get; private set; }
+        public string Logger { get; private set; } 
+        public string Pid { get; private set; }
+        public string Spid { get; private set; }
         
 
         
@@ -140,14 +140,14 @@ namespace LogInsights
             if (entry == null) throw new ArgumentNullException(nameof(entry));
 
             m_Entry = entry;
-            textLocator = new TextLocator(entry.Locator.Source, -1, entry.Locator.Position, entry.Locator.EntryNumber);
-            payloadMessage = entry.Message;
-            messageTimestamp = entry.TimeStamp;
+            Locator = new TextLocator(entry.Locator.Source, -1, entry.Locator.Position, entry.Locator.EntryNumber);
+            Message = entry.Message;
+            TimeStamp = entry.TimeStamp;
             numberOfLines = 1; // TODO ?? entry.Message.Count(t => t == '\n') ??
-            loggerLevel = entry.Level;
-            loggerSource = entry.Logger;
-            pid = entry.Pid;
-            spid = entry.Spid;
+            Level = entry.Level;
+            Logger = entry.Logger;
+            Pid = entry.Pid;
+            Spid = entry.Spid;
             entry.Tag = this; 
         }
 
@@ -156,11 +156,11 @@ namespace LogInsights
             //more or less for debugging
             //for productive usage take property messageText
             return string.Format("msg #{0} in line {1}@{2}/{3}: {4}", 
-                    textLocator.messageNumber, 
-                    textLocator.fileLinePosition, 
-                    textLocator.fileName, 
-                    textLocator.fileStreamOffset, 
-                    messageText);
+                    Locator.messageNumber, 
+                    Locator.fileLinePosition, 
+                    Locator.fileName, 
+                    Locator.fileStreamOffset, 
+                    FullMessage);
         }
 
 
@@ -176,12 +176,12 @@ namespace LogInsights
             firstIndex = firstIndex.EnsureRange(0, mergeCandidates.Count - 1);
             lastIndex = lastIndex.EnsureRange(firstIndex, mergeCandidates.Count - 1);
 
-            StringBuilder sb = new StringBuilder(this.payloadMessage);
+            StringBuilder sb = new StringBuilder(this.Message);
             int numberOfLinesPassed = 0;
 
             for (int i = firstIndex; i <= lastIndex; i++)
             {
-                sb.Append(mergeCandidates[i].messageText); //we know that each messageText object ends with <newline>
+                sb.Append(mergeCandidates[i].FullMessage); //we know that each messageText object ends with <newline>
                 numberOfLinesPassed += mergeCandidates[i].numberOfLines;
             }
             
@@ -206,8 +206,8 @@ namespace LogInsights
             TextMessage tm = new TextMessage(m_Entry);
 
             //ensure all data from this text message will be available in the transfer msg too, so populate attributes which were not populated in the constructor
-            tm._contextMsgAfter = contextMsgAfter;
-            tm._contextMsgBefore = contextMsgBefore;
+            tm._contextMsgAfter = ContextNextEntries;
+            tm._contextMsgBefore = ContextPreviousEntries;
             //tm.messageLogfileType = messageLogfileType;
 
             //special handling for count of lines as this attribute is not handled by the finalized method below
@@ -225,7 +225,7 @@ namespace LogInsights
             //put the current old message's attributes into the transfer message
             tm.numberOfLines = newNumberOfLines;
             if (newText != null)
-                tm.payloadMessage = $"{tm.payloadMessage}\n{newText}";
+                tm.Message = $"{tm.Message}\n{newText}";
 
             //return the transfer message a new cloned message
             return tm;
@@ -235,11 +235,11 @@ namespace LogInsights
         {
             return
                 //refMsg.loggerLevel == loggerLevel &&
-                refMsg.loggerSource == loggerSource &&
-                refMsg.textLocator.fileName == textLocator.fileName &&
-                refMsg.spid == spid &&
-                refMsg.pid == pid &&
-                refMsg.messageTimestamp.AlmostEqual(messageTimestamp, tolleranceTimestampDiff_ms);
+                refMsg.Logger == Logger &&
+                refMsg.Locator.fileName == Locator.fileName &&
+                refMsg.Spid == Spid &&
+                refMsg.Pid == Pid &&
+                refMsg.TimeStamp.AlmostEqual(TimeStamp, tolleranceTimestampDiff_ms);
         }
 
     }

@@ -66,7 +66,7 @@ namespace LogInsights
         {
             try
             {
-                if (rx_stopTerm.Match(msg.messageText).Success)
+                if (rx_stopTerm.Match(msg.FullMessage).Success)
                 {
                     UpdateStatistic(3);
                     return AdaptiveStatisticalStopKeyAnalyserResult.StopKeyPostive;

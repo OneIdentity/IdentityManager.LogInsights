@@ -101,68 +101,68 @@ namespace LogInsights.Detectors
 			detectorStats.numberOfLinesParsed += msg.numberOfLines;
 
             //count msgs - msg source
-            generalLogData.NumberOflogSources.AddOrIncrease(msg.loggerSource);
+            generalLogData.NumberOflogSources.AddOrIncrease(msg.Logger);
 
             
             //handle time ranges generally and per log file
             if (startDateSet.Count == 0)
-                generalLogData.LogDataOverallTimeRangeStart = msg.messageTimestamp;
+                generalLogData.LogDataOverallTimeRangeStart = msg.TimeStamp;
 
-            if (startDateSet.EnableKey(msg.textLocator.fileName)) //first occurance of any line of this log file
+            if (startDateSet.EnableKey(msg.Locator.fileName)) //first occurance of any line of this log file
             {
-                generalLogData.LogfileInformation.GetOrAdd(msg.textLocator.fileName).filename = msg.textLocator.fileName;
-                generalLogData.LogfileInformation[msg.textLocator.fileName].firstMessage = msg;
-                generalLogData.LogfileInformation[msg.textLocator.fileName].logfileTimerange_Start = msg.messageTimestamp;                
-                generalLogData.LogfileInformation[msg.textLocator.fileName].filesize = Helpers.FileHelper.GetFileSizes(new String[] { msg.textLocator.fileName });
+                generalLogData.LogfileInformation.GetOrAdd(msg.Locator.fileName).filename = msg.Locator.fileName;
+                generalLogData.LogfileInformation[msg.Locator.fileName].firstMessage = msg;
+                generalLogData.LogfileInformation[msg.Locator.fileName].logfileTimerange_Start = msg.TimeStamp;                
+                generalLogData.LogfileInformation[msg.Locator.fileName].filesize = Helpers.FileHelper.GetFileSizes(new String[] { msg.Locator.fileName });
             }
 
             //stats per log file
-            generalLogData.LogfileInformation[msg.textLocator.fileName].cntBlockMsgs++;
-            generalLogData.LogfileInformation[msg.textLocator.fileName].cntLines += msg.numberOfLines;
-            generalLogData.LogfileInformation[msg.textLocator.fileName].charsRead += msg.messageText.Length;
+            generalLogData.LogfileInformation[msg.Locator.fileName].cntBlockMsgs++;
+            generalLogData.LogfileInformation[msg.Locator.fileName].cntLines += msg.numberOfLines;
+            generalLogData.LogfileInformation[msg.Locator.fileName].charsRead += msg.FullMessage.Length;
 
 
 			//count msgs - msg log level
-			generalLogData.NumberOfEntriesPerLoglevel.AddOrIncrease(msg.loggerLevel);
-			generalLogData.LogfileInformation[msg.textLocator.fileName].numberOfEntriesPerLoglevel
-				.AddOrIncrease(msg.loggerLevel);
+			generalLogData.NumberOfEntriesPerLoglevel.AddOrIncrease(msg.Level);
+			generalLogData.LogfileInformation[msg.Locator.fileName].numberOfEntriesPerLoglevel
+				.AddOrIncrease(msg.Level);
 
-			if (msg.loggerLevel != _currentHighestLogLevelFound )
+			if (msg.Level != _currentHighestLogLevelFound )
 			{
-				bool levelChanged = SetHighestLogLevel(msg.loggerLevel);
+				bool levelChanged = SetHighestLogLevel(msg.Level);
 
 				if ( levelChanged )
-					generalLogData.mostDetailedLogLevel = msg.loggerLevel;
+					generalLogData.mostDetailedLogLevel = msg.Level;
 			}
 
 
 			//errors and warnings
-            if (msg.loggerLevel == LogLevel.Warn)
+            if (msg.Level == LogLevel.Warn)
             {
                 generalLogData.MessageWarnings.Add(new DatastoreBaseDataPoint()
                 {
-                    dtTimestamp = msg.messageTimestamp,
+                    dtTimestamp = msg.TimeStamp,
                     isDataComplete = true,
                     message = msg,
-                    metaData = msg.loggerLevel.ToString() 
+                    metaData = msg.Level.ToString() 
                 });
             }
 
-            if (msg.loggerLevel == LogLevel.Error || msg.loggerLevel == LogLevel.Critical)
+            if (msg.Level == LogLevel.Error || msg.Level == LogLevel.Critical)
             {
                 generalLogData.MessageErrors.Add(new DatastoreBaseDataPoint
 					{
-                    dtTimestamp = msg.messageTimestamp,
+                    dtTimestamp = msg.TimeStamp,
                     isDataComplete = true,
                     message = msg,
-                    metaData = msg.loggerLevel.ToString()
+                    metaData = msg.Level.ToString()
                 });
             }
 
             // as we do not know if this is the last log line of this file, we need to store every timestamp as the last one
             sw.Stop();
-            generalLogData.LogDataOverallTimeRangeFinish = msg.messageTimestamp;
-            generalLogData.LogfileInformation.GetOrAdd(msg.textLocator.fileName).logfileTimerange_Finish = msg.messageTimestamp;
+            generalLogData.LogDataOverallTimeRangeFinish = msg.TimeStamp;
+            generalLogData.LogfileInformation.GetOrAdd(msg.Locator.fileName).logfileTimerange_Finish = msg.TimeStamp;
 
             detectorStats.parseDuration += sw.ElapsedMilliseconds;
         }

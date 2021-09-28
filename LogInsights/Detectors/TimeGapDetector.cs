@@ -118,28 +118,28 @@ namespace LogInsights.Detectors
 
 			detectorStats.numberOfLinesParsed += msg.numberOfLines;    
 
-            var currentTime = msg.messageTimestamp;
+            var currentTime = msg.TimeStamp;
             if (currentTime == DateTime.MinValue)  //skip invalid timestamps
             {
-                logger.Trace($"invalid timestamp: {msg.messageText}; skip processing :(");
+                logger.Trace($"invalid timestamp: {msg.FullMessage}; skip processing :(");
                 return; // :(
             }
 
             //init? or new logfile? In this case time gaps are expected
-            if (CurrentLogfilename != msg.textLocator.fileName)
+            if (CurrentLogfilename != msg.Locator.fileName)
             {
-                CurrentLogfilename = msg.textLocator.fileName;
+                CurrentLogfilename = msg.Locator.fileName;
                 CurrentLogfileTime = currentTime;
 
                 return;
             }
 
             //min time gap?
-            if ((msg.messageTimestamp - CurrentLogfileTime).TotalSeconds > gap_threshold_WhenLogIsOnLevel_Min)
+            if ((msg.TimeStamp - CurrentLogfileTime).TotalSeconds > gap_threshold_WhenLogIsOnLevel_Min)
                 timegaps.Add(new TimeGap()
                 {                    
                     dtTimestampStart = CurrentLogfileTime,
-                    dtTimestampEnd = msg.messageTimestamp,                    
+                    dtTimestampEnd = msg.TimeStamp,                    
                     message = msg
                 });
 

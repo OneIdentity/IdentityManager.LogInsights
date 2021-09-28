@@ -161,42 +161,42 @@ namespace LogInsights.Detectors
 
             detectorStats.numberOfLinesParsed += msg.numberOfLines;    
 
-            if (msg.spid != "" && 
-                (msg.loggerSource == "SystemConnector" || msg.loggerSource == "SystemConnection"))
+            if (msg.Spid != "" && 
+                (msg.Logger == "SystemConnector" || msg.Logger == "SystemConnection"))
             {
-                if (systemConnectorsAndConnections.ContainsKey(msg.spid))
-                    systemConnectorsAndConnections[msg.spid].dtTimestampEnd = msg.messageTimestamp;
+                if (systemConnectorsAndConnections.ContainsKey(msg.Spid))
+                    systemConnectorsAndConnections[msg.Spid].dtTimestampEnd = msg.TimeStamp;
                 else
                 {
                     Datastore.SystemConnInfo data = new Datastore.SystemConnInfo()
                     {
-                        dtTimestampStart = msg.messageTimestamp,
-                        systemConnType = msg.loggerSource == "SystemConnector" ? SystemConnType.SystemConnector : SystemConnType.SystemConnection,
+                        dtTimestampStart = msg.TimeStamp,
+                        systemConnType = msg.Logger == "SystemConnector" ? SystemConnType.SystemConnector : SystemConnType.SystemConnection,
                         message = msg
                     };
-                    systemConnectorsAndConnections.Add(msg.spid, data);
-                    logger.Trace($"new systemConn info {data.systemConnType.ToString()} for spid {msg.spid}");
+                    systemConnectorsAndConnections.Add(msg.Spid, data);
+                    logger.Trace($"new systemConn info {data.systemConnType.ToString()} for spid {msg.Spid}");
                 }
 
                 //try to assign the schema display to an system connector/connection
-                if (!systemConnectorsHasSchemaDisplay.ContainsKey(msg.spid))
+                if (!systemConnectorsHasSchemaDisplay.ContainsKey(msg.Spid))
                     foreach (var regexGetSchema in regex_SystemConnSchemaDetect_DetermineSide)
                     {                     
-                        var rm_SystemConnector_DetermineSide = regexGetSchema.Match(msg.messageText);
+                        var rm_SystemConnector_DetermineSide = regexGetSchema.Match(msg.FullMessage);
                         if (rm_SystemConnector_DetermineSide.Success)
                         {
                             logger.Trace($"regex match for rx regexGetSchema: {regexGetSchema.ToString()}");
 
                             string schemaname = rm_SystemConnector_DetermineSide.Groups["schemaname"].Value;
-                            systemConnectorsHasSchemaDisplay.Add(msg.spid, schemaname);
+                            systemConnectorsHasSchemaDisplay.Add(msg.Spid, schemaname);
                         }
                     }
 
                 //trying to specify the side (left or right)
-                if (systemConnectorsAndConnections[msg.spid].belongsToSide == SystemConnBelongsTo.Unknown && msg.loggerSource == "SystemConnection")
+                if (systemConnectorsAndConnections[msg.Spid].belongsToSide == SystemConnBelongsTo.Unknown && msg.Logger == "SystemConnection")
                     foreach(var regexSide in regex_SystemConnSideDetect_DetermineSide)
                     {
-                        var rm_SystemConnector_DetermineSide = regexSide.Match(msg.messageText);
+                        var rm_SystemConnector_DetermineSide = regexSide.Match(msg.FullMessage);
                         if (rm_SystemConnector_DetermineSide.Success)
                         {
                             logger.Trace($"regex match for rx regexSide: {regexSide.ToString()}");
@@ -204,25 +204,25 @@ namespace LogInsights.Detectors
                             string side = rm_SystemConnector_DetermineSide.Groups["sidetype"].Value;
 
                             if (side.Contains("One Identity Manager"))
-                                systemConnectorsAndConnections[msg.spid].belongsToSide = SystemConnBelongsTo.IdentityManagerSide;
+                                systemConnectorsAndConnections[msg.Spid].belongsToSide = SystemConnBelongsTo.IdentityManagerSide;
                             else
-                                systemConnectorsAndConnections[msg.spid].belongsToSide = SystemConnBelongsTo.TargetsystemSide;
+                                systemConnectorsAndConnections[msg.Spid].belongsToSide = SystemConnBelongsTo.TargetsystemSide;
                         }
                     }
 
                 //get timestamps for connecting and disconnecting
-                if (systemConnectorsAndConnections[msg.spid].connectTimestamp.Count == systemConnectorsAndConnections[msg.spid].disconnectTimestamp.Count)
-                    if (regex_SystemConnTimestampConnect.IsMatch(msg.messageText))
+                if (systemConnectorsAndConnections[msg.Spid].connectTimestamp.Count == systemConnectorsAndConnections[msg.Spid].disconnectTimestamp.Count)
+                    if (regex_SystemConnTimestampConnect.IsMatch(msg.FullMessage))
                     {
                         logger.Trace($"regex match for rx regex_SystemConnTimestampConnect: {regex_SystemConnTimestampConnect.ToString()}");
-                        systemConnectorsAndConnections[msg.spid].connectTimestamp.Add(msg.messageTimestamp);
+                        systemConnectorsAndConnections[msg.Spid].connectTimestamp.Add(msg.TimeStamp);
                     }
 
-                if (systemConnectorsAndConnections[msg.spid].connectTimestamp.Count > systemConnectorsAndConnections[msg.spid].disconnectTimestamp.Count)
-                    if (regex_SystemConnTimestampDisconnect.IsMatch(msg.messageText))
+                if (systemConnectorsAndConnections[msg.Spid].connectTimestamp.Count > systemConnectorsAndConnections[msg.Spid].disconnectTimestamp.Count)
+                    if (regex_SystemConnTimestampDisconnect.IsMatch(msg.FullMessage))
                     {
                         logger.Trace($"regex match for rx regex_SystemConnTimestampDisconnect: {regex_SystemConnTimestampDisconnect.ToString()}");
-                        systemConnectorsAndConnections[msg.spid].disconnectTimestamp.Add(msg.messageTimestamp);
+                        systemConnectorsAndConnections[msg.Spid].disconnectTimestamp.Add(msg.TimeStamp);
                     }
             }
 

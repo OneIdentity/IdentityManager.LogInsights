@@ -100,7 +100,7 @@ namespace LogInsights.Detectors
 
 			detectorStats.numberOfLinesParsed += msg.numberOfLines;    
 			
-            var matches = regex_Uid.Matches(msg.messageText);
+            var matches = regex_Uid.Matches(msg.FullMessage);
             if (matches.Count > 1)            
             {
                 List<string> uids = new List<string>();
@@ -113,17 +113,17 @@ namespace LogInsights.Detectors
                 //for (int i=0; i<uids.Count -1; i++)
                 foreach (string uid in uids)
                 {
-                    if (msg.spid == uid)
+                    if (msg.Spid == uid)
                         continue;
 
-                    string key = msg.spid + "=>" + uid;
+                    string key = msg.Spid + "=>" + uid;
                     if (!idmatches.ContainsKey(key))
                         idmatches.Add(key, new IdMatches()
                         {
-                            uid1 = msg.spid,
+                            uid1 = msg.Spid,
                             uid2 = uid,
-                            text = msg.messageText,
-                            loggerSrc = msg.loggerSource
+                            text = msg.FullMessage,
+                            loggerSrc = msg.Logger
                         });
                 }
                 

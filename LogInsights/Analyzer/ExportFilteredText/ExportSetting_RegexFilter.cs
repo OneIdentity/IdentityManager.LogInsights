@@ -72,14 +72,14 @@ namespace LogInsights
                 if (!isEnabledAtStart)
                     return MessageMatchResult.filterNotApplied;
 
-                return isFilterChainMatch(filterByRegex_AppliedAtStart_RegexLst, msg.messageText);                
+                return isFilterChainMatch(filterByRegex_AppliedAtStart_RegexLst, msg.FullMessage);                
             }
             else  //check at the end of the filter chain
             {
                 if (!isEnabledAtEnd)
                     return MessageMatchResult.filterNotApplied;
 
-                return isFilterChainMatch(filterByRegex_AppliedAtEnd_RegexLst, msg.messageText);
+                return isFilterChainMatch(filterByRegex_AppliedAtEnd_RegexLst, msg.FullMessage);
             }
 
         }

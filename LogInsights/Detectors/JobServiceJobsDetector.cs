@@ -114,7 +114,7 @@ namespace LogInsights.Detectors
                 (msg.messageLogfileType != LogfileType.Jobservice && msg.loggerSource != "Jobservice" && msg.loggerSource != "SqlLog")
                )
             */
-            if (msg.loggerSource != "Jobservice" /* && msg.loggerSource != "SqlLog" */ )
+            if (msg.Logger != "Jobservice" /* && msg.loggerSource != "SqlLog" */ )
                 return;
 
             long tcStart = Environment.TickCount64;
@@ -138,8 +138,8 @@ namespace LogInsights.Detectors
                 //job start
                 Match rm_JobStart = null;
 
-                if (msg.loggerSource == "Jobservice")
-                    rm_JobStart = regex_JobStart.Match(msg.payloadMessage);
+                if (msg.Logger == "Jobservice")
+                    rm_JobStart = regex_JobStart.Match(msg.Message);
                 /*
                 else if (msg.loggerSource == "SqlLog" && msg.loggerLevel == LogLevel.Debug)
                     rm_JobStart = regex_JobStart_SQL.Match(msg.payloadMessage);
@@ -149,7 +149,7 @@ namespace LogInsights.Detectors
                 {
                     jobId = rm_JobStart.Groups["jobid"].Value;
                     if (string.IsNullOrEmpty(jobId))
-                        jobId = msg.spid;
+                        jobId = msg.Spid;
 
                     if (jobs.ContainsKey(jobId))
                     {
@@ -180,10 +180,10 @@ namespace LogInsights.Detectors
                     }
 
                     //avoid adding the same job from different log files into the list
-                    if (!job.jobserviceJobattempts.Any(j => j.dtTimestampStart.AlmostEqual(msg.messageTimestamp)))
+                    if (!job.jobserviceJobattempts.Any(j => j.dtTimestampStart.AlmostEqual(msg.TimeStamp)))
                         job.jobserviceJobattempts.Add(new JobserviceJobattempt()
                         {
-                            dtTimestampStart = msg.messageTimestamp,
+                            dtTimestampStart = msg.TimeStamp,
                             message = msg
                         });
 
@@ -194,8 +194,8 @@ namespace LogInsights.Detectors
                 //job finish
                 Match rm_JobFinish = null;
 
-                 if (msg.loggerSource == "Jobservice")
-                    rm_JobFinish = regex_JobFinish.Match(msg.payloadMessage);
+                 if (msg.Logger == "Jobservice")
+                    rm_JobFinish = regex_JobFinish.Match(msg.Message);
                  /*
                  else if (msg.loggerSource == "SqlLog" && msg.loggerLevel == LogLevel.Debug)
                     rm_JobFinish = regex_JobFinish_SQL.Match(msg.payloadMessage);
@@ -208,7 +208,7 @@ namespace LogInsights.Detectors
                     logger.Trace($"found job finish event for job id {jobId}");
 
                     if (string.IsNullOrEmpty(jobId))
-                        jobId = msg.spid;
+                        jobId = msg.Spid;
 
                     job = jobs.GetOrAdd(jobId);                    
 
@@ -241,7 +241,7 @@ namespace LogInsights.Detectors
                     //2.) we have only one logfile which recorded the end event, so the start is really missing
                     if (jobAttend == null)
                     {
-                        jobAttend = job.jobserviceJobattempts.Where(n => n.isDataComplete && n.dtTimestampEnd.AlmostEqual(msg.messageTimestamp)).OrderByDescending(n => n.dtTimestampStart).Take(1).FirstOrDefault();
+                        jobAttend = job.jobserviceJobattempts.Where(n => n.isDataComplete && n.dtTimestampEnd.AlmostEqual(msg.TimeStamp)).OrderByDescending(n => n.dtTimestampStart).Take(1).FirstOrDefault();
 
                         if (jobAttend != null) //a duplicate log event
                             return;
@@ -257,7 +257,7 @@ namespace LogInsights.Detectors
 
 
                     jobAttend.isDataComplete = true;
-                    jobAttend.dtTimestampEnd = msg.messageTimestamp;
+                    jobAttend.dtTimestampEnd = msg.TimeStamp;
                     jobAttend.endmessage = msg;
                     jobAttend.resultmessagetext = rm_JobFinish.Groups["msg"]?.Value.TrimStart('\r', '\n');
                     jobAttend.jobExecutionState =

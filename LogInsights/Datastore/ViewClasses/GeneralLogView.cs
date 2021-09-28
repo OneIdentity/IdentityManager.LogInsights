@@ -251,12 +251,12 @@ namespace LogInsights.Datastore
                                 {
                                     item.metaData,
                                     item.dtTimestamp.ToString("G"),
-                                    item.message.messageText
+                                    item.message.FullMessage
                                 });
                     }
                     else
                     {
-                        var distGrps = data.GroupBy(m => m.message.payloadMessageDevalued).ToArray();
+                        var distGrps = data.GroupBy(m => m.message.MessageDevalued).ToArray();
 
                         uc.SetupCaption($"{caption} ({distGrps.Length})");
                         uc.SetupHeaders(new string[]

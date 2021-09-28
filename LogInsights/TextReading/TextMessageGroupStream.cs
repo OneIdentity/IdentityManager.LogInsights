@@ -78,7 +78,7 @@ namespace LogInsights
 
         private string GetStreamKey(TextMessage msg)
         {
-            return string.Format("{0}|{1}", msg.loggerSource, msg.spid);
+            return string.Format("{0}|{1}", msg.Logger, msg.Spid);
         }
     }
 }
