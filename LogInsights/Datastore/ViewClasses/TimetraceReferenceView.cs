@@ -7,6 +7,7 @@ using System.Drawing;
 using LogInsights.Helpers;
 using LogInsights.Controls;
 using LogInsights.ExceptionHandling;
+using LogInsights.LogReader;
 
 
 namespace LogInsights.Datastore
@@ -238,7 +239,7 @@ namespace LogInsights.Datastore
                 var errorEvents = generalLogData.MessageErrors
                         .Select(t => 
                             new TimelineTrackEvent(
-                                    StringHelper.ShortenText(t.message.messageText), 
+                                    StringHelper.ShortenText(t.message.FullMessage), 
                                     t.dtTimestamp,
                                     t.message
                                     ));
@@ -261,7 +262,7 @@ namespace LogInsights.Datastore
                 var warningEvents = generalLogData.MessageWarnings
                                         .Select(t =>
                                             new TimelineTrackEvent(
-                                                    StringHelper.ShortenText(t.message.messageText),
+                                                    StringHelper.ShortenText(t.message.FullMessage),
                                                     t.dtTimestamp,
                                                     t.message));
 
@@ -287,7 +288,11 @@ namespace LogInsights.Datastore
                            contextLinesUc.SetData(args.timelineTrackTextMessage);
                        else if (args.timelineTrackText != null)
                        {
-                           TextMessage tm = new TextMessage(new TextLocator("info"), $"\n{args.timelineTrackText}");
+                           var tm = new LogEntry
+                               {
+                                   Locator = new Locator(source: "info"),
+                                   Message = $"\n{args.timelineTrackText}"
+                               };
                            contextLinesUc.SetData(tm);
                        }
                    }

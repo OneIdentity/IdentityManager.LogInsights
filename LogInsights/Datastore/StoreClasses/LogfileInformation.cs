@@ -1,4 +1,6 @@
-﻿using System;
+﻿using LogInsights.LogReader;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -17,7 +19,7 @@ namespace LogInsights.Datastore
 
         public Dictionary<Helpers.LogLevel, long> numberOfEntriesPerLoglevel = new Dictionary<Helpers.LogLevel, long>();
 
-        public TextMessage firstMessage;
+        public LogEntry firstMessage;
 
         //log file text stats
         public float avgCharsPerLine = -1;  //line.Length()

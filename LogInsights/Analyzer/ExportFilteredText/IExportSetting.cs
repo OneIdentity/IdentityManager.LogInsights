@@ -1,6 +1,7 @@
 ﻿using System;
 
 using LogInsights.Datastore;
+using LogInsights.LogReader;
 
 namespace LogInsights
 {
@@ -10,7 +11,7 @@ namespace LogInsights
 
         string ExportAsJson();
 
-        MessageMatchResult IsMessageMatch(TextMessage msg, object additionalData);
+        MessageMatchResult IsMessageMatch(LogEntry msg, object additionalData);
 
         Datastore.DataStore datastore { set; }
     }

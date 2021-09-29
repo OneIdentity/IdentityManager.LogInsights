@@ -1,4 +1,6 @@
-﻿using System;
+﻿using LogInsights.LogReader;
+
+using System;
 
 
 namespace LogInsights.Detectors
@@ -8,7 +10,7 @@ namespace LogInsights.Detectors
         void InitializeDetector();
 
         void FinalizeDetector();
-        void ProcessMessage(TextMessage msg);
+        void ProcessMessage(LogEntry msg);
 
         bool isEnabled { get; set; }
 

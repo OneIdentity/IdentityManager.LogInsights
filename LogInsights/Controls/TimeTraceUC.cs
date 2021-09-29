@@ -8,6 +8,7 @@ using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
 using LogInsights.Helpers;
+using LogInsights.LogReader;
 
 namespace LogInsights.Controls
 {
@@ -251,11 +252,11 @@ namespace LogInsights.Controls
 
                     panelToolTipLastMouseLocation = args.Location;
 
-                    var tripelData = GetTrackDataFromLocationExt(args.Location); //<vrtTimelineTrack, vrtTimelineTrackEvent, string, TextMessage>
+                    var tripelData = GetTrackDataFromLocationExt(args.Location); //<vrtTimelineTrack, vrtTimelineTrackEvent, string, LogEntry>
                     vrtTimelineTrack track = tripelData.Item1;
                     vrtTimelineTrackEvent trackEvt = tripelData.Item2;
-                    string trackText = tripelData.Item3 ?? tripelData.Item4?.messageText;
-                    TextMessage trackTextMsg = tripelData.Item4;
+                    string trackText = tripelData.Item3 ?? tripelData.Item4?.FullMessage;
+                    LogEntry trackTextMsg = tripelData.Item4;
 
                     if (track == null)
                         return;
@@ -937,23 +938,23 @@ namespace LogInsights.Controls
             return new Tuple<vrtTimelineTrack, vrtTimelineTrackEvent, string>(null, null, null);
         }
 
-        private Tuple<vrtTimelineTrack, vrtTimelineTrackEvent, string, TextMessage> GetTrackDataFromLocationExt(Point p)  
+        private Tuple<vrtTimelineTrack, vrtTimelineTrackEvent, string, LogEntry> GetTrackDataFromLocationExt(Point p)  
         {
             //track object
             var fndTr = timelineTracks.Where(tr => tr.isShown && tr.tooltipRectangle.Contains(p)).FirstOrDefault();
             if (fndTr != null)
-                return new Tuple<vrtTimelineTrack, vrtTimelineTrackEvent, string, TextMessage>(fndTr, null, fndTr.toolTipText, null);
+                return new Tuple<vrtTimelineTrack, vrtTimelineTrackEvent, string, LogEntry>(fndTr, null, fndTr.toolTipText, null);
     
             //track event object
             var fndTrEvt = timelineTracks.SelectMany(tr => tr.vrtTrackEvents.Where(te => te.isShown && te.tooltipRectangle.Contains(p))).FirstOrDefault();
             if (fndTrEvt != null)
             {
                 var vrtTrack = timelineTracks.First(vTr => vTr.vrtTrackEvents.Any(a => a == fndTrEvt));
-                return new Tuple<vrtTimelineTrack, vrtTimelineTrackEvent, string, TextMessage>(vrtTrack, fndTrEvt, fndTrEvt.toolTipText, fndTrEvt.textmsg);
+                return new Tuple<vrtTimelineTrack, vrtTimelineTrackEvent, string, LogEntry>(vrtTrack, fndTrEvt, fndTrEvt.toolTipText, fndTrEvt.textmsg);
             }
 
             //return null tripel when input point hit no track (event) object
-            return new Tuple<vrtTimelineTrack, vrtTimelineTrackEvent, string, TextMessage>(null, null, null, null);
+            return new Tuple<vrtTimelineTrack, vrtTimelineTrackEvent, string, LogEntry>(null, null, null, null);
         }
 
        
@@ -1092,7 +1093,7 @@ namespace LogInsights.Controls
         {
             public TimelineTrackEvent baseTrackEvent;
             public byte laneId = 0;
-            public TextMessage textmsg;
+            public LogEntry textmsg;
 
             public vrtTimelineTrackEvent() { }
 
@@ -1193,10 +1194,10 @@ namespace LogInsights.Controls
         public DateTime eventStart;
         public DateTime eventEnd;  //optional
         public int durationMinutes;
-        public TextMessage message;
+        public LogEntry message;
         
 
-        public TimelineTrackEvent(string label, DateTime dtStart, DateTime dtEnd, TextMessage textmessage = null, string additionalData = "")
+        public TimelineTrackEvent(string label, DateTime dtStart, DateTime dtEnd, LogEntry textmessage = null, string additionalData = "")
         {
             this.label = label;
             this.eventStart = dtStart;
@@ -1209,7 +1210,7 @@ namespace LogInsights.Controls
                 throw new ArgumentOutOfRangeException($"Event start time ({eventStart}) or end time ({eventEnd}) out of expected range");
         }
 
-        public TimelineTrackEvent(string label, DateTime dtStart, TextMessage textmessage = null, string additionalData = "", double durationMin = 0d)
+        public TimelineTrackEvent(string label, DateTime dtStart, LogEntry textmessage = null, string additionalData = "", double durationMin = 0d)
         {
             this.label = label;
             this.eventStart = dtStart;
@@ -1230,7 +1231,7 @@ namespace LogInsights.Controls
         public string timelineTrackId;
         public TimelineTrackEvent timelineTrackEvent;
         public string timelineTrackText;
-        public TextMessage timelineTrackTextMessage;
+        public LogEntry timelineTrackTextMessage;
     }
 
     

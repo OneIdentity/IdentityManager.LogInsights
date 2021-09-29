@@ -165,12 +165,10 @@ namespace LogInsights
             IReadOnlyCollection<LogEntry> partition;
             while ((partition = await preloader.GetNextAsync().ConfigureAwait(false)) != null)
             {
-                var textMsgs = partition.Select(p => new TextMessage(p)).ToArray();
-
                 Parallel.ForEach(detectors, new ParallelOptions {MaxDegreeOfParallelism = AnalyzeDOP},
                     detector =>
                     {
-                        foreach (var entry in textMsgs)
+                        foreach (var entry in partition)
                             detector.ProcessMessage(entry);
                     });
             }

@@ -9,13 +9,14 @@ using System.Text;
 using System.Windows.Forms;
 
 using LogInsights.Helpers;
+using LogInsights.LogReader;
 
 
 namespace LogInsights.Controls
 {
     public partial class ContextLinesUC : UserControl
     {
-        private TextMessage currentMsg = null; 
+        private LogEntry currentMsg = null; 
 
         private Exporter logfileFilterExporter;
 
@@ -88,8 +89,8 @@ namespace LogInsights.Controls
 
                 if (comboBox_OpenInEditor.Items.Count == 0)
                 {
-                    fn = currentMsg.textLocator.fileName;
-                    fp = currentMsg.textLocator.fileLinePosition;
+                    fn = currentMsg.Locator.Source;
+                    fp = currentMsg.Locator.Position;
                 }
                 else
                 {
@@ -129,91 +130,98 @@ namespace LogInsights.Controls
         }
 
          
-        public void SetData(params TextMessage[] theMessages)
+        public void SetData(params LogEntry[] theMessages)
         {
             if (theMessages == null || theMessages.Length == 0)
                 return; 
 
-            theMessages = theMessages.Where(m => m != null).OrderBy(m => m.textLocator.fileLinePosition).ToArray();  //clear null messages and sort the rest by line position
+            theMessages = theMessages.Where(m => m != null).OrderBy(m => m.Locator.Position).ToArray();  //clear null messages and sort the rest by line position
 
             //check if theMessageA.contextMsgAfter to theMessageB.contextMsgBefore will close the gap
-            string fn = theMessages[0].textLocator.fileName;
-            long ppos = theMessages[0].contextMsgAfter.GetLastElemOrDefault(theMessages[0]).textLocator.fileLinePosition;
+            LogEntry theMessage = theMessages[0];
+            string fn = theMessage.Locator.Source;
+            long ppos = theMessage.ContextNextEntries.GetLastElemOrDefault(theMessage).Locator.Position;
             bool isOpenGap = false;
             long msgIdfirstbreak = -1;
             bool isSingleMsg = theMessages.Length == 1;
 
             foreach (var msg in theMessages)
             {
-                //if (msg.contextMsgBefore == null) msg.contextMsgBefore = new TextMessage[] { };
-                //if (msg.contextMsgAfter == null) msg.contextMsgAfter = new TextMessage[] { };
+                //if (msg.contextMsgBefore == null) msg.contextMsgBefore = new LogEntry[] { };
+                //if (msg.contextMsgAfter == null) msg.contextMsgAfter = new LogEntry[] { };
                 
                 if (!isOpenGap && !isSingleMsg)
                 {
-                    if (fn != msg.textLocator.fileName)
+                    if (fn != msg.Locator.Source)
                         isOpenGap = true;
 
                     //if end of last message's context (after) message line (+1) is lower than the starting context (before) message line of current message, we have an open gap
-                    if ((ppos + 1) < msg.contextMsgBefore.GetFirstElemOrDefault(msg).textLocator.fileLinePosition)
+                    if ((ppos + 1) < msg.ContextPreviousEntries.GetFirstElemOrDefault(msg).Locator.Position)
                     {
                         isOpenGap = true;
-                        msgIdfirstbreak = msg.textLocator.messageNumber;
+                        msgIdfirstbreak = msg.Locator.EntryNumber;
                     }
                     else
-                        ppos = msg.contextMsgAfter.GetLastElemOrDefault(msg).textLocator.fileLinePosition;
+                        ppos = msg.ContextNextEntries.GetLastElemOrDefault(msg).Locator.Position;
                 }
             }
 
             //we take messageA and build up a new contextMsgAfter list including the lines of messageB and so on
             if (!isSingleMsg)
             {
-                Dictionary<long, TextMessage> dict_newContextLinesAfter = new Dictionary<long, TextMessage>();
+                var dict_newContextLinesAfter = new Dictionary<int, LogEntry>();
                 dict_newContextLinesAfter.AddRange(
-                                            theMessages[0].contextMsgAfter.Select(e => e.textLocator.fileLinePosition).ToArray(),
-                                            theMessages[0].contextMsgAfter.ToArray());
+                                            theMessage.ContextNextEntries.Select(e => e.Locator.Position).ToArray(),
+                                            theMessage.ContextNextEntries.ToArray());
                 
                 for (int i = 1; i < theMessages.Length; i++)
                 {
-                    if (isOpenGap && theMessages[i].textLocator.messageNumber >= msgIdfirstbreak)
+                    if (isOpenGap && theMessages[i].Locator.EntryNumber >= msgIdfirstbreak)
                         //append all context lines of msgB after a gap indicator 
-                        dict_newContextLinesAfter.Add(theMessages[i].textLocator.fileLinePosition - 1, new TextMessage(new TextLocator(), " < ... > " + Environment.NewLine));
+                        dict_newContextLinesAfter.Add(
+                            theMessages[i].Locator.Position - 1, 
+                            new LogEntry
+                            {
+                                Locator = new Locator(),
+                                Message = " < ... > " + Environment.NewLine
+                            });
 
                     //add the context (before) messages
                     dict_newContextLinesAfter.AddRange(
-                                theMessages[i].contextMsgBefore.Select(e => e.textLocator.fileLinePosition).ToArray(),
-                                theMessages[i].contextMsgBefore.ToArray());
+                                theMessages[i].ContextPreviousEntries.Select(e => e.Locator.Position).ToArray(),
+                                theMessages[i].ContextPreviousEntries.ToArray());
 
                     //add the message itself
-                    dict_newContextLinesAfter.AddOrUpdate(theMessages[i].textLocator.fileLinePosition, theMessages[i]);
+                    dict_newContextLinesAfter.AddOrUpdate(theMessages[i].Locator.Position, theMessages[i]);
 
                     //add the context (after) messages
                     dict_newContextLinesAfter.AddRange(
-                                theMessages[i].contextMsgAfter.Select(e => e.textLocator.fileLinePosition).ToArray(),
-                                theMessages[i].contextMsgAfter.ToArray());
+                                theMessages[i].ContextNextEntries.Select(e => e.Locator.Position).ToArray(),
+                                theMessages[i].ContextNextEntries.ToArray());
                 }
 
-                theMessages[0].contextMsgAfter = 
+                theMessage.ContextNextEntries = 
                     dict_newContextLinesAfter
-                    .Where(msg => !theMessages[0]
-                                    .contextMsgBefore
-                                    .Any(msgb => msgb.textLocator.fileLinePosition == msg.Key) 
+                    .Where(msg => !theMessage
+                                    .ContextPreviousEntries
+                                    .Any(msgb => msgb.Locator.Position == msg.Key) 
                                   && 
-                                  msg.Key != theMessages[0].textLocator.fileLinePosition)
+                                  msg.Key != theMessage.Locator.Position)
                     .OrderBy(e => e.Key)
                     .Select(e => e.Value)
                     .ToArray();
             }
 
-            rtbLog.ShowLineNumbers = !isOpenGap && theMessages[0].textLocator?.fileLinePosition > 0;
+            rtbLog.ShowLineNumbers = !isOpenGap && theMessage.Locator?.Position > 0;
 
-            bool fullyCompleteMessage = theMessages[0].textLocator?.fileLinePosition > 0;
+            bool fullyCompleteMessage = theMessage.Locator?.Position > 0;
 
-            List<FileInformationContext> jumpLines = _SetData(theMessages[0],
+            List<FileInformationContext> jumpLines = _SetData(theMessage,
                                                               fullyCompleteMessage,
-                                                              fullyCompleteMessage ? theMessages.Select(m => m.textLocator.fileLinePosition) : new long[] { },
+                                                              fullyCompleteMessage ? theMessages.Select(m => m.Locator.Position) : Array.Empty<int>(),
                                                               fullyCompleteMessage);
 
-            currentMsg = theMessages[0];
+            currentMsg = theMessage;
 
             buttonExport.Enabled = true;
             buttonShowInEditor.Enabled = fullyCompleteMessage; 
@@ -253,7 +261,7 @@ namespace LogInsights.Controls
             button_MessagesJumpBack.Enabled = comboBox_OpenInEditor.SelectedIndex > 0;
         }
 
-        private List<FileInformationContext> _SetData(TextMessage theMessage, bool setCaption, IEnumerable<long> highlightFilePositions, bool jumpToLastMarker = false)
+        private List<FileInformationContext> _SetData(LogEntry theMessage, bool setCaption, IEnumerable<int> highlightFilePositions, bool jumpToLastMarker = false)
         {
            
             //rtbLog.SuspendPainting();
@@ -269,7 +277,7 @@ namespace LogInsights.Controls
                 List<Tuple<int, int>> highlightEditorPositions = new List<Tuple<int, int>>();
                 int highlightEditorPositions_tmp_start;
                 if (highlightFilePositions == null)
-                    highlightFilePositions = new long[] { };
+                    highlightFilePositions = Array.Empty<int>();
                 else
                     highlightFilePositions = highlightFilePositions.ToArray();
 
@@ -277,61 +285,61 @@ namespace LogInsights.Controls
 
                 if (rtbLog.ShowLineNumbers)
                 {
-                    var tmFirst = theMessage.contextMsgBefore.GetFirstElemOrDefault(theMessage);
+                    var tmFirst = theMessage.ContextPreviousEntries.GetFirstElemOrDefault(theMessage);
 
-                    rtbLog.LineNumberOffset = (int) tmFirst.textLocator.fileLinePosition-1;
+                    rtbLog.LineNumberOffset = (int) tmFirst.Locator.Position-1;
                 }
 
 
                 //pre lines
-                if (theMessage.contextMsgBefore != null)
-                    foreach (TextMessage tm in theMessage.contextMsgBefore)
+                if (theMessage.ContextPreviousEntries != null)
+                    foreach (LogEntry tm in theMessage.ContextPreviousEntries)
                     {
-                        if (highlightFilePositions.Contains(tm.textLocator.fileLinePosition))
+                        if (highlightFilePositions.Contains(tm.Locator.Position))
                             highlightEditorPositions_tmp_start = Math.Max(0, rtbLog.Lines.Length - 1);
                         else
                             highlightEditorPositions_tmp_start = -1;
 
-                        rtbLog.AppendText(tm.messageText+Environment.NewLine);
+                        rtbLog.AppendText(tm.FullMessage+Environment.NewLine);
 
                         if (highlightEditorPositions_tmp_start >= 0)
                         {
                             highlightEditorPositions.Add(new Tuple<int, int>(highlightEditorPositions_tmp_start, rtbLog.Lines.Length - 1));
-                            filectxLst.Add(new FileInformationContext(tm.textLocator.fileName, tm.textLocator.fileLinePosition, highlightEditorPositions_tmp_start));
+                            filectxLst.Add(new FileInformationContext(tm.Locator.Source, tm.Locator.Position, highlightEditorPositions_tmp_start));
                         }
                     }
 
 
                 //the message itself
-                if (highlightFilePositions.Contains(theMessage.textLocator.fileLinePosition))
+                if (highlightFilePositions.Contains(theMessage.Locator.Position))
                     highlightEditorPositions_tmp_start = Math.Max(0, rtbLog.Lines.Length - 1);
                 else
                     highlightEditorPositions_tmp_start = -1;
 
-                rtbLog.AppendText(theMessage.messageText + Environment.NewLine);
+                rtbLog.AppendText(theMessage.FullMessage + Environment.NewLine);
 
                 if (highlightEditorPositions_tmp_start >= 0)
                 { 
                     highlightEditorPositions.Add(new Tuple<int, int>(highlightEditorPositions_tmp_start, rtbLog.Lines.Length - 1));
-                    filectxLst.Add(new FileInformationContext(theMessage.textLocator.fileName, theMessage.textLocator.fileLinePosition, highlightEditorPositions_tmp_start));
+                    filectxLst.Add(new FileInformationContext(theMessage.Locator.Source, theMessage.Locator.Position, highlightEditorPositions_tmp_start));
                 }
 
 
                 //post lines
-                if (theMessage.contextMsgAfter != null)
-                    foreach (TextMessage tm in theMessage.contextMsgAfter)
+                if (theMessage.ContextNextEntries != null)
+                    foreach (LogEntry tm in theMessage.ContextNextEntries)
                         {
-                            if (highlightFilePositions.Contains(tm.textLocator.fileLinePosition))
+                            if (highlightFilePositions.Contains(tm.Locator.Position))
                                 highlightEditorPositions_tmp_start = Math.Max(0, rtbLog.Lines.Length - 1);
                             else
                                 highlightEditorPositions_tmp_start = -1;
 
-                            rtbLog.AppendText(tm.messageText + Environment.NewLine);
+                            rtbLog.AppendText(tm.FullMessage + Environment.NewLine);
 
                             if (highlightEditorPositions_tmp_start >= 0)
                             { 
                                 highlightEditorPositions.Add(new Tuple<int, int>(highlightEditorPositions_tmp_start, rtbLog.Lines.Length - 1));
-                                filectxLst.Add(new FileInformationContext(tm.textLocator.fileName, tm.textLocator.fileLinePosition, highlightEditorPositions_tmp_start));
+                                filectxLst.Add(new FileInformationContext(tm.Locator.Source, tm.Locator.Position, highlightEditorPositions_tmp_start));
                             }
                         }
 
@@ -373,9 +381,9 @@ namespace LogInsights.Controls
 
             if (setCaption)
             {
-                long l1 = theMessage.textLocator.fileLinePosition;
-                long lBefore = theMessage.contextMsgBefore.Length == 0 ? -1 : theMessage.contextMsgBefore[0].textLocator.fileLinePosition;
-                long lAfter  = theMessage.contextMsgAfter.Length == 0 ? -1 : theMessage.contextMsgAfter.Last().textLocator.fileLinePosition;
+                long l1 = theMessage.Locator.Position;
+                long lBefore = theMessage.ContextPreviousEntries.Length == 0 ? -1 : theMessage.ContextPreviousEntries[0].Locator.Position;
+                long lAfter  = theMessage.ContextNextEntries.Length == 0 ? -1 : theMessage.ContextNextEntries.Last().Locator.Position;
 
                 StringBuilder sb = new StringBuilder();
 
@@ -384,14 +392,14 @@ namespace LogInsights.Controls
                 if (lBefore > 0)
                     sb.Append($"{lBefore} ... ");
 
-                sb.Append(!highlightFilePositions.Any() ? theMessage.textLocator.fileLinePosition.ToString() : string.Join(";", highlightFilePositions));
+                sb.Append(!highlightFilePositions.Any() ? theMessage.Locator.Position.ToString() : string.Join(";", highlightFilePositions));
 
                 if (lAfter > 0)
                     sb.Append($" ... {lAfter}");
 
                 sb.Append("]");
                 SetupCaption(string.Format("file {0}; line(s) {1}", 
-                                            System.IO.Path.GetFileName(theMessage.textLocator.fileName), 
+                                            System.IO.Path.GetFileName(theMessage.Locator.Source), 
                                             sb.ToString()));
             }
 

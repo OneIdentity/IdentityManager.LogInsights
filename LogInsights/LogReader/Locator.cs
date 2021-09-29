@@ -2,7 +2,7 @@
 {
     public class Locator
     {
-        public Locator(int entryNumber, int position, string source)
+        public Locator(int entryNumber = -1, int position = -1, string source = "")
         {
             Position = position;
             Source = source;
@@ -10,9 +10,7 @@
         }
 
         public int Position { get; }
-
         public string Source { get; }
-
         public int EntryNumber { get; }
     }
 }

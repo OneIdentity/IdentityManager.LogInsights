@@ -1,4 +1,6 @@
-﻿using System;
+﻿using LogInsights.LogReader;
+
+using System;
 using System.Collections;
 using System.Linq;
 
@@ -75,7 +77,7 @@ namespace LogInsights
                 e.Prepare();
         }
 
-        public bool IsMessageMatch(TextMessage msg)
+        public bool IsMessageMatch(LogEntry msg)
         {
             MessageMatchResult filterResponse;
 

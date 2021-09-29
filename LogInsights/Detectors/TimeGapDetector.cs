@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using LogInsights.Datastore;
 using LogInsights.Helpers;
+using LogInsights.LogReader;
 
 namespace LogInsights.Detectors
 {
@@ -102,7 +103,7 @@ namespace LogInsights.Detectors
         }
 
         
-        public void ProcessMessage(TextMessage msg)
+        public void ProcessMessage(LogEntry msg)
         {
             if (!_isEnabled)
                 return;
@@ -116,30 +117,30 @@ namespace LogInsights.Detectors
             if (msg == null)
                 return;
 
-			detectorStats.numberOfLinesParsed += msg.numberOfLines;    
+			detectorStats.numberOfLinesParsed += msg.NumberOfLines;    
 
-            var currentTime = msg.messageTimestamp;
+            var currentTime = msg.TimeStamp;
             if (currentTime == DateTime.MinValue)  //skip invalid timestamps
             {
-                logger.Trace($"invalid timestamp: {msg.messageText}; skip processing :(");
+                logger.Trace($"invalid timestamp: {msg.FullMessage}; skip processing :(");
                 return; // :(
             }
 
             //init? or new logfile? In this case time gaps are expected
-            if (CurrentLogfilename != msg.textLocator.fileName)
+            if (CurrentLogfilename != msg.Locator.Source)
             {
-                CurrentLogfilename = msg.textLocator.fileName;
+                CurrentLogfilename = msg.Locator.Source;
                 CurrentLogfileTime = currentTime;
 
                 return;
             }
 
             //min time gap?
-            if ((msg.messageTimestamp - CurrentLogfileTime).TotalSeconds > gap_threshold_WhenLogIsOnLevel_Min)
+            if ((msg.TimeStamp - CurrentLogfileTime).TotalSeconds > gap_threshold_WhenLogIsOnLevel_Min)
                 timegaps.Add(new TimeGap()
                 {                    
                     dtTimestampStart = CurrentLogfileTime,
-                    dtTimestampEnd = msg.messageTimestamp,                    
+                    dtTimestampEnd = msg.TimeStamp,                    
                     message = msg
                 });
 

@@ -275,7 +275,7 @@ namespace LogInsights.Detectors
             isFinalizing = false;
         }
 
-        public void ProcessMessage(TextMessage msg)
+        public void ProcessMessage(LogEntry msg)
         {
             if (!_isEnabled)
                 return;
@@ -283,7 +283,7 @@ namespace LogInsights.Detectors
 			long tcStart = Environment.TickCount64;
 
             //if (msg != null && (msg.loggerSource != "ProjectorEngine" && !msg.loggerSource.StartsWith("SystemCon")))
-            if (msg != null && (msg.spid == "" || !msg.loggerSource.StartsWith("SystemCon")))
+            if (msg != null && (msg.Spid == "" || !msg.Logger.StartsWith("SystemCon")))
                 return;
 
 
@@ -295,11 +295,11 @@ namespace LogInsights.Detectors
                 return;
              
 
-			detectorStats.numberOfLinesParsed += msg.numberOfLines;
+			detectorStats.numberOfLinesParsed += msg.NumberOfLines;
 
 
             bool ret = false;
-            if (msg.loggerSource == "SystemConnection")
+            if (msg.Logger == "SystemConnection")
             {
                 ret = _HandleSystemConnectionMessages(msg, regex_QueryObject_SystemConnection_Start, regex_QueryObject_SystemConnection_Done, QueryByEnum.UnknownQueryType);
 
@@ -307,7 +307,7 @@ namespace LogInsights.Detectors
                     ret = _HandleSystemConnectionMessages(msg, regex_ReloadObject_SystemConnection_Start, regex_ReloadObject_SystemConnection_Done, QueryByEnum.ReloadObject);
             }
 
-            if (msg.loggerSource == "SystemConnector")
+            if (msg.Logger == "SystemConnector")
             {
                 ret = _HandleSystemConnectorMessages(msg, regex_QueryObject_SystemConnector_Start, regex_QueryObject_SystemConnector_Done, QueryByEnum.UnknownQueryType);
 
@@ -319,13 +319,13 @@ namespace LogInsights.Detectors
         }
         
         
-        private bool _HandleSystemConnectionMessages(TextMessage msg, Regex regex_Start, Regex regex_Done, QueryByEnum qtypeInput)
+        private bool _HandleSystemConnectionMessages(LogEntry msg, Regex regex_Start, Regex regex_Done, QueryByEnum qtypeInput)
         {
             bool fnd = false;
 
 
             //start (request) message
-            var rm = regex_Start.Match(msg.messageText);
+            var rm = regex_Start.Match(msg.FullMessage);
             if (rm.Success)
             {
                 logger.Trace($"_HandleSystemConnectionMessages: regex match for rx regex_Start: {regex_Start.ToString()}");
@@ -333,7 +333,7 @@ namespace LogInsights.Detectors
 
                 fnd = true;
 
-                var connectionDetail = systemConnectionGeneralQueryObjectInfos.GetOrAdd(msg.spid);
+                var connectionDetail = systemConnectionGeneralQueryObjectInfos.GetOrAdd(msg.Spid);
 
                 string qObjDisp = "<NoSingleObject>"; 
                 QueryByEnum qtypeEnum = QueryByEnum.UnknownQueryType;
@@ -366,12 +366,12 @@ namespace LogInsights.Detectors
                     objectsToRequest = rm.Groups["objCnt"].Value.ToIntSave();
                 }
 
-                logger.Debug($"_HandleSystemConnectionMessages: found new connectionDetail for spid {msg.spid}");
+                logger.Debug($"_HandleSystemConnectionMessages: found new connectionDetail for spid {msg.Spid}");
                 connectionDetail.Add(new SyncStepDetailBase()
                     {
                         queryObjectInformation = new SyncStepDetailQueryObject()
                         {
-                            dtTimestampStart = msg.messageTimestamp,
+                            dtTimestampStart = msg.TimeStamp,
                             queryType = qtypeEnum, 
                             queryObjectDisplay = qObjDisp,
                             systemConnType = SystemConnType.SystemConnection,
@@ -385,14 +385,14 @@ namespace LogInsights.Detectors
 
 
             //finish (reply) message
-            rm = regex_Done.Match(msg.messageText);
+            rm = regex_Done.Match(msg.FullMessage);
             if (rm.Success)
             {
                 logger.Trace($"_HandleSystemConnectionMessages: regex match for rx regex_Done: {regex_Done.ToString()}");
                 
                 fnd = true;
 
-                var connectionDetail = systemConnectionGeneralQueryObjectInfos.GetOrAdd(msg.spid);
+                var connectionDetail = systemConnectionGeneralQueryObjectInfos.GetOrAdd(msg.Spid);
                 if (connectionDetail.Count > 0)
                 {
                     SyncStepDetailBase stepDetail = connectionDetail.Where(n => !n.queryObjectInformation.isDataComplete).LastOrDefault();
@@ -413,10 +413,10 @@ namespace LogInsights.Detectors
                         queryResult_NumberOfObjectsAfterScope = queryResult_NumberOfObjectsBeforeScope;
                     }
 
-                    stepDetail.queryObjectInformation.isSuccessful = msg.loggerLevel == LogLevel.Debug;
+                    stepDetail.queryObjectInformation.isSuccessful = msg.Level == LogLevel.Debug;
                     stepDetail.queryObjectInformation.isDataComplete = true;
                     stepDetail.queryObjectInformation.messageEnd = msg;
-                    stepDetail.queryObjectInformation.dtTimestampEnd = msg.messageTimestamp;
+                    stepDetail.queryObjectInformation.dtTimestampEnd = msg.TimeStamp;
                     stepDetail.queryObjectInformation.queryResult_NumberOfObjectsBeforeScope = queryResult_NumberOfObjectsBeforeScope;
                     stepDetail.queryObjectInformation.queryResult_NumberOfObjectsAfterScope = queryResult_NumberOfObjectsAfterScope;
                 }
@@ -425,20 +425,20 @@ namespace LogInsights.Detectors
             return fnd;
         }
 
-        private bool _HandleSystemConnectorMessages(TextMessage msg, Regex regex_Start, Regex regex_Done, QueryByEnum qtypeInput)
+        private bool _HandleSystemConnectorMessages(LogEntry msg, Regex regex_Start, Regex regex_Done, QueryByEnum qtypeInput)
         {
             bool fnd = false;
 
 
             //start (request) message
-            var rm = regex_Start.Match(msg.messageText);
+            var rm = regex_Start.Match(msg.FullMessage);
             if (rm.Success) 
             {
                 logger.Trace($"_HandleSystemConnectorMessages: regex match for rx regex_Start: {regex_Start.ToString()}");
 
                 fnd = true;
 
-                var connectionDetail = systemConnectionGeneralQueryObjectInfos.GetOrAdd(msg.spid);
+                var connectionDetail = systemConnectionGeneralQueryObjectInfos.GetOrAdd(msg.Spid);
                  
                 string qObjDisp = "<NoSingleObject>";
                 string options = ""; 
@@ -473,12 +473,12 @@ namespace LogInsights.Detectors
                 }
 
 
-                logger.Debug($"_HandleSystemConnectorMessages: found new connectionDetail for spid {msg.spid}");
+                logger.Debug($"_HandleSystemConnectorMessages: found new connectionDetail for spid {msg.Spid}");
                 connectionDetail.Add(new SyncStepDetailBase()
                 {
                     queryObjectInformation = new SyncStepDetailQueryObject()
                     {
-                        dtTimestampStart = msg.messageTimestamp,
+                        dtTimestampStart = msg.TimeStamp,
                         queryType = qtypeEnum, 
                         queryObjectDisplay = qObjDisp,
                         systemConnType = SystemConnType.SystemConnector,
@@ -491,14 +491,14 @@ namespace LogInsights.Detectors
 
 
             //finish (reply) message
-            rm = regex_Done.Match(msg.messageText);
+            rm = regex_Done.Match(msg.FullMessage);
             if (rm.Success)
             {
                 logger.Trace($"_HandleSystemConnectorMessages: regex match for rx regex_Done: {regex_Done.ToString()}");
                 
                 fnd = true;
 
-                var connectionDetail = systemConnectionGeneralQueryObjectInfos.GetOrAdd(msg.spid);
+                var connectionDetail = systemConnectionGeneralQueryObjectInfos.GetOrAdd(msg.Spid);
                 if (connectionDetail.Count > 0)
                 {
                     string qObjDisp = rm.Groups["objectDisp"].Value.Trim();
@@ -543,10 +543,10 @@ namespace LogInsights.Detectors
 
                      
 
-                    stepDetail.queryObjectInformation.isSuccessful = (cntFailure == 0 && state == "Success") || (string.IsNullOrEmpty(state) && msg.loggerLevel == LogLevel.Debug);
+                    stepDetail.queryObjectInformation.isSuccessful = (cntFailure == 0 && state == "Success") || (string.IsNullOrEmpty(state) && msg.Level == LogLevel.Debug);
                     stepDetail.queryObjectInformation.isDataComplete = true;
                     stepDetail.queryObjectInformation.messageEnd = msg;
-                    stepDetail.queryObjectInformation.dtTimestampEnd = msg.messageTimestamp;
+                    stepDetail.queryObjectInformation.dtTimestampEnd = msg.TimeStamp;
                     stepDetail.queryObjectInformation.queryResult_NumberOfObjectsBeforeScope = cntOk;
                     stepDetail.queryObjectInformation.queryResult_NumberOfObjectsAfterScope = cntOkAfter;
                     stepDetail.queryObjectInformation.queryResult_NumberOfObjectsFailed = cntFailure;

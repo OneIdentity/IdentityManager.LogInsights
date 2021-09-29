@@ -1,4 +1,6 @@
-﻿using System;
+﻿using LogInsights.LogReader;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,21 +14,21 @@ namespace LogInsights.Datastore
         public bool isDataComplete;
         public string metaData;
 
-        public TextMessage message;
+        public LogEntry message;
 
         public string loggerSourceId  //NLog SPID / sessionID / loggerID
         {
-            get { return message?.spid; }
+            get { return message?.Spid; }
         }
 
         public long logfilePosition
         {
-            get { return message == null ? -1 : message.textLocator.fileLinePosition; }
+            get { return message == null ? -1 : message.Locator.Position; }
         }
 
         public string logfileName
         {
-            get { return message == null ? "" : message.textLocator.fileName; }
+            get { return message == null ? "" : message.Locator.Source; }
         }
 
 
@@ -42,9 +44,9 @@ namespace LogInsights.Datastore
                 return "";
 
 
-            string logfilenameShort = System.IO.Path.GetFileName(message.textLocator.fileName);            
+            string logfilenameShort = System.IO.Path.GetFileName(message.Locator.Source);            
 
-            return ($"{logfilenameShort}@+{message.textLocator.fileLinePosition.ToString()}");
+            return ($"{logfilenameShort}@+{message.Locator.Position.ToString()}");
         }
 
     }

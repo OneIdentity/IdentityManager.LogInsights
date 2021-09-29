@@ -33,18 +33,18 @@ namespace LogInsights
             await FilterAndExportBase().ConfigureAwait(false);
         }
 
-        public async Task FilterAndExportFromMessage(TextMessage inputMsg)
+        public async Task FilterAndExportFromMessage(LogEntry inputMsg)
         {
             //change exportSettings before GUI display??
-            if (inputMsg != null && !string.IsNullOrEmpty(inputMsg.textLocator.fileName))
+            if (inputMsg != null && !string.IsNullOrEmpty(inputMsg.Locator.Source))
             {
                 //try to preselect FileName and Folder
-                exportSettings.inputOutputOptions.includeFiles.AddIfNotPresent(inputMsg.textLocator.fileName);
-                exportSettings.inputOutputOptions.outputFolder = FileHelper.EnsureFolderisWritableOrReturnDefault(Path.GetDirectoryName(inputMsg.textLocator.fileName));
+                exportSettings.inputOutputOptions.includeFiles.AddIfNotPresent(inputMsg.Locator.Source);
+                exportSettings.inputOutputOptions.outputFolder = FileHelper.EnsureFolderisWritableOrReturnDefault(Path.GetDirectoryName(inputMsg.Locator.Source));
                              
                 //try to preselect ProjectionActivity
                 ProjectionType ptype;
-                string uuid = m_datastore.GetOrAdd<ProjectionActivity>().GetUuidByLoggerId(inputMsg.spid, out ptype);
+                string uuid = m_datastore.GetOrAdd<ProjectionActivity>().GetUuidByLoggerId(inputMsg.Spid, out ptype);
                 if (!string.IsNullOrEmpty(uuid))
                 {
                     exportSettings.filterByActivity.isfilterEnabled_ProjectionActivity = true;
@@ -132,19 +132,17 @@ namespace LogInsights
             using (var writer = new StreamWriter(exportfilename, false, Encoding.UTF8))
                 while ((partition = await preloader.GetNextAsync().ConfigureAwait(false)) != null)
                 {
-                    var textMsgs = partition.Select(p => new TextMessage(p)).ToArray();
-
-                    foreach (var msg in textMsgs)
+                    foreach (var msg in partition)
                         if (exportSettings.IsMessageMatch(msg))
                         {
                             //do we need a line break at the end?
-                            if (writeLn == null && !string.IsNullOrEmpty(msg.messageText))
-                                writeLn = !msg.messageText.EndsWith(Environment.NewLine);
+                            if (writeLn == null && !string.IsNullOrEmpty(msg.FullMessage))
+                                writeLn = !msg.FullMessage.EndsWith(Environment.NewLine);
                              
                             if (writeLn == false)
-                                await writer.WriteAsync(msg.messageText).ConfigureAwait(false);
+                                await writer.WriteAsync(msg.FullMessage).ConfigureAwait(false);
                             else
-                                await writer.WriteLineAsync(msg.messageText).ConfigureAwait(false);
+                                await writer.WriteLineAsync(msg.FullMessage).ConfigureAwait(false);
                         }
                 } 
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using LogInsights.Helpers;
+using LogInsights.LogReader;
 
 namespace LogInsights.Datastore
 {
@@ -12,7 +13,7 @@ namespace LogInsights.Datastore
         public DateTime dtTimestampStart = DateTime.MinValue;
         public DateTime dtTimestampEnd = DateTime.MinValue;
 
-        public TextMessage messageEnd;
+        public LogEntry messageEnd;
 
         public long logfilePositionStart
         {
@@ -21,7 +22,7 @@ namespace LogInsights.Datastore
 
         public long logfilePositionEnd
         {
-            get { return messageEnd == null ? -1 : messageEnd.textLocator.fileLinePosition; }
+            get { return messageEnd == null ? -1 : messageEnd.Locator.Position; }
         }
         
 
@@ -32,7 +33,7 @@ namespace LogInsights.Datastore
  
         public string logfileNameEnd
         {
-            get { return messageEnd == null ? "" : messageEnd.textLocator.fileName; }
+            get { return messageEnd == null ? "" : messageEnd.Locator.Source; }
         }
 
         public uint durationMin
@@ -112,9 +113,9 @@ namespace LogInsights.Datastore
                 return "";
 
 
-            string logfilenameShort = System.IO.Path.GetFileName(messageEnd.textLocator.fileName);
+            string logfilenameShort = System.IO.Path.GetFileName(messageEnd.Locator.Source);
 
-            return ($"{logfilenameShort}@+{messageEnd.textLocator.fileLinePosition.ToString()}");
+            return ($"{logfilenameShort}@+{messageEnd.Locator.Position.ToString()}");
         }
         public override string GetEventLocator()
         {
