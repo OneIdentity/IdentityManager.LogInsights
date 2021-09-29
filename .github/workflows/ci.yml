@@ -47,3 +47,7 @@ jobs:
       run: msbuild $env:Solution_Name /p:Configuration=$env:Configuration
       env:
         Configuration: ${{ matrix.configuration }}
+
+    # Execute all unit tests in the solution
+    - name: Execute unit tests
+      run: dotnet test
