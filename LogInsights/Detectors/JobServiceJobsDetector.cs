@@ -32,7 +32,7 @@ namespace LogInsights.Detectors
 
          */
 
-        private static Regex regex_JobStart = new Regex(@"(<p>.*?( - (?<queue>(\\[^ ]+) - )| - ))?Process step parameter (?<jobid>[-0-9a-zA-Z]{36,38}).*?ComponentClass=(?<classname>.*?)Task=(?<taskname>.*?)Executiontype.*?(?<params>\[Parameters\].+)", RegexOptions.Compiled | RegexOptions.Singleline);
+        private static Regex regex_JobStart = new Regex(@"(((?<queue>(\\[^ ]+)) - ))?Process step parameter (?<jobid>[-0-9a-zA-Z]{36,38}).*?ComponentClass=(?<classname>.*?)Task=(?<taskname>.*?)Executiontype.*?(?<params>\[Parameters\].+)", RegexOptions.Compiled | RegexOptions.Singleline);
         //private static Regex regex_JobStart_SQL = new Regex(@"exec QBM_PJobUpdateState N?'(?<jobid>[-0-9a-zA-Z]{36,38})', N'PROCESSING'", RegexOptions.Compiled | RegexOptions.Singleline);
 
         //private static Regex regex_JobFinish_TypeJS = new Regex(@"<[swrxe]>.*?(?<queue>\\.+?) - .*?(?<jobid>[-0-9a-fA-Z]{36,38}): (?<jobstate>[a-zA-Z ]+)(?<msg>.*)?$|<[swrxe]>.*?(?<jobid>[-0-9a-fA-Z]{36,38}): (?<jobstate>[a-zA-Z ]+)(?<msg>.*)?$|<[swrxe]>.*?(?<queue>\\.+?) - Process step output parameter (?<jobid>[-0-9a-fA-Z]{36,38}):(?<msg>.*)?$", RegexOptions.Compiled | RegexOptions.Singleline);
@@ -217,6 +217,16 @@ namespace LogInsights.Detectors
                     if (string.IsNullOrEmpty(job.componentname) && rm_JobFinish.Groups.ContainsKey("component"))
                     {
                         job.componentname = rm_JobFinish.Groups["component"].Value;
+                    }
+
+                    if (string.IsNullOrEmpty(job.uidJob) && rm_JobFinish.Groups.ContainsKey("jobid"))
+                    {
+                        job.uidJob = rm_JobFinish.Groups["jobid"].Value;
+                    }
+
+                    if (string.IsNullOrEmpty(job.queuename) && rm_JobFinish.Groups.ContainsKey("queue"))
+                    {
+                        job.queuename = rm_JobFinish.Groups["queue"].Value;
                     }
 
                     //did we miss the beginning? This can happen if we got only logfile(s) where the end was logged but the start was reported ages ago :(
