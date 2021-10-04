@@ -22,7 +22,7 @@ namespace LogInsights
                             RegexOptions.Compiled | RegexOptions.Singleline);
 
         public static Regex regexMessageMetaDataJobservice =
-            new Regex(@"^(?<tag><.>(<.>)?){0,2}(?<Timestamp>20\d\d-\d\d-\d\d \d\d:\d\d(:\d\d(\.\d+)?)?(?<TimeOffset>\s+[+-]\d\d:\d\d)?)(.*?(?<SID>[-0-9a-zA-Z]{36}))?([ ]*:)?(?<Payload>.*)", 
+            new Regex(@"^(?<tag><.>(<.>)?){0,2}(?<Timestamp>20\d\d-\d\d-\d\d \d\d:\d\d(:\d\d(\.\d+)?)?(?<TimeOffset>\s+[+-]\d\d:\d\d)?)(?<Payload>(.*?(?<SID>[-0-9a-zA-Z]{36}))?([ ]*:)?.*)", 
                             RegexOptions.Compiled | RegexOptions.Singleline);
 
         public static string str_FormatPlaceholder = "{.*?}";
