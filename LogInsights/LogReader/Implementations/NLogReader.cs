@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -9,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using LogInsights.Helpers;
-using System.IO.Enumeration;
+using System.IO;
 
 namespace LogInsights.LogReader
 {
@@ -88,18 +87,23 @@ namespace LogInsights.LogReader
                         continue; // todo log message or other user notification
                 }
 
-
-                using var reader = new StreamReader(file, m_Encoding, true);
+                using FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read, 4096 * 32, FileOptions.SequentialScan);
+                using var reader = new StreamReader(fs, m_Encoding, true);
 
                 sb.Length = 0;
                 int lineNumberTotal = 0;
                 int lineNumber = 1;
                 int entryNumber = 0;
 
-                await foreach(var line in _ReadAsync(reader, ct).ConfigureAwait(false))
+                foreach(var line in _Read(reader))
                 {
                     string entry = null;
                     lineNumberTotal++;
+
+                    if ((lineNumberTotal & 0xFF) == 0)
+                    {
+                        ct.ThrowIfCancellationRequested();
+                    }
 
                     bool isStart = line == null || _IsLineStart(line, logFormat);
                     if (!isStart)
@@ -108,7 +112,7 @@ namespace LogInsights.LogReader
                         sb.Append(line);
                         continue;
                     }
-
+                    
                     entry = sb.ToString();
                     sb.Clear();
 
@@ -156,23 +160,29 @@ namespace LogInsights.LogReader
         
         private static async Task<(string FileName, LogFormat Format, DateTime FirstTimeStamp)> _TryDetectFileFormatAsync(string file)
         {
-            using (StreamReader reader = new StreamReader(file))
+            using FileStream fs = new(file, FileMode.Open, FileAccess.Read, FileShare.Read, 4096 * 16, System.IO.FileOptions.SequentialScan);
+            using StreamReader reader = new StreamReader(fs);
+
+            string line;
+            int idx = 0;
+            while ((line = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
             {
-                string line;
-                int idx = 0;
-                while ((line = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
-                {
-                    var match = Constants.regexMessageMetaDataNLogDefault.Match(line);
-                    if (match.Success)
-                        return (file, LogFormat.NLog, DateTime.TryParse(match.Groups["Timestamp"].Value, out var timeStamp) ? timeStamp : DateTime.MinValue);
+                var match = Constants.regexMessageMetaDataNLogDefault.Match(line);
+                if (match.Success)
+                    return (file, LogFormat.NLog,
+                        DateTime.TryParse(match.Groups["Timestamp"].Value, out var timeStamp)
+                            ? timeStamp
+                            : DateTime.MinValue);
 
-                    match = Constants.regexMessageMetaDataJobservice.Match(line);
-                    if (match.Success)
-                        return (file, LogFormat.JobService, DateTime.TryParse(match.Groups["Timestamp"].Value, out var timeStamp) ? timeStamp : DateTime.MinValue);
+                match = Constants.regexMessageMetaDataJobservice.Match(line);
+                if (match.Success)
+                    return (file, LogFormat.JobService,
+                        DateTime.TryParse(match.Groups["Timestamp"].Value, out var timeStamp)
+                            ? timeStamp
+                            : DateTime.MinValue);
 
-                    if (idx++ == 32)
-                        break;
-                }
+                if (idx++ == 32)
+                    break;
             }
 
             return (file, LogFormat.Unknown, DateTime.MinValue);
@@ -250,11 +260,11 @@ namespace LogInsights.LogReader
             return LogLevel.Info;
         }
 
-        private static async IAsyncEnumerable<string> _ReadAsync(StreamReader reader, [EnumeratorCancellation] CancellationToken ct)
+        private static IEnumerable<string> _Read(StreamReader reader)
         {
             string line;
 
-            while ((line = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
+            while ((line = reader.ReadLine()) != null)
                 yield return line;
 
             // we have to add null in order to handle the last entry correctly
