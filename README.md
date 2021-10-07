@@ -3,7 +3,8 @@
 # Log Insights for One Identity Manager logs
 
 [![CI](https://github.com/OneIdentity/IdentityManager.LogInsights/actions/workflows/ci.yml/badge.svg)](https://github.com/OneIdentity/IdentityManager.LogInsights/actions/workflows/ci.yml)
-[![GitHub](https://img.shields.io/github/v/release/OneIdentity/IdentityManager.LogInsights)](https://github.com/OneIdentity/IdentityManager.LogInsights/releases/)
+[![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/OneIdentity/IdentityManager.LogInsights?include_prereleases)](https://github.com/OneIdentity/IdentityManager.LogInsights/releases/)
+
 
 _Provide insights over the contents of One Identity Manager log files or log entries in Azure Application Insights._
 
