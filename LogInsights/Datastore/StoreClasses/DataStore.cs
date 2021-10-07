@@ -10,27 +10,7 @@ namespace LogInsights.Datastore
     {
         bool HasData { get; } 
     }
-
-    public abstract class DataStoreContentBaseXXX: IDataStoreContent
-    {
-        public virtual bool HasData => false;
-
-        public Type storetype => throw new NotImplementedException();
-
-        public virtual string AsJson()
-        {
-            var x =  JsonSerializer.Serialize(this, new JsonSerializerOptions()
-            {
-                PropertyNameCaseInsensitive = true,
-                IncludeFields = true, //include public fields even without an explicit getter/setter
-                WriteIndented = true, //write pretty formatted text
-                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
-            });
-
-            return x;
-        }
-    }
-
+    
     public class DataStore
     {
         private readonly ConcurrentDictionary<Type, IDataStoreContent> _content = new();
