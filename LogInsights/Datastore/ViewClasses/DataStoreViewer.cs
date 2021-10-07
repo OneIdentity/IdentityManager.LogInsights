@@ -51,14 +51,8 @@ namespace LogInsights.Datastore
                 return ("Datastore is empty because no analysis was yet performed!");
 
             try
-            {                                 
-                return JsonSerializer.Serialize(datastore, new JsonSerializerOptions()
-                {                    
-                    PropertyNameCaseInsensitive = true,
-                    IncludeFields = true, //include public fields even without an explicit getter/setter
-                    WriteIndented = true, //write pretty formatted text
-                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
-                });
+            {
+                return datastore.AsJson();
             }
             catch (Exception E)
             {
