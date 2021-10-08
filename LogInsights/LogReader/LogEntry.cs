@@ -5,14 +5,18 @@ using LogInsights.Helpers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading;
 
 namespace LogInsights.LogReader
 {
    public class LogEntry
     {
+        [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
         private LogEntry[] _contextPreviousEntries;
+        [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
         private LogEntry[] _contextNextEntries;
+
         private string _fullMessage;
         private string _messageDevalued;
         private Locator _locator;
@@ -35,12 +39,14 @@ namespace LogInsights.LogReader
         public object Tag { get; set; }
         public int NumberOfLines { get; init; } = 1;
 
+        [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
         public LogEntry[] ContextPreviousEntries
         {
             get => _contextPreviousEntries ?? Array.Empty<LogEntry>();
             internal set => _contextPreviousEntries = value;
         }
 
+        [JsonIgnore(Condition = JsonIgnoreCondition.Always)]
         public LogEntry[] ContextNextEntries
         {
             get => _contextNextEntries ?? Array.Empty<LogEntry>();
