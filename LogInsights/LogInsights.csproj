@@ -23,7 +23,7 @@
     </PackageReference>
     <PackageReference Include="NLog" Version="5.0.4" />
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
-    <PackageReference Include="CsvHelper" Version="28.0.1" />
+    <PackageReference Include="CsvHelper" Version="30.0.0" />
     <PackageReference Include="ConfigureAwaitChecker.Analyzer" Version="5.0.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
