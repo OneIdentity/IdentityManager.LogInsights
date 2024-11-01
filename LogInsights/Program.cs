@@ -6,9 +6,6 @@ namespace LogInsights
 {
     static class Program
     {
-        /// <summary>
-        /// Der Haupteinstiegspunkt für die Anwendung.
-        /// </summary>
         [STAThread]
         static void Main()
         {
@@ -19,7 +16,7 @@ namespace LogInsights
             var mainForm = new MainForm();
             var exHandler = ExceptionHandler.Instance;
             exHandler.MainForm = mainForm;
-            
+
             Application.Run(mainForm);
         }
     }
