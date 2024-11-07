@@ -46,20 +46,25 @@ To get a local copy up and running follow these simple steps.
 
 ### Prerequisites
 
-Download the [.NET 5 SDK](https://dotnet.microsoft.com/download).
+Download the [.NET 8 SDK](https://dotnet.microsoft.com/download).
 
 ### Building
 
 1. Clone the repo
+
    ```powershell
    git clone https://github.com/OneIdentity/IdentityManager.LogInsights.git
    cd IdentityManager.LogInsights
    ```
+
 2. Build the project
+
    ```powershell
    dotnet build
    ```
+
 3. Run the program
+
    ```powershell
     dotnet run --project LogInsights\LogInsights.csproj
    ```
@@ -71,7 +76,7 @@ Or open it in Visual Studio and run it from there.
 Download a ZIP file from the [Releases](https://github.com/OneIdentity/IdentityManager.LogInsights/releases/)
 page, unzip it into a folder and run `LogInsights.exe`.
 
-The program runs on all Windows versions supported by .NET 5.
+The program runs on all Windows versions supported by .NET 8.
 
 <!-- USAGE EXAMPLES -->
 ## Usage
