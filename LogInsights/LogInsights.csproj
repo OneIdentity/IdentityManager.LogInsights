@@ -21,7 +21,7 @@
     <PackageReference Include="GitVersion.MsBuild" Version="6.0.5">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="NLog" Version="5.3.4" />
+    <PackageReference Include="NLog" Version="5.4.0" />
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
     <PackageReference Include="CsvHelper" Version="33.0.1" />
     <PackageReference Include="ConfigureAwaitChecker.Analyzer" Version="5.0.0.1">
