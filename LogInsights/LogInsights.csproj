@@ -18,7 +18,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Azure.Monitor.Query" Version="1.5.0" />
-    <PackageReference Include="GitVersion.MsBuild" Version="6.0.5">
+    <PackageReference Include="GitVersion.MsBuild" Version="6.1.0">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="NLog" Version="5.3.4" />
