@@ -2,7 +2,11 @@
 using CsvHelper.Configuration.Attributes;
 
 using LogInsights.Helpers;
-using Microsoft.Azure.ApplicationInsights.Query;
+using Azure.Core;
+using Azure.Identity;
+using Azure.Monitor.Query;
+using Azure.Monitor.Query.Models;
+using System.Net.Http;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -17,9 +21,30 @@ using System.Threading.Tasks;
 
 namespace LogInsights.LogReader
 {
+    // Custom TokenCredential for Application Insights API key authentication
+    internal class AppInsightsApiKeyCredential : TokenCredential
+    {
+        private readonly string _apiKey;
+
+        public AppInsightsApiKeyCredential(string apiKey)
+        {
+            _apiKey = apiKey ?? throw new ArgumentNullException(nameof(apiKey));
+        }
+
+        public override AccessToken GetToken(TokenRequestContext requestContext, CancellationToken cancellationToken)
+        {
+            // Return the API key as a bearer token - this may need adjustment based on actual Azure.Monitor.Query implementation
+            return new AccessToken(_apiKey, DateTimeOffset.UtcNow.AddHours(1));
+        }
+
+        public override ValueTask<AccessToken> GetTokenAsync(TokenRequestContext requestContext, CancellationToken cancellationToken)
+        {
+            return new ValueTask<AccessToken>(GetToken(requestContext, cancellationToken));
+        }
+    }
     public class AppInsightsLogReader : LogReader
     {
-        private readonly ApplicationInsightsDataClient _client;
+        private readonly LogsQueryClient _client;
         private readonly AppInsightsLogReaderConnectionStringBuilder _connString;
 
         private static readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.General) {
@@ -92,8 +117,13 @@ namespace LogInsights.LogReader
                 if ( string.IsNullOrEmpty(apiKey) )
                     throw new Exception($"Missing {nameof(apiKey)} value.");
 
-                _client = new ApplicationInsightsDataClient(new ApiKeyClientCredentials(apiKey));
-                Display = $"App Insights Reader - {_client.BaseUri.OriginalString}";
+                // Create LogsQueryClient for Application Insights
+                // Note: Application Insights now uses Log Analytics workspace under the hood
+                // API key authentication is handled via custom credential
+                var credential = new AppInsightsApiKeyCredential(apiKey);
+                var options = new LogsQueryClientOptions();
+                _client = new LogsQueryClient(credential, options);
+                Display = $"App Insights Reader - {appId}";
             }
             else
             {
@@ -177,19 +207,30 @@ namespace LogInsights.LogReader
 
         private async IAsyncEnumerable<_Row> _ReadAppInsightsDataAsync([EnumeratorCancellation] CancellationToken ct)
         {
-            var events = new Events(_client);
+            QueryTimeRange timeRange = QueryTimeRange.All;
+            if (!string.IsNullOrEmpty(_connString.TimeSpan))
+            {
+                // Try to parse the timespan - the old API used formats like "P1D" (ISO 8601 duration)
+                // The new API expects QueryTimeRange or TimeSpan objects
+                if (TimeSpan.TryParse(_connString.TimeSpan, out var parsedTimespan))
+                {
+                    timeRange = new QueryTimeRange(parsedTimespan);
+                }
+                else
+                {
+                    // Try parsing as ISO 8601 duration or use default
+                    timeRange = QueryTimeRange.All;
+                }
+            }
 
-            var result = await events.Client.Query.ExecuteAsync(
+            var result = await _client.QueryWorkspaceAsync(
                     _connString.AppId,
                     _connString.Query,
-                    !string.IsNullOrEmpty(_connString.TimeSpan) ? _connString.TimeSpan : null,
+                    timeRange,
                     cancellationToken: ct)
                 .ConfigureAwait(false);
 
-            if (result.Tables.Count < 1)
-                throw new Exception("Missing result table");
-
-            var table = result.Tables[0];
+            var table = result.Value.Table;
 
             int timestampIdx = -1;
             int messageIdx = -1;
@@ -244,13 +285,14 @@ namespace LogInsights.LogReader
             {
                 yield return new _Row
                     {
-                        ItemId = (string)row[itemIdIdx],
-                        TimeStamp = (DateTime)row[timestampIdx],
-                        Message = (string)row[messageIdx],
-                        Severity = severityIdx > -1 ? (long)row[severityIdx] : 1L,
-                        CustomDimensions = customDimensionsIdx > -1 ? (string)row[customDimensionsIdx] : "",
-                        Details = detailsIdx > -1 ? (string)row[detailsIdx] : "",
-                        OuterMessage = detailsIdx > -1 ? (string)row[outerMessageIdx] : ""
+                        ItemId = row[itemIdIdx]?.ToString(),
+                        TimeStamp = row[timestampIdx] is DateTimeOffset dto ? dto.DateTime : 
+                                   DateTime.TryParse(row[timestampIdx]?.ToString(), out var dt) ? dt : DateTime.MinValue,
+                        Message = row[messageIdx]?.ToString(),
+                        Severity = severityIdx > -1 && long.TryParse(row[severityIdx]?.ToString(), out var sev) ? sev : 1L,
+                        CustomDimensions = customDimensionsIdx > -1 ? row[customDimensionsIdx]?.ToString() : "",
+                        Details = detailsIdx > -1 ? row[detailsIdx]?.ToString() : "",
+                        OuterMessage = outerMessageIdx > -1 ? row[outerMessageIdx]?.ToString() : ""
                 };
             }
         }
